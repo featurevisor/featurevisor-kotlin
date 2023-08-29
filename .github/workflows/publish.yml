@@ -1,13 +1,13 @@
-name: Check commits in non-main branches
+name: Publish release
 
 on:
-  push:
-    branches-ignore:
-      - main
+  release:
+    types: [published]
 
 jobs:
-  checks:
+  publish:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout latest code
         uses: actions/checkout@v3
@@ -26,8 +26,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      - name: Build with Gradle
-        run: ./gradlew build
+      - name: Publish artifact
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Test with Gradle
-        run: ./gradlew test
+        run: |
+          NEW_VERSION=$(echo "${GITHUB_REF}" | cut -d "/" -f3)
+          echo "New version: ${NEW_VERSION}"
+          echo "Github username: ${GITHUB_ACTOR}"
+          ./gradlew -Pversion=${NEW_VERSION} publish
