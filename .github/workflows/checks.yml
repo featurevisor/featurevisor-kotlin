@@ -1,9 +1,6 @@
-name: Check commits in non-main branches
+name: Check commits in all branches (including main)
 
-on:
-  push:
-    branches-ignore:
-      - main
+on: push
 
 jobs:
   checks:
