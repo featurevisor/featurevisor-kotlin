@@ -36,9 +36,9 @@ $ gradle test
 
 - [ ] Add documentation in README for Installation and Usage sections
 - [ ] Verify if `JavaLanguageVersion` set in `build.gradle.kt` is correct (set to `8` now)
-- [ ] Set up CI/CD pipeline
-- [ ] Publish as package
-- [ ] Find a compatible MurmurHash implementation for Kotlin/JVM
+- [x] Set up CI/CD pipeline
+- [x] Publish as package
+- [x] Find a compatible MurmurHash implementation for Kotlin/JVM
 - [ ] Port the SDK API as defined below
 
 ### SDK API
@@ -48,7 +48,7 @@ We are breaking down the various parts that we need to migrate to Swift in the s
 | Section             | Task                                             | Status |
 |---------------------|--------------------------------------------------|--------|
 | Files               | `@featurevisor/types` ➡️ `Types.kt`              | ✅      |
-|                     | SDK's `bucket.ts` ➡️ `bucket.kt`                 |        |
+|                     | SDK's `bucket.ts` ➡️ `Bucket.kt`                 | ✅      |
 |                     | SDK's `conditions.ts` ➡️ `conditions.kt`         |        |
 |                     | SDK's `datafileReader.ts` ➡️ `DatafileReader.kt` |        |
 |                     | SDK's `emitter.ts` ➡️ `Emitter.kt`               |        |
