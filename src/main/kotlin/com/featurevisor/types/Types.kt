@@ -7,6 +7,7 @@ sealed class AttributeValue {
     data class IntValue(val value: Int) : AttributeValue()
     data class DoubleValue(val value: Double) : AttributeValue()
     data class BooleanValue(val value: Boolean) : AttributeValue()
+
     // @TODO: implement Date
     object NullValue : AttributeValue()
 }
@@ -17,7 +18,7 @@ data class Attribute(
     val key: AttributeKey,
     val type: String,
     val archived: Boolean?,
-    val capture: Boolean?
+    val capture: Boolean?,
 )
 
 enum class Operator(val value: String) {
@@ -59,6 +60,7 @@ sealed class ConditionValue {
     data class DoubleValue(val value: Double) : ConditionValue()
     data class BooleanValue(val value: Boolean) : ConditionValue()
     data class ArrayValue(val values: Array<String>) : ConditionValue()
+
     // @TODO: implement Date
     object NullValue : ConditionValue()
 }
@@ -66,19 +68,19 @@ sealed class ConditionValue {
 data class PlainCondition(
     val attribute: AttributeKey,
     val operator: Operator,
-    val value: ConditionValue
+    val value: ConditionValue,
 )
 
 data class AndCondition(
-    val and: Array<Condition>
+    val and: Array<Condition>,
 )
 
 data class OrCondition(
-    val or: Array<Condition>
+    val or: Array<Condition>,
 )
 
 data class NotCondition(
-    val not: Array<Condition>
+    val not: Array<Condition>,
 )
 
 sealed class Condition {
@@ -95,21 +97,21 @@ typealias SegmentKey = String
 data class Segment(
     val archived: Boolean?,
     val key: SegmentKey,
-    val conditions: Condition
+    val conditions: Condition,
 )
 
 typealias PlainGroupSegment = SegmentKey
 
 data class AndGroupSegment(
-    val and: Array<GroupSegment>
+    val and: Array<GroupSegment>,
 )
 
 data class OrGroupSegment(
-    val or: Array<GroupSegment>
+    val or: Array<GroupSegment>,
 )
 
 data class NotGroupSegment(
-    val not: Array<GroupSegment>
+    val not: Array<GroupSegment>,
 )
 
 sealed class GroupSegment {
@@ -152,13 +154,13 @@ data class VariableOverride(
 
     // one of the below must be present in YAML
     val conditions: Condition?,
-    val segments: GroupSegment?
+    val segments: GroupSegment?,
 )
 
 data class Variable(
     val key: VariableKey,
     val value: VariableValue,
-    val overrides: Array<VariableOverride>?
+    val overrides: Array<VariableOverride>?,
 )
 
 data class Variation(
@@ -170,13 +172,13 @@ data class Variation(
     // 0 to 100 (available from parsed YAML, but not in datafile)
     val weight: Double?,
 
-    val variables: Array<Variable>?
+    val variables: Array<Variable>?,
 )
 
 data class VariableSchema(
     val key: VariableKey,
     val type: VariableType,
-    val defaultValue: VariableValue
+    val defaultValue: VariableValue,
 )
 
 typealias FeatureKey = String
@@ -190,7 +192,7 @@ data class Force(
 
     val enabled: Boolean?,
     val variation: VariationValue?,
-    val variables: VariableValues?
+    val variables: VariableValues?,
 )
 
 data class Slot(
@@ -198,13 +200,13 @@ data class Slot(
     val feature: FeatureKey?,
 
     // 0 to 100
-    val percentage: Weight
+    val percentage: Weight,
 )
 
 data class Group(
     val key: String,
     val description: String,
-    val slots: Array<Slot>
+    val slots: Array<Slot>,
 )
 
 typealias BucketKey = String
@@ -220,12 +222,12 @@ typealias Percentage = Int
 
 data class Range(
     val start: Percentage,
-    val end: Percentage
+    val end: Percentage,
 )
 
 data class Allocation(
     val variation: VariationValue,
-    val range: Range
+    val range: Range,
 )
 
 data class Traffic(
@@ -237,7 +239,7 @@ data class Traffic(
     val variation: VariationValue?,
     val variables: VariableValues?,
 
-    val allocation: Array<Allocation>
+    val allocation: Array<Allocation>,
 )
 
 typealias PlainBucketBy = String
@@ -245,7 +247,7 @@ typealias PlainBucketBy = String
 typealias AndBucketBy = Array<BucketBy>
 
 data class OrBucketBy(
-    val or: Array<String>
+    val or: Array<String>,
 )
 
 sealed class BucketBy {
@@ -256,7 +258,7 @@ sealed class BucketBy {
 
 data class RequiredWithVariation(
     val key: FeatureKey,
-    val variation: VariationValue
+    val variation: VariationValue,
 )
 
 sealed class Required {
@@ -275,7 +277,7 @@ data class Feature(
     val force: Array<Force>?,
 
     // if in a Group (mutex), these are available slot ranges
-    val ranges: Array<Range>?
+    val ranges: Array<Range>?,
 )
 
 data class DatafileContent(
@@ -283,13 +285,13 @@ data class DatafileContent(
     val revision: String,
     val attributes: Array<Attribute>,
     val segments: Array<Segment>,
-    val features: Array<Feature>
+    val features: Array<Feature>,
 )
 
 data class OverrideFeature(
     val enabled: Boolean,
     val variation: VariationValue?,
-    val variables: VariableValues?
+    val variables: VariableValues?,
 )
 
 typealias StickyFeatures = Map<FeatureKey, OverrideFeature>
@@ -313,13 +315,13 @@ data class Rule(
 
     val enabled: Boolean?,
     val variation: VariationValue?,
-    val variables: VariableValues?
+    val variables: VariableValues?,
 )
 
 data class Environment(
     val expose: Boolean?,
     val rules: Array<Rule>,
-    val force: Array<Force>?
+    val force: Array<Force>?,
 )
 
 typealias Environments = Map<EnvironmentKey, Environment>
@@ -340,7 +342,7 @@ data class ParsedFeature(
     val variablesSchema: Array<VariableSchema>?,
     val variations: Array<Variation>?,
 
-    val environments: Environments
+    val environments: Environments,
 )
 
 /**
@@ -353,23 +355,23 @@ data class FeatureAssertion(
     val context: Context,
     val expectedToBeEnabled: Boolean,
     val expectedVariation: VariationValue?,
-    val expectedVariables: VariableValues?
+    val expectedVariables: VariableValues?,
 )
 
 data class TestFeature(
     val key: FeatureKey,
-    val assertions: Array<FeatureAssertion>
+    val assertions: Array<FeatureAssertion>,
 )
 
 data class SegmentAssertion(
     val description: String?,
     val context: Context,
-    val expectedToMatch: Boolean
+    val expectedToMatch: Boolean,
 )
 
 data class TestSegment(
     val key: SegmentKey,
-    val assertions: Array<SegmentAssertion>
+    val assertions: Array<SegmentAssertion>,
 )
 
 data class Test(
@@ -381,9 +383,9 @@ data class Test(
     val features: Array<TestFeature>?,
 
     // needed for segment testing
-    val segments: Array<TestSegment>?
+    val segments: Array<TestSegment>?,
 )
 
 data class Spec(
-    val tests: Array<Test>
+    val tests: Array<Test>,
 )
