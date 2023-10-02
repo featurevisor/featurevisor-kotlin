@@ -22,9 +22,11 @@ object Conditions {
                     Operator.notEquals -> return contextValue.value != conditionValue.value
                     Operator.contains -> return contextValue.value.contains(conditionValue.value)
                     Operator.notContains ->
-                            return !contextValue.value.contains(conditionValue.value)
+                        return !contextValue.value.contains(conditionValue.value)
+
                     Operator.startsWith ->
-                            return contextValue.value.startsWith(conditionValue.value)
+                        return contextValue.value.startsWith(conditionValue.value)
+
                     Operator.endsWith -> return contextValue.value.endsWith(conditionValue.value)
                     else -> return false
                 }

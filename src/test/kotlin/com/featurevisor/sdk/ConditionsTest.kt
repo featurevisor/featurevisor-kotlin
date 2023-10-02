@@ -11,56 +11,56 @@ class ConditionsTest {
     @Test
     fun testEqualsOperatorForStrings() {
         val condition =
-                PlainCondition(
-                        "browser_type",
-                        Operator.equals,
-                        ConditionValue.StringValue("chrome")
-                )
+            PlainCondition(
+                "browser_type",
+                Operator.equals,
+                ConditionValue.StringValue("chrome")
+            )
 
         // match
         assertEquals(
-                true,
-                Conditions.conditionIsMatched(
-                        condition,
-                        mapOf("browser_type" to AttributeValue.StringValue("chrome"))
-                )
+            true,
+            Conditions.conditionIsMatched(
+                condition,
+                mapOf("browser_type" to AttributeValue.StringValue("chrome"))
+            )
         )
 
         // not match
         assertEquals(
-                false,
-                Conditions.conditionIsMatched(
-                        condition,
-                        mapOf("browser_type" to AttributeValue.StringValue("firefox"))
-                )
+            false,
+            Conditions.conditionIsMatched(
+                condition,
+                mapOf("browser_type" to AttributeValue.StringValue("firefox"))
+            )
         )
     }
 
     @Test
     fun testNotEqualsOperatorForStrings() {
         val condition =
-                PlainCondition(
-                        "browser_type",
-                        Operator.notEquals,
-                        ConditionValue.StringValue("chrome")
-                )
+            PlainCondition(
+                "browser_type",
+                Operator.notEquals,
+                ConditionValue.StringValue("chrome")
+            )
 
         // match
         assertEquals(
-                true,
-                Conditions.conditionIsMatched(
-                        condition,
-                        mapOf("browser_type" to AttributeValue.StringValue("firefox"))
-                )
+            true,
+            Conditions.conditionIsMatched(
+                condition,
+                mapOf("browser_type" to AttributeValue.StringValue("firefox"))
+            )
         )
 
         // not match
         assertEquals(
-                false,
-                Conditions.conditionIsMatched(
-                        condition,
-                        mapOf("browser_type" to AttributeValue.StringValue("chrome"))
-                )
+            false,
+            Conditions.conditionIsMatched(
+                condition,
+                mapOf("browser_type" to AttributeValue.StringValue("chrome"))
+            )
         )
     }
 
@@ -70,20 +70,20 @@ class ConditionsTest {
 
         // match
         assertEquals(
-                true,
-                Conditions.conditionIsMatched(
-                        condition,
-                        mapOf("age" to AttributeValue.IntValue(19))
-                )
+            true,
+            Conditions.conditionIsMatched(
+                condition,
+                mapOf("age" to AttributeValue.IntValue(19))
+            )
         )
 
         // not match
         assertEquals(
-                false,
-                Conditions.conditionIsMatched(
-                        condition,
-                        mapOf("age" to AttributeValue.IntValue(17))
-                )
+            false,
+            Conditions.conditionIsMatched(
+                condition,
+                mapOf("age" to AttributeValue.IntValue(17))
+            )
         )
     }
 
@@ -93,20 +93,20 @@ class ConditionsTest {
 
         // match
         assertEquals(
-                true,
-                Conditions.conditionIsMatched(
-                        condition,
-                        mapOf("age" to AttributeValue.IntValue(17))
-                )
+            true,
+            Conditions.conditionIsMatched(
+                condition,
+                mapOf("age" to AttributeValue.IntValue(17))
+            )
         )
 
         // not match
         assertEquals(
-                false,
-                Conditions.conditionIsMatched(
-                        condition,
-                        mapOf("age" to AttributeValue.IntValue(19))
-                )
+            false,
+            Conditions.conditionIsMatched(
+                condition,
+                mapOf("age" to AttributeValue.IntValue(19))
+            )
         )
     }
 }

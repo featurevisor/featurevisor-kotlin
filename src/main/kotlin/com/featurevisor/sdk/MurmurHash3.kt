@@ -63,20 +63,20 @@ public class MurmurHash3(private val seed: UInt = 1.toUInt()) {
 
     private fun ByteArray.getLittleEndianUInt(index: Int): UInt {
         return this.getUInt(index) or
-                (this.getUInt(index + 1) shl 8) or
-                (this.getUInt(index + 2) shl 16) or
-                (this.getUInt(index + 3) shl 24)
+            (this.getUInt(index + 1) shl 8) or
+            (this.getUInt(index + 2) shl 16) or
+            (this.getUInt(index + 3) shl 24)
     }
 
     private fun ByteArray.getLittleEndianLong(index: Int): ULong {
         return this.getULong(index) or
-                (this.getULong(index + 1) shl 8) or
-                (this.getULong(index + 2) shl 16) or
-                (this.getULong(index + 3) shl 24) or
-                (this.getULong(index + 4) shl 32) or
-                (this.getULong(index + 5) shl 40) or
-                (this.getULong(index + 6) shl 48) or
-                (this.getULong(index + 7) shl 56)
+            (this.getULong(index + 1) shl 8) or
+            (this.getULong(index + 2) shl 16) or
+            (this.getULong(index + 3) shl 24) or
+            (this.getULong(index + 4) shl 32) or
+            (this.getULong(index + 5) shl 40) or
+            (this.getULong(index + 6) shl 48) or
+            (this.getULong(index + 7) shl 56)
     }
 
     private fun UInt.mix(r: Int, c1: UInt, c2: UInt): UInt {
