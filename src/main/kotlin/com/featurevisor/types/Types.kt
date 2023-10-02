@@ -350,7 +350,7 @@ data class ParsedFeature(
  */
 data class FeatureAssertion(
     val description: String?,
-    val environment: EnvironmentKey?,
+    val environment: EnvironmentKey,
     // bucket weight: 0 to 100
     val at: Weight,
     val context: Context,
