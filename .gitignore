@@ -1,5 +1,19 @@
-# Ignore Gradle project-specific cache directory
-.gradle
+# Generated files
+bin/
+gen/
+out/
 
-# Ignore Gradle build output directory
-build
+# Gradle files
+.gradle/
+build/
+*/build/*
+rep/
+
+# Local configuration file (sdk path, etc)
+local.properties
+
+# Intellij
+*.iml
+*iws
+.idea/workspace.xml
+.idea/
