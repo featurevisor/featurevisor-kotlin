@@ -1,7 +1,6 @@
 package com.featurevisor.sdk
 
 import com.featurevisor.types.AttributeValue
-import com.featurevisor.types.ConditionValue
 import com.featurevisor.types.Operator
 import com.featurevisor.types.PlainCondition
 import kotlin.test.Test
@@ -13,8 +12,8 @@ class ConditionsTest {
         val condition =
             PlainCondition(
                 "browser_type",
-                Operator.equals,
-                ConditionValue.StringValue("chrome")
+                Operator.EQUALS,
+                AttributeValue.StringValue("chrome")
             )
 
         // match
@@ -41,8 +40,8 @@ class ConditionsTest {
         val condition =
             PlainCondition(
                 "browser_type",
-                Operator.notEquals,
-                ConditionValue.StringValue("chrome")
+                Operator.NOT_EQUALS,
+                AttributeValue.StringValue("chrome")
             )
 
         // match
@@ -66,7 +65,7 @@ class ConditionsTest {
 
     @Test
     fun testGreaterThanOperator() {
-        val condition = PlainCondition("age", Operator.greaterThan, ConditionValue.IntValue(18))
+        val condition = PlainCondition("age", Operator.GREATER_THAN, AttributeValue.IntValue(18))
 
         // match
         assertEquals(
@@ -89,7 +88,7 @@ class ConditionsTest {
 
     @Test
     fun testLessThanOperator() {
-        val condition = PlainCondition("age", Operator.lessThan, ConditionValue.IntValue(18))
+        val condition = PlainCondition("age", Operator.LESS_THAN, AttributeValue.IntValue(18))
 
         // match
         assertEquals(
