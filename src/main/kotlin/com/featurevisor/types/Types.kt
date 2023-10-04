@@ -295,6 +295,7 @@ data class ParsedFeature(
  */
 data class FeatureAssertion(
     val description: String?,
+    val environment: EnvironmentKey,
     // bucket weight: 0 to 100
     val at: Weight,
     val context: Context,
@@ -319,18 +320,7 @@ data class TestSegment(
     val assertions: List<SegmentAssertion>,
 )
 
-data class Test(
-    val description: String?,
-
-    // needed for feature testing
-    val tag: String?,
-    val environment: EnvironmentKey?,
-    val features: List<TestFeature>?,
-
-    // needed for segment testing
-    val segments: List<TestSegment>?,
-)
-
-data class Spec(
-    val tests: List<Test>,
-)
+sealed class Test {
+    data class Feature(val value: TestFeature) : Test()
+    data class Segment(val value: TestSegment) : Test()
+}
