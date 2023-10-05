@@ -1,111 +1,513 @@
 package com.featurevisor.sdk
 
 import com.featurevisor.types.AttributeValue
+import com.featurevisor.types.Condition
+import com.featurevisor.types.ConditionValue
 import com.featurevisor.types.Operator
-import com.featurevisor.types.PlainCondition
+import io.kotest.matchers.shouldBe
+import java.time.LocalDate
 import kotlin.test.Test
-import kotlin.test.assertEquals
 
 class ConditionsTest {
     @Test
-    fun testEqualsOperatorForStrings() {
+    fun `EQUALS operator works for strings`() {
         val condition =
-            PlainCondition(
-                "browser_type",
-                Operator.EQUALS,
-                AttributeValue.StringValue("chrome")
+            Condition.Plain(
+                attributeKey = "browser_type",
+                operator = Operator.EQUALS,
+                value = ConditionValue.StringValue("chrome")
             )
 
-        // match
-        assertEquals(
-            true,
-            Conditions.conditionIsMatched(
-                condition,
-                mapOf("browser_type" to AttributeValue.StringValue("chrome"))
-            )
-        )
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("browser_type" to AttributeValue.StringValue("chrome"))
+        ) shouldBe true
 
-        // not match
-        assertEquals(
-            false,
-            Conditions.conditionIsMatched(
-                condition,
-                mapOf("browser_type" to AttributeValue.StringValue("firefox"))
-            )
-        )
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("browser_type" to AttributeValue.StringValue("firefox"))
+        ) shouldBe false
     }
 
     @Test
-    fun testNotEqualsOperatorForStrings() {
+    fun `NOT_EQUALS operator works for strings`() {
         val condition =
-            PlainCondition(
-                "browser_type",
-                Operator.NOT_EQUALS,
-                AttributeValue.StringValue("chrome")
+            Condition.Plain(
+                attributeKey = "browser_type",
+                operator = Operator.NOT_EQUALS,
+                value = ConditionValue.StringValue("chrome")
             )
 
-        // match
-        assertEquals(
-            true,
-            Conditions.conditionIsMatched(
-                condition,
-                mapOf("browser_type" to AttributeValue.StringValue("firefox"))
-            )
-        )
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("browser_type" to AttributeValue.StringValue("firefox"))
+        ) shouldBe true
 
-        // not match
-        assertEquals(
-            false,
-            Conditions.conditionIsMatched(
-                condition,
-                mapOf("browser_type" to AttributeValue.StringValue("chrome"))
-            )
-        )
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("browser_type" to AttributeValue.StringValue("chrome"))
+        ) shouldBe false
     }
 
     @Test
-    fun testGreaterThanOperator() {
-        val condition = PlainCondition("age", Operator.GREATER_THAN, AttributeValue.IntValue(18))
-
-        // match
-        assertEquals(
-            true,
-            Conditions.conditionIsMatched(
-                condition,
-                mapOf("age" to AttributeValue.IntValue(19))
+    fun `GREATER_THAN operator works for integers`() {
+        val condition =
+            Condition.Plain(
+                attributeKey = "age",
+                operator = Operator.GREATER_THAN,
+                value = ConditionValue.IntValue(18)
             )
-        )
 
-        // not match
-        assertEquals(
-            false,
-            Conditions.conditionIsMatched(
-                condition,
-                mapOf("age" to AttributeValue.IntValue(17))
-            )
-        )
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("age" to AttributeValue.IntValue(19))
+        ) shouldBe true
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("age" to AttributeValue.IntValue(17))
+        ) shouldBe false
     }
 
     @Test
-    fun testLessThanOperator() {
-        val condition = PlainCondition("age", Operator.LESS_THAN, AttributeValue.IntValue(18))
+    fun `LESS_THAN operator works for integers`() {
+        val condition =
+            Condition.Plain(
+                attributeKey = "age",
+                operator = Operator.LESS_THAN,
+                value = ConditionValue.IntValue(18)
+            )
 
-        // match
-        assertEquals(
-            true,
-            Conditions.conditionIsMatched(
-                condition,
-                mapOf("age" to AttributeValue.IntValue(17))
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("age" to AttributeValue.IntValue(17))
+        ) shouldBe true
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("age" to AttributeValue.IntValue(19))
+        ) shouldBe false
+    }
+
+    @Test
+    fun `GREATER_THAN_OR_EQUAL operator works for integers`() {
+        val condition =
+            Condition.Plain(
+                attributeKey = "age",
+                operator = Operator.GREATER_THAN_OR_EQUAL,
+                value = ConditionValue.IntValue(18)
+            )
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("age" to AttributeValue.IntValue(17))
+        ) shouldBe false
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("age" to AttributeValue.IntValue(18))
+        ) shouldBe true
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("age" to AttributeValue.IntValue(19))
+        ) shouldBe true
+    }
+
+    @Test
+    fun `LESS_THAN_OR_EQUAL operator works for integers`() {
+        val condition =
+            Condition.Plain(
+                attributeKey = "age",
+                operator = Operator.LESS_THAN_OR_EQUAL,
+                value = ConditionValue.IntValue(18)
+            )
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("age" to AttributeValue.IntValue(17))
+        ) shouldBe true
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("age" to AttributeValue.IntValue(18))
+        ) shouldBe true
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("age" to AttributeValue.IntValue(19))
+        ) shouldBe false
+    }
+
+    @Test
+    fun `CONTAINS operator works for strings`() {
+        val condition = Condition.Plain(
+            attributeKey = "browser_type",
+            operator = Operator.CONTAINS,
+            value = ConditionValue.StringValue("hro"),
+        )
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("browser_type" to AttributeValue.StringValue("chrome"))
+        ) shouldBe true
+
+        Conditions.conditionIsMatched(
+            condition = condition.copy(value = ConditionValue.StringValue("hrk")),
+            context = mapOf("browser_type" to AttributeValue.StringValue("chrome"))
+        ) shouldBe false
+    }
+
+    @Test
+    fun `NOT_CONTAINS operator works for strings`() {
+        val condition = Condition.Plain(
+            attributeKey = "browser_type",
+            operator = Operator.CONTAINS,
+            value = ConditionValue.StringValue("hro"),
+        )
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("browser_type" to AttributeValue.StringValue("chrome"))
+        ) shouldBe true
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("browser_type" to AttributeValue.StringValue("firefox"))
+        ) shouldBe false
+    }
+
+    @Test
+    fun `STARTS_WITH operator works for strings`() {
+        val condition = Condition.Plain(
+            attributeKey = "browser_type",
+            operator = Operator.STARTS_WITH,
+            value = ConditionValue.StringValue("chr"),
+        )
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("browser_type" to AttributeValue.StringValue("chrome"))
+        ) shouldBe true
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("browser_type" to AttributeValue.StringValue("firefox"))
+        ) shouldBe false
+    }
+
+    @Test
+    fun `ENDS_WITH operator works for strings`() {
+        val condition = Condition.Plain(
+            attributeKey = "browser_type",
+            operator = Operator.ENDS_WITH,
+            value = ConditionValue.StringValue("ome"),
+        )
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("browser_type" to AttributeValue.StringValue("chrome"))
+        ) shouldBe true
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("browser_type" to AttributeValue.StringValue("firefox"))
+        ) shouldBe false
+    }
+
+    @Test
+    fun `SEMVER_EQUALS operator works for strings`() {
+        val condition = Condition.Plain(
+            attributeKey = "version",
+            operator = Operator.SEMVER_EQUALS,
+            value = ConditionValue.StringValue("1.2.3")
+        )
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("version" to AttributeValue.StringValue("1.2.3"))
+        ) shouldBe true
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("version" to AttributeValue.StringValue("1.2.4"))
+        ) shouldBe false
+    }
+
+    @Test
+    fun `SEMVER_NOT_EQUALS operator works for strings`() {
+        val condition = Condition.Plain(
+            attributeKey = "version",
+            operator = Operator.SEMVER_NOT_EQUALS,
+            value = ConditionValue.StringValue("1.2.3")
+        )
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("version" to AttributeValue.StringValue("1.2.3"))
+        ) shouldBe false
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("version" to AttributeValue.StringValue("1.2.4"))
+        ) shouldBe true
+    }
+
+    @Test
+    fun `SEMVER_GREATER_THAN operator works for strings`() {
+        val condition = Condition.Plain(
+            attributeKey = "version",
+            operator = Operator.SEMVER_GREATER_THAN,
+            value = ConditionValue.StringValue("1.2.3")
+        )
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("version" to AttributeValue.StringValue("1.2.4"))
+        ) shouldBe true
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("version" to AttributeValue.StringValue("1.2.3"))
+        ) shouldBe false
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("version" to AttributeValue.StringValue("1.2.2"))
+        ) shouldBe false
+    }
+
+    @Test
+    fun `SEMVER_GREATER_THAN_OR_EQUAL operator works for strings`() {
+        val condition = Condition.Plain(
+            attributeKey = "version",
+            operator = Operator.SEMVER_GREATER_THAN_OR_EQUAL,
+            value = ConditionValue.StringValue("1.2.3")
+        )
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("version" to AttributeValue.StringValue("1.2.4"))
+        ) shouldBe true
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("version" to AttributeValue.StringValue("1.2.3"))
+        ) shouldBe true
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("version" to AttributeValue.StringValue("1.2.2"))
+        ) shouldBe false
+    }
+
+    @Test
+    fun `SEMVER_LESS_THAN operator works for strings`() {
+        val condition = Condition.Plain(
+            attributeKey = "version",
+            operator = Operator.SEMVER_LESS_THAN,
+            value = ConditionValue.StringValue("1.2.3")
+        )
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("version" to AttributeValue.StringValue("1.2.4"))
+        ) shouldBe false
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("version" to AttributeValue.StringValue("1.2.3"))
+        ) shouldBe false
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("version" to AttributeValue.StringValue("1.2.2"))
+        ) shouldBe true
+    }
+
+    @Test
+    fun `SEMVER_LESS_THAN_OR_EQUAL operator works for strings`() {
+        val condition = Condition.Plain(
+            attributeKey = "version",
+            operator = Operator.SEMVER_LESS_THAN_OR_EQUAL,
+            value = ConditionValue.StringValue("1.2.3")
+        )
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("version" to AttributeValue.StringValue("1.2.4"))
+        ) shouldBe false
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("version" to AttributeValue.StringValue("1.2.3"))
+        ) shouldBe true
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("version" to AttributeValue.StringValue("1.2.2"))
+        ) shouldBe true
+    }
+
+    @Test
+    fun `BEFORE operator works for strings`() {
+        val condition = Condition.Plain(
+            attributeKey = "date",
+            operator = Operator.BEFORE,
+            value = ConditionValue.DateTimeValue(LocalDate.of(2023, 10, 5)),
+        )
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("date" to AttributeValue.DateValue(LocalDate.of(2023, 10, 4)))
+        ) shouldBe true
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("date" to AttributeValue.DateValue(LocalDate.of(2023, 10, 5)))
+        ) shouldBe false
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("date" to AttributeValue.DateValue(LocalDate.of(2023, 10, 6)))
+        ) shouldBe false
+    }
+
+    @Test
+    fun `AFTER operator works for strings`() {
+        val condition = Condition.Plain(
+            attributeKey = "date",
+            operator = Operator.AFTER,
+            value = ConditionValue.DateTimeValue(LocalDate.of(2023, 10, 5)),
+        )
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("date" to AttributeValue.DateValue(LocalDate.of(2023, 10, 4)))
+        ) shouldBe false
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("date" to AttributeValue.DateValue(LocalDate.of(2023, 10, 5)))
+        ) shouldBe false
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("date" to AttributeValue.DateValue(LocalDate.of(2023, 10, 6)))
+        ) shouldBe true
+    }
+
+    @Test
+    fun `IN_ARRAY operator works for strings`() {
+        val condition = Condition.Plain(
+            attributeKey = "letter",
+            operator = Operator.IN_ARRAY,
+            value = ConditionValue.ArrayValue(listOf("a", "b", "c")),
+        )
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("letter" to AttributeValue.StringValue("b")),
+        ) shouldBe true
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("letter" to AttributeValue.StringValue("d")),
+        ) shouldBe false
+    }
+
+    @Test
+    fun `NOT_IN_ARRAY operator works for strings`() {
+        val condition = Condition.Plain(
+            attributeKey = "letter",
+            operator = Operator.NOT_IN_ARRAY,
+            value = ConditionValue.ArrayValue(listOf("a", "b", "c")),
+        )
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("letter" to AttributeValue.StringValue("b")),
+        ) shouldBe false
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("letter" to AttributeValue.StringValue("d")),
+        ) shouldBe true
+    }
+
+    @Test
+    fun `multiple conditions work`() {
+        val startsWithCondition = Condition.Plain(
+            attributeKey = "browser_type",
+            operator = Operator.STARTS_WITH,
+            value = ConditionValue.StringValue("chr"),
+        )
+
+        val semVerCondition = Condition.Plain(
+            attributeKey = "version",
+            operator = Operator.SEMVER_GREATER_THAN,
+            value = ConditionValue.StringValue("1.2.3")
+        )
+
+        val ageCondition =
+            Condition.Plain(
+                attributeKey = "age",
+                operator = Operator.GREATER_THAN,
+                value = ConditionValue.IntValue(18)
+            )
+
+        val beforeCondition = Condition.Plain(
+            attributeKey = "date",
+            operator = Operator.BEFORE,
+            value = ConditionValue.DateTimeValue(LocalDate.of(2023, 10, 5)),
+        )
+
+        val inArrayCondition = Condition.Plain(
+            attributeKey = "letter",
+            operator = Operator.IN_ARRAY,
+            value = ConditionValue.ArrayValue(listOf("a", "b", "c")),
+        )
+
+        val condition = Condition.And(
+            listOf(
+                Condition.And(
+                    listOf(
+                        startsWithCondition,
+                        semVerCondition,
+                    )
+                ),
+                Condition.Or(
+                    listOf(
+                        ageCondition,
+                        beforeCondition,
+                    )
+                ),
+                Condition.Not(
+                    listOf(
+                        inArrayCondition
+                    )
+                )
             )
         )
 
-        // not match
-        assertEquals(
-            false,
-            Conditions.conditionIsMatched(
-                condition,
-                mapOf("age" to AttributeValue.IntValue(19))
-            )
+        val context = mapOf(
+            "browser_type" to AttributeValue.StringValue("chrome"), // true
+            "version" to AttributeValue.StringValue("1.2.4"), // true
+            "date" to AttributeValue.DateValue(LocalDate.of(2023, 10, 6)), // false
+            "letter" to AttributeValue.StringValue("x"), // false
+            "age" to AttributeValue.IntValue(19), // true
         )
+
+        Conditions.allConditionsAreMatched(
+            condition = condition,
+            context = context,
+        ) shouldBe true
+
+        Conditions.allConditionsAreMatched(
+            condition = condition,
+            context = context.toMutableMap().apply {
+                this["age"] = AttributeValue.IntValue(17)
+            },
+        ) shouldBe false
     }
 }

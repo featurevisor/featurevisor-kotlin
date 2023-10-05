@@ -1,41 +1,6 @@
 package com.featurevisor.types
 
-typealias AttributeKey = String
 typealias Context = Map<AttributeKey, AttributeValue>
-
-data class Attribute(
-    val key: AttributeKey,
-    val type: String,
-    val archived: Boolean?,
-    val capture: Boolean?,
-)
-
-data class PlainCondition(
-    val attributeKey: AttributeKey,
-    val operator: Operator,
-    val value: AttributeValue,
-)
-
-data class AndCondition(
-    val and: List<Condition>,
-)
-
-data class OrCondition(
-    val or: List<Condition>,
-)
-
-data class NotCondition(
-    val not: List<Condition>,
-)
-
-sealed class Condition {
-    data class Plain(val condition: PlainCondition) : Condition()
-    data class Multiple(val conditions: List<Condition>) : Condition()
-
-    data class And(val condition: AndCondition) : Condition()
-    data class Or(val condition: OrCondition) : Condition()
-    data class Not(val condition: NotCondition) : Condition()
-}
 
 typealias SegmentKey = String
 
