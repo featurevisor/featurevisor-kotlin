@@ -41,12 +41,8 @@ object Conditions {
                     EQUALS -> attributeValue.value == conditionValue.value
                     NOT_EQUALS -> attributeValue.value != conditionValue.value
                     CONTAINS -> attributeValue.value.contains(conditionValue.value)
-                    NOT_CONTAINS ->
-                        attributeValue.value.contains(conditionValue.value).not()
-
-                    STARTS_WITH ->
-                        attributeValue.value.startsWith(conditionValue.value)
-
+                    NOT_CONTAINS -> attributeValue.value.contains(conditionValue.value).not()
+                    STARTS_WITH -> attributeValue.value.startsWith(conditionValue.value)
                     ENDS_WITH -> attributeValue.value.endsWith(conditionValue.value)
                     SEMVER_EQUALS -> compareVersions(attributeValue.value, conditionValue.value) == 0
                     SEMVER_NOT_EQUALS -> compareVersions(attributeValue.value, conditionValue.value) != 0
