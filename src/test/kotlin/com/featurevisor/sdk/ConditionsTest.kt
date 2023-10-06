@@ -3,7 +3,25 @@ package com.featurevisor.sdk
 import com.featurevisor.types.AttributeValue
 import com.featurevisor.types.Condition
 import com.featurevisor.types.ConditionValue
-import com.featurevisor.types.Operator
+import com.featurevisor.types.Operator.AFTER
+import com.featurevisor.types.Operator.BEFORE
+import com.featurevisor.types.Operator.CONTAINS
+import com.featurevisor.types.Operator.ENDS_WITH
+import com.featurevisor.types.Operator.EQUALS
+import com.featurevisor.types.Operator.GREATER_THAN
+import com.featurevisor.types.Operator.GREATER_THAN_OR_EQUAL
+import com.featurevisor.types.Operator.IN_ARRAY
+import com.featurevisor.types.Operator.LESS_THAN
+import com.featurevisor.types.Operator.LESS_THAN_OR_EQUAL
+import com.featurevisor.types.Operator.NOT_EQUALS
+import com.featurevisor.types.Operator.NOT_IN_ARRAY
+import com.featurevisor.types.Operator.SEMVER_EQUALS
+import com.featurevisor.types.Operator.SEMVER_GREATER_THAN
+import com.featurevisor.types.Operator.SEMVER_GREATER_THAN_OR_EQUAL
+import com.featurevisor.types.Operator.SEMVER_LESS_THAN
+import com.featurevisor.types.Operator.SEMVER_LESS_THAN_OR_EQUAL
+import com.featurevisor.types.Operator.SEMVER_NOT_EQUALS
+import com.featurevisor.types.Operator.STARTS_WITH
 import io.kotest.matchers.shouldBe
 import java.time.LocalDate
 import kotlin.test.Test
@@ -14,7 +32,7 @@ class ConditionsTest {
         val condition =
             Condition.Plain(
                 attributeKey = "browser_type",
-                operator = Operator.EQUALS,
+                operator = EQUALS,
                 value = ConditionValue.StringValue("chrome")
             )
 
@@ -34,7 +52,7 @@ class ConditionsTest {
         val condition =
             Condition.Plain(
                 attributeKey = "browser_type",
-                operator = Operator.NOT_EQUALS,
+                operator = NOT_EQUALS,
                 value = ConditionValue.StringValue("chrome")
             )
 
@@ -54,7 +72,7 @@ class ConditionsTest {
         val condition =
             Condition.Plain(
                 attributeKey = "age",
-                operator = Operator.GREATER_THAN,
+                operator = GREATER_THAN,
                 value = ConditionValue.IntValue(18)
             )
 
@@ -74,7 +92,7 @@ class ConditionsTest {
         val condition =
             Condition.Plain(
                 attributeKey = "age",
-                operator = Operator.LESS_THAN,
+                operator = LESS_THAN,
                 value = ConditionValue.IntValue(18)
             )
 
@@ -94,7 +112,7 @@ class ConditionsTest {
         val condition =
             Condition.Plain(
                 attributeKey = "age",
-                operator = Operator.GREATER_THAN_OR_EQUAL,
+                operator = GREATER_THAN_OR_EQUAL,
                 value = ConditionValue.IntValue(18)
             )
 
@@ -119,7 +137,7 @@ class ConditionsTest {
         val condition =
             Condition.Plain(
                 attributeKey = "age",
-                operator = Operator.LESS_THAN_OR_EQUAL,
+                operator = LESS_THAN_OR_EQUAL,
                 value = ConditionValue.IntValue(18)
             )
 
@@ -143,7 +161,7 @@ class ConditionsTest {
     fun `CONTAINS operator works for strings`() {
         val condition = Condition.Plain(
             attributeKey = "browser_type",
-            operator = Operator.CONTAINS,
+            operator = CONTAINS,
             value = ConditionValue.StringValue("hro"),
         )
 
@@ -162,7 +180,7 @@ class ConditionsTest {
     fun `NOT_CONTAINS operator works for strings`() {
         val condition = Condition.Plain(
             attributeKey = "browser_type",
-            operator = Operator.CONTAINS,
+            operator = CONTAINS,
             value = ConditionValue.StringValue("hro"),
         )
 
@@ -181,7 +199,7 @@ class ConditionsTest {
     fun `STARTS_WITH operator works for strings`() {
         val condition = Condition.Plain(
             attributeKey = "browser_type",
-            operator = Operator.STARTS_WITH,
+            operator = STARTS_WITH,
             value = ConditionValue.StringValue("chr"),
         )
 
@@ -200,7 +218,7 @@ class ConditionsTest {
     fun `ENDS_WITH operator works for strings`() {
         val condition = Condition.Plain(
             attributeKey = "browser_type",
-            operator = Operator.ENDS_WITH,
+            operator = ENDS_WITH,
             value = ConditionValue.StringValue("ome"),
         )
 
@@ -219,7 +237,7 @@ class ConditionsTest {
     fun `SEMVER_EQUALS operator works for strings`() {
         val condition = Condition.Plain(
             attributeKey = "version",
-            operator = Operator.SEMVER_EQUALS,
+            operator = SEMVER_EQUALS,
             value = ConditionValue.StringValue("1.2.3")
         )
 
@@ -238,7 +256,7 @@ class ConditionsTest {
     fun `SEMVER_NOT_EQUALS operator works for strings`() {
         val condition = Condition.Plain(
             attributeKey = "version",
-            operator = Operator.SEMVER_NOT_EQUALS,
+            operator = SEMVER_NOT_EQUALS,
             value = ConditionValue.StringValue("1.2.3")
         )
 
@@ -257,7 +275,7 @@ class ConditionsTest {
     fun `SEMVER_GREATER_THAN operator works for strings`() {
         val condition = Condition.Plain(
             attributeKey = "version",
-            operator = Operator.SEMVER_GREATER_THAN,
+            operator = SEMVER_GREATER_THAN,
             value = ConditionValue.StringValue("1.2.3")
         )
 
@@ -281,7 +299,7 @@ class ConditionsTest {
     fun `SEMVER_GREATER_THAN_OR_EQUAL operator works for strings`() {
         val condition = Condition.Plain(
             attributeKey = "version",
-            operator = Operator.SEMVER_GREATER_THAN_OR_EQUAL,
+            operator = SEMVER_GREATER_THAN_OR_EQUAL,
             value = ConditionValue.StringValue("1.2.3")
         )
 
@@ -305,7 +323,7 @@ class ConditionsTest {
     fun `SEMVER_LESS_THAN operator works for strings`() {
         val condition = Condition.Plain(
             attributeKey = "version",
-            operator = Operator.SEMVER_LESS_THAN,
+            operator = SEMVER_LESS_THAN,
             value = ConditionValue.StringValue("1.2.3")
         )
 
@@ -329,7 +347,7 @@ class ConditionsTest {
     fun `SEMVER_LESS_THAN_OR_EQUAL operator works for strings`() {
         val condition = Condition.Plain(
             attributeKey = "version",
-            operator = Operator.SEMVER_LESS_THAN_OR_EQUAL,
+            operator = SEMVER_LESS_THAN_OR_EQUAL,
             value = ConditionValue.StringValue("1.2.3")
         )
 
@@ -353,7 +371,7 @@ class ConditionsTest {
     fun `BEFORE operator works for strings`() {
         val condition = Condition.Plain(
             attributeKey = "date",
-            operator = Operator.BEFORE,
+            operator = BEFORE,
             value = ConditionValue.DateTimeValue(LocalDate.of(2023, 10, 5)),
         )
 
@@ -377,7 +395,7 @@ class ConditionsTest {
     fun `AFTER operator works for strings`() {
         val condition = Condition.Plain(
             attributeKey = "date",
-            operator = Operator.AFTER,
+            operator = AFTER,
             value = ConditionValue.DateTimeValue(LocalDate.of(2023, 10, 5)),
         )
 
@@ -401,7 +419,7 @@ class ConditionsTest {
     fun `IN_ARRAY operator works for strings`() {
         val condition = Condition.Plain(
             attributeKey = "letter",
-            operator = Operator.IN_ARRAY,
+            operator = IN_ARRAY,
             value = ConditionValue.ArrayValue(listOf("a", "b", "c")),
         )
 
@@ -420,7 +438,7 @@ class ConditionsTest {
     fun `NOT_IN_ARRAY operator works for strings`() {
         val condition = Condition.Plain(
             attributeKey = "letter",
-            operator = Operator.NOT_IN_ARRAY,
+            operator = NOT_IN_ARRAY,
             value = ConditionValue.ArrayValue(listOf("a", "b", "c")),
         )
 
@@ -439,32 +457,32 @@ class ConditionsTest {
     fun `multiple conditions work`() {
         val startsWithCondition = Condition.Plain(
             attributeKey = "browser_type",
-            operator = Operator.STARTS_WITH,
+            operator = STARTS_WITH,
             value = ConditionValue.StringValue("chr"),
         )
 
         val semVerCondition = Condition.Plain(
             attributeKey = "version",
-            operator = Operator.SEMVER_GREATER_THAN,
+            operator = SEMVER_GREATER_THAN,
             value = ConditionValue.StringValue("1.2.3")
         )
 
         val ageCondition =
             Condition.Plain(
                 attributeKey = "age",
-                operator = Operator.GREATER_THAN,
+                operator = GREATER_THAN,
                 value = ConditionValue.IntValue(18)
             )
 
         val beforeCondition = Condition.Plain(
             attributeKey = "date",
-            operator = Operator.BEFORE,
+            operator = BEFORE,
             value = ConditionValue.DateTimeValue(LocalDate.of(2023, 10, 5)),
         )
 
         val inArrayCondition = Condition.Plain(
             attributeKey = "letter",
-            operator = Operator.IN_ARRAY,
+            operator = IN_ARRAY,
             value = ConditionValue.ArrayValue(listOf("a", "b", "c")),
         )
 

@@ -107,8 +107,8 @@ object Conditions {
         }
     }
 
-    fun allConditionsAreMatched(condition: Condition, context: Context): Boolean {
-        return when (condition) {
+    fun allConditionsAreMatched(condition: Condition, context: Context): Boolean =
+        when (condition) {
             is Plain -> conditionIsMatched(condition, context)
 
             is And -> condition.and.all {
@@ -123,7 +123,6 @@ object Conditions {
                 allConditionsAreMatched(it, context)
             }.not()
         }
-    }
 
     private fun compareVersions(actual: String, condition: String): Int =
         SemVer.parse(actual).compareTo(SemVer.parse(condition))
