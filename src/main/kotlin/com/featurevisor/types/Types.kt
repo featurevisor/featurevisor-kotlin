@@ -1,96 +1,6 @@
 package com.featurevisor.types
 
-typealias AttributeKey = String
-
-sealed class AttributeValue {
-    data class StringValue(val value: String) : AttributeValue()
-    data class IntValue(val value: Int) : AttributeValue()
-    data class DoubleValue(val value: Double) : AttributeValue()
-    data class BooleanValue(val value: Boolean) : AttributeValue()
-
-    // @TODO: implement Date
-    object NullValue : AttributeValue()
-}
-
 typealias Context = Map<AttributeKey, AttributeValue>
-
-data class Attribute(
-    val key: AttributeKey,
-    val type: String,
-    val archived: Boolean?,
-    val capture: Boolean?,
-)
-
-enum class Operator(val value: String) {
-    equals("equals"),
-    notEquals("notEquals"),
-
-    // numeric
-    greaterThan("greaterThan"),
-    greaterThanOrEquals("greaterThanOrEqual"),
-    lessThan("lessThan"),
-    lessThanOrEquals("lessThanOrEqual"),
-
-    // string
-    contains("contains"),
-    notContains("notContains"),
-    startsWith("startsWith"),
-    endsWith("endsWith"),
-
-    // semver (string)
-    semverEquals("semverEquals"),
-    semverNotEquals("semverNotEquals"),
-    semverGreaterThan("semverGreaterThan"),
-    semverGreaterThanOrEquals("semverGreaterThanOrEqual"),
-    semverLessThan("semverLessThan"),
-    semverLessThanOrEquals("semverLessThanOrEqual"),
-
-    // date comparisons
-    before("before"),
-    after("after"),
-
-    // array of strings
-    inArray("in"),
-    notInArray("notIn");
-}
-
-sealed class ConditionValue {
-    data class StringValue(val value: String) : ConditionValue()
-    data class IntValue(val value: Int) : ConditionValue()
-    data class DoubleValue(val value: Double) : ConditionValue()
-    data class BooleanValue(val value: Boolean) : ConditionValue()
-    data class ArrayValue(val values: Array<String>) : ConditionValue()
-
-    // @TODO: implement Date
-    object NullValue : ConditionValue()
-}
-
-data class PlainCondition(
-    val attribute: AttributeKey,
-    val operator: Operator,
-    val value: ConditionValue,
-)
-
-data class AndCondition(
-    val and: Array<Condition>,
-)
-
-data class OrCondition(
-    val or: Array<Condition>,
-)
-
-data class NotCondition(
-    val not: Array<Condition>,
-)
-
-sealed class Condition {
-    data class Plain(val condition: PlainCondition) : Condition()
-    data class Multiple(val conditions: Array<Condition>) : Condition()
-
-    data class And(val condition: AndCondition) : Condition()
-    data class Or(val condition: OrCondition) : Condition()
-    data class Not(val condition: NotCondition) : Condition()
-}
 
 typealias SegmentKey = String
 
@@ -103,20 +13,20 @@ data class Segment(
 typealias PlainGroupSegment = SegmentKey
 
 data class AndGroupSegment(
-    val and: Array<GroupSegment>,
+    val and: List<GroupSegment>,
 )
 
 data class OrGroupSegment(
-    val or: Array<GroupSegment>,
+    val or: List<GroupSegment>,
 )
 
 data class NotGroupSegment(
-    val not: Array<GroupSegment>,
+    val not: List<GroupSegment>,
 )
 
 sealed class GroupSegment {
     data class Plain(val segment: PlainGroupSegment) : GroupSegment()
-    data class Multiple(val segments: Array<GroupSegment>) : GroupSegment()
+    data class Multiple(val segments: List<GroupSegment>) : GroupSegment()
 
     data class And(val segment: AndGroupSegment) : GroupSegment()
     data class Or(val segment: OrGroupSegment) : GroupSegment()
@@ -144,7 +54,7 @@ sealed class VariableValue {
     data class StringValue(val value: String) : VariableValue()
     data class IntValue(val value: Int) : VariableValue()
     data class DoubleValue(val value: Double) : VariableValue()
-    data class ArrayValue(val values: Array<String>) : VariableValue()
+    data class ArrayValue(val values: List<String>) : VariableValue()
     data class ObjectValue(val value: VariableObjectValue) : VariableValue()
     data class JsonValue(val value: String) : VariableValue()
 }
@@ -160,7 +70,7 @@ data class VariableOverride(
 data class Variable(
     val key: VariableKey,
     val value: VariableValue,
-    val overrides: Array<VariableOverride>?,
+    val overrides: List<VariableOverride>?,
 )
 
 data class Variation(
@@ -172,7 +82,7 @@ data class Variation(
     // 0 to 100 (available from parsed YAML, but not in datafile)
     val weight: Double?,
 
-    val variables: Array<Variable>?,
+    val variables: List<Variable>?,
 )
 
 data class VariableSchema(
@@ -206,7 +116,7 @@ data class Slot(
 data class Group(
     val key: String,
     val description: String,
-    val slots: Array<Slot>,
+    val slots: List<Slot>,
 )
 
 typealias BucketKey = String
@@ -239,15 +149,15 @@ data class Traffic(
     val variation: VariationValue?,
     val variables: VariableValues?,
 
-    val allocation: Array<Allocation>,
+    val allocation: List<Allocation>,
 )
 
 typealias PlainBucketBy = String
 
-typealias AndBucketBy = Array<BucketBy>
+typealias AndBucketBy = List<BucketBy>
 
 data class OrBucketBy(
-    val or: Array<String>,
+    val or: List<String>,
 )
 
 sealed class BucketBy {
@@ -269,23 +179,23 @@ sealed class Required {
 data class Feature(
     val key: FeatureKey,
     val deprecated: Boolean?,
-    val variablesSchema: Array<VariableSchema>?,
-    val variations: Array<Variation>?,
+    val variablesSchema: List<VariableSchema>?,
+    val variations: List<Variation>?,
     val bucketBy: BucketBy,
-    val required: Array<Required>?,
-    val traffic: Array<Traffic>,
-    val force: Array<Force>?,
+    val required: List<Required>?,
+    val traffic: List<Traffic>,
+    val force: List<Force>?,
 
     // if in a Group (mutex), these are available slot ranges
-    val ranges: Array<Range>?,
+    val ranges: List<Range>?,
 )
 
 data class DatafileContent(
     val schemaVersion: String,
     val revision: String,
-    val attributes: Array<Attribute>,
-    val segments: Array<Segment>,
-    val features: Array<Feature>,
+    val attributes: List<Attribute>,
+    val segments: List<Segment>,
+    val features: List<Feature>,
 )
 
 data class OverrideFeature(
@@ -320,8 +230,8 @@ data class Rule(
 
 data class Environment(
     val expose: Boolean?,
-    val rules: Array<Rule>,
-    val force: Array<Force>?,
+    val rules: List<Rule>,
+    val force: List<Force>?,
 )
 
 typealias Environments = Map<EnvironmentKey, Environment>
@@ -333,14 +243,14 @@ data class ParsedFeature(
     val deprecated: Boolean?,
 
     val description: String,
-    val tags: Array<String>,
+    val tags: List<String>,
 
     val bucketBy: BucketBy,
 
-    val required: Array<Required>?,
+    val required: List<Required>?,
 
-    val variablesSchema: Array<VariableSchema>?,
-    val variations: Array<Variation>?,
+    val variablesSchema: List<VariableSchema>?,
+    val variations: List<Variation>?,
 
     val environments: Environments,
 )
@@ -360,8 +270,8 @@ data class FeatureAssertion(
 )
 
 data class TestFeature(
-    val feature: FeatureKey,
-    val assertions: Array<FeatureAssertion>,
+    val key: FeatureKey,
+    val assertions: List<FeatureAssertion>,
 )
 
 data class SegmentAssertion(
@@ -371,8 +281,8 @@ data class SegmentAssertion(
 )
 
 data class TestSegment(
-    val segment: SegmentKey,
-    val assertions: Array<SegmentAssertion>,
+    val key: SegmentKey,
+    val assertions: List<SegmentAssertion>,
 )
 
 sealed class Test {

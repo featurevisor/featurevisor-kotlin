@@ -46,9 +46,11 @@ publishing {
 dependencies {
     // Use the Kotlin JUnit 5 integration.
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
-
     // Use the JUnit 5 integration.
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.9.2")
+    // Uncomment when needed
+//    testImplementation("io.mockk:mockk:1.13.8")
+    testImplementation("io.kotest:kotest-assertions-core:5.7.2")
 
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
@@ -57,12 +59,14 @@ dependencies {
 
     // This dependency is used internally, and not exposed to consumers on their own compile classpath.
     implementation("com.google.guava:guava:31.1-jre")
+    implementation("net.swiftzer.semver:semver:1.3.0")
+    implementation("com.goncalossilva:murmurhash:0.4.0")
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(8))
+        languageVersion.set(JavaLanguageVersion.of(11))
     }
 }
 
