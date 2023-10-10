@@ -49,10 +49,10 @@ We are breaking down the various parts that we need to migrate to Swift in the s
 |---------------------|--------------------------------------------------|--------|
 | Files               | `@featurevisor/types` ➡️ `Types.kt`              | ✅      |
 |                     | SDK's `bucket.ts` ➡️ `Bucket.kt`                 | ✅      |
-|                     | SDK's `conditions.ts` ➡️ `Conditions.kt`         | 🟠      |
-|                     | SDK's `datafileReader.ts` ➡️ `DatafileReader.kt` |        |
-|                     | SDK's `emitter.ts` ➡️ `Emitter.kt`               |        |
-|                     | SDK's `feature.ts` ➡️ `Emitter.kt`               |        |
+|                     | SDK's `conditions.ts` ➡️ `Conditions.kt`         | ✅      |
+|                     | SDK's `datafileReader.ts` ➡️ `DatafileReader.kt` | ✅      |
+|                     | SDK's `emitter.ts` ➡️ `Emitter.kt`               | 🟠     |
+|                     | SDK's `feature.ts` ➡️ `Feature.kt`               |        |
 |                     | SDK's `instance.ts` ➡️ `Instance.kt`             |        |
 |                     | SDK's `logger.ts` ➡️ `Logger.kt`                 |        |
 |                     | SDK's `segments.ts` ➡️ `segments.kt`             |        |
