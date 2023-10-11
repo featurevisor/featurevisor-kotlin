@@ -41,12 +41,8 @@ object Conditions {
                     EQUALS -> attributeValue.value == conditionValue.value
                     NOT_EQUALS -> attributeValue.value != conditionValue.value
                     CONTAINS -> attributeValue.value.contains(conditionValue.value)
-                    NOT_CONTAINS ->
-                        attributeValue.value.contains(conditionValue.value).not()
-
-                    STARTS_WITH ->
-                        attributeValue.value.startsWith(conditionValue.value)
-
+                    NOT_CONTAINS -> attributeValue.value.contains(conditionValue.value).not()
+                    STARTS_WITH -> attributeValue.value.startsWith(conditionValue.value)
                     ENDS_WITH -> attributeValue.value.endsWith(conditionValue.value)
                     SEMVER_EQUALS -> compareVersions(attributeValue.value, conditionValue.value) == 0
                     SEMVER_NOT_EQUALS -> compareVersions(attributeValue.value, conditionValue.value) != 0
@@ -111,8 +107,8 @@ object Conditions {
         }
     }
 
-    fun allConditionsAreMatched(condition: Condition, context: Context): Boolean {
-        return when (condition) {
+    fun allConditionsAreMatched(condition: Condition, context: Context): Boolean =
+        when (condition) {
             is Plain -> conditionIsMatched(condition, context)
 
             is And -> condition.and.all {
@@ -127,7 +123,6 @@ object Conditions {
                 allConditionsAreMatched(it, context)
             }.not()
         }
-    }
 
     private fun compareVersions(actual: String, condition: String): Int =
         SemVer.parse(actual).compareTo(SemVer.parse(condition))

@@ -6,10 +6,11 @@ import com.featurevisor.types.Condition
 import com.featurevisor.types.ConditionValue
 import com.featurevisor.types.DatafileContent
 import com.featurevisor.types.Feature
-import com.featurevisor.types.Operator
+import com.featurevisor.types.Operator.EQUALS
+import com.featurevisor.types.Operator.NOT_EQUALS
 import com.featurevisor.types.Segment
 
-object MockDatafileContentFactory {
+object DatafileContentFactory {
 
     fun get() = DatafileContent(
         schemaVersion = "schemaVersion",
@@ -45,12 +46,12 @@ object MockDatafileContentFactory {
                 listOf(
                     Condition.Plain(
                         attributeKey = "browser_type",
-                        operator = Operator.EQUALS,
+                        operator = EQUALS,
                         value = ConditionValue.StringValue("chrome"),
                     ),
                     Condition.Plain(
                         attributeKey = "device",
-                        operator = Operator.NOT_EQUALS,
+                        operator = NOT_EQUALS,
                         value = ConditionValue.StringValue("tablet"),
                     )
                 ),

@@ -1,13 +1,13 @@
 package com.featurevisor.sdk
 
-import com.featurevisor.sdk.factory.MockDatafileContentFactory
+import com.featurevisor.sdk.factory.DatafileContentFactory
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 
 class DataFileReaderTest {
 
     private val systemUnderTest = DataFileReader(
-        datafileJson = MockDatafileContentFactory.get()
+        datafileJson = DatafileContentFactory.get()
     )
 
     @Test
@@ -22,22 +22,22 @@ class DataFileReaderTest {
 
     @Test
     fun `getAllAttributes() returns correct list`() {
-        systemUnderTest.getAllAttributes() shouldBe MockDatafileContentFactory.getAttributes()
+        systemUnderTest.getAllAttributes() shouldBe DatafileContentFactory.getAttributes()
     }
 
     @Test
     fun `getAttribute() returns correct value`() {
-        systemUnderTest.getAttribute("browser_type") shouldBe MockDatafileContentFactory.getAttributes().first()
+        systemUnderTest.getAttribute("browser_type") shouldBe DatafileContentFactory.getAttributes().first()
     }
 
     @Test
     fun `getSegment() returns correct value`() {
-        systemUnderTest.getSegment("netherlands") shouldBe MockDatafileContentFactory.getSegments().first()
+        systemUnderTest.getSegment("netherlands") shouldBe DatafileContentFactory.getSegments().first()
     }
 
     @Test
     fun `getFeature() returns correct value`() {
-        systemUnderTest.getFeature("landing_page") shouldBe MockDatafileContentFactory.getFeatures().first()
+        systemUnderTest.getFeature("landing_page") shouldBe DatafileContentFactory.getFeatures().first()
     }
 
     @Test
