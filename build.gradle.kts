@@ -49,7 +49,7 @@ dependencies {
     // Use the JUnit 5 integration.
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.9.2")
     // Uncomment when needed
-//    testImplementation("io.mockk:mockk:1.13.8")
+    testImplementation("io.mockk:mockk:1.13.8")
     testImplementation("io.kotest:kotest-assertions-core:5.7.2")
 
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
