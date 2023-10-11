@@ -35,7 +35,7 @@ class EmitterTest {
         systemUnderTest.addListener(ACTIVATION, activationCallback)
 
         values().forEach {
-            systemUnderTest.invoke(it)
+            systemUnderTest.emit(it)
         }
 
         verify(exactly = 1) {
@@ -54,7 +54,7 @@ class EmitterTest {
 
         systemUnderTest.removeListener(REFRESH)
         values().forEach {
-            systemUnderTest.invoke(it)
+            systemUnderTest.emit(it)
         }
 
         verify(exactly = 1) {
@@ -75,7 +75,7 @@ class EmitterTest {
 
         systemUnderTest.removeAllListeners()
         values().forEach {
-            systemUnderTest.invoke(it)
+            systemUnderTest.emit(it)
         }
 
         verify(exactly = 0) {

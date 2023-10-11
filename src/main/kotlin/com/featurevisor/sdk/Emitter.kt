@@ -17,7 +17,7 @@ class Emitter {
         listeners.clear()
     }
 
-    operator fun invoke(event: EventName) {
+    fun emit(event: EventName) {
         listeners.getOrDefault(event, null)?.invoke()
     }
 }
