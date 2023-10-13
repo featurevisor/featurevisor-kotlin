@@ -27,6 +27,7 @@ class Logger(
         fun createLogger(levels: List<LogLevel> = defaultLogLevels, handle: LogHandler = defaultLogHandler): Logger =
             Logger(levels, handle)
     }
+
     fun setLevels(levels: List<LogLevel>) {
         this.levels = levels
     }
@@ -42,7 +43,6 @@ class Logger(
 
     fun error(message: LogMessage, details: LogDetails? = null) =
         log(ERROR, message, details)
-
 
     private fun log(level: LogLevel, message: LogMessage, details: LogDetails? = null) {
         if (level in levels) {
