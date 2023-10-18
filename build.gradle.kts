@@ -80,5 +80,3 @@ tasks.named<Test>("test") {
         showStandardStreams = true
     }
 }
-
-// TEST
