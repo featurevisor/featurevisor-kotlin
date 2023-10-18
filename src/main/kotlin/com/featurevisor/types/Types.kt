@@ -7,13 +7,13 @@ typealias VariationValue = String
 typealias VariableKey = String
 
 enum class VariableType(val value: String) {
-    boolean("boolean"),
-    string("string"),
-    integer("integer"),
-    double("double"),
-    array("array"),
-    object_("object"),
-    json("json");
+    BOOLEAN("boolean"),
+    STRING("string"),
+    INTEGER("integer"),
+    DOUBLE("double"),
+    ARRAY("array"),
+    OBJECT("object"),
+    JSON("json");
 }
 
 typealias VariableObjectValue = Map<String, VariableValue>
@@ -95,7 +95,7 @@ typealias BucketValue = Int
 
 typealias StickyFeatures = Map<FeatureKey, OverrideFeature>
 
-typealias InitialFeatures = Map<FeatureKey, VariationValue>
+typealias InitialFeatures = Map<FeatureKey, OverrideFeature>
 
 /**
  * YAML-only type

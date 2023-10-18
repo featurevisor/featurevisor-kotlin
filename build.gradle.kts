@@ -80,18 +80,3 @@ tasks.named<Test>("test") {
         showStandardStreams = true
     }
 }
-
-// TODO: Remove excludes when Instance.kt is ready
-sourceSets {
-    main {
-        kotlin {
-            exclude("com/featurevisor/sdk/Instance.kt")
-            exclude("com/featurevisor/sdk/InstanceOptions.kt")
-        }
-    }
-    test {
-        kotlin {
-            exclude("com/featurevisor/sdk/InstanceTest.kt")
-        }
-    }
-}
