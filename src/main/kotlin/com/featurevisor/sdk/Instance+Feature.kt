@@ -8,7 +8,7 @@ import com.featurevisor.types.Force
 import com.featurevisor.types.Traffic
 
 fun FeaturevisorInstance.getFeatureByKey(featureKey: String): Feature? {
-    return datafileReader?.getFeature(featureKey)
+    return datafileReader.getFeature(featureKey)
 }
 
 fun FeaturevisorInstance.findForceFromFeature(
@@ -59,7 +59,7 @@ fun FeaturevisorInstance.getMatchedTrafficAndAllocation(
     context: Context,
     bucketValue: Int,
     datafileReader: DatafileReader,
-    logger: Logger,
+    logger: Logger?,
 ): MatchedTrafficAndAllocation {
 
     var matchedAllocation: Allocation? = null

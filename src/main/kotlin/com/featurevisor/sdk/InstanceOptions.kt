@@ -4,7 +4,7 @@ import com.featurevisor.types.DatafileContent
 import com.featurevisor.types.InitialFeatures
 import com.featurevisor.types.StickyFeatures
 
-typealias Listener = () -> Unit
+typealias Listener = (Array<out Any>) -> Unit
 
 data class InstanceOptions(
     val bucketKeySeparator: String = defaultBucketKeySeparator,

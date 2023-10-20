@@ -3,79 +3,26 @@
  */
 package com.featurevisor.sdk
 
-import com.featurevisor.sdk.FeaturevisorError.*
+import com.featurevisor.sdk.FeaturevisorError.FetchingDataFileFailed
+import com.featurevisor.sdk.FeaturevisorError.MissingDatafileOptions
 import com.featurevisor.types.BucketKey
 import com.featurevisor.types.BucketValue
 import com.featurevisor.types.Context
 import com.featurevisor.types.DatafileContent
 import com.featurevisor.types.EventName
-import com.featurevisor.types.EventName.*
+import com.featurevisor.types.EventName.ACTIVATION
+import com.featurevisor.types.EventName.READY
+import com.featurevisor.types.EventName.REFRESH
+import com.featurevisor.types.EventName.UPDATE
 import com.featurevisor.types.Feature
-import com.featurevisor.types.FeatureKey
-import com.featurevisor.types.OverrideFeature
-import com.featurevisor.types.RuleKey
 import com.featurevisor.types.StickyFeatures
-import com.featurevisor.types.Traffic
-import com.featurevisor.types.VariableKey
-import com.featurevisor.types.VariableSchema
-import com.featurevisor.types.VariableValue
-import com.featurevisor.types.Variation
-import com.featurevisor.types.VariationValue
-import kotlinx.serialization.Serializable
+import kotlinx.coroutines.Job
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.decodeFromJsonElement
-import kotlinx.serialization.json.encodeToJsonElement
-import java.util.Timer
 
 typealias ConfigureBucketKey = (Feature, Context, BucketKey) -> BucketKey
 typealias ConfigureBucketValue = (Feature, Context, BucketValue) -> BucketValue
 typealias InterceptContext = (Context) -> Context
 typealias DatafileFetchHandler = (datafileUrl: String) -> Result<DatafileContent>
-
-data class Statuses(var ready: Boolean, var refreshInProgress: Boolean)
-
-enum class EvaluationReason(val value: String) {
-    NOT_FOUND("not_found"),
-    NO_VARIATIONS("no_variations"),
-    DISABLED("disabled"),
-    REQUIRED("required"),
-    OUT_OF_RANGE("out_of_range"),
-    FORCED("forced"),
-    INITIAL("initial"),
-    STICKY("sticky"),
-    RULE("rule"),
-    ALLOCATED("allocated"),
-    DEFAULTED("defaulted"),
-    OVERRIDE("override"),
-    ERROR("error")
-}
-
-@Serializable
-data class Evaluation(
-    val featureKey: FeatureKey,
-    val reason: EvaluationReason,
-    val bucketValue: BucketValue? = null,
-    val ruleKey: RuleKey? = null,
-    val enabled: Boolean? = null,
-    val traffic: Traffic? = null,
-    val sticky: OverrideFeature? = null,
-    val initial: OverrideFeature? = null,
-    val variation: Variation? = null,
-    val variationValue: VariationValue? = null,
-    val variableKey: VariableKey? = null,
-    val variableValue: VariableValue? = null,
-    val variableSchema: VariableSchema? = null,
-) {
-    fun toDictionary(): Map<String, Any> {
-        val data = try {
-            val json = Json.encodeToJsonElement(this)
-            Json.decodeFromJsonElement<Map<String, Any>>(json)
-        } catch (e: Exception) {
-            emptyMap()
-        }
-        return data
-    }
-}
 
 val emptyDatafile = DatafileContent(
     schemaVersion = "1",
@@ -93,20 +40,26 @@ class FeaturevisorInstance private constructor(options: InstanceOptions) {
         }
     }
 
-    private val emitter: Emitter = Emitter()
     //    private val on: (EventName, Listener) -> Unit
-    private val addListener: (EventName, Listener) -> Unit
     //    private val off: (EventName) -> Unit
+    private val addListener: (EventName, Listener) -> Unit
     private val removeListener: (EventName) -> Unit
     private val removeAllListeners: () -> Unit
-    private var timer: Timer? = null
 
     internal val statuses = Statuses(ready = false, refreshInProgress = false)
     internal val logger = options.logger
     internal val initialFeatures = options.initialFeatures
+    internal val interceptContext = options.interceptContext
+    internal val emitter: Emitter = Emitter()
+    internal val datafileUrl = options.datafileUrl
+    internal val handleDatafileFetch = options.handleDatafileFetch
+    internal val refreshInterval = options.refreshInterval
+    internal lateinit var datafileReader: DatafileReader
     internal var stickyFeatures = options.stickyFeatures
-    internal var datafileReader: DatafileReader? = null
-//    var urlSession: URLSession = URLSession(configuration = options.sessionConfiguration)
+    internal var bucketKeySeparator = options.bucketKeySeparator
+    internal var configureBucketKey = options.configureBucketKey
+    internal var configureBucketValue = options.configureBucketValue
+    internal var refreshJob: Job? = null
 
     init {
         with(options) {
@@ -178,13 +131,6 @@ class FeaturevisorInstance private constructor(options: InstanceOptions) {
     }
 
     fun getRevision(): String {
-        return datafileReader!!.getRevision()
+        return datafileReader.getRevision()
     }
 }
-
-//TODO: All of the below move to another place
-private fun fetchDatafileContent(dataFileUrl: String?, lambda: (Result<DatafileContent>) -> Unit) {
-
-}
-
-private fun startRefreshing() {}

@@ -30,7 +30,7 @@ data class Traffic(
 
 typealias PlainBucketBy = String
 
-typealias AndBucketBy = List<BucketBy>
+typealias AndBucketBy = List<String>
 
 data class OrBucketBy(
     val or: List<String>,
@@ -48,7 +48,7 @@ data class RequiredWithVariation(
 )
 
 sealed class Required {
-    data class FeatureKey(val required: FeatureKey) : Required()
+    data class FeatureKey(val required: com.featurevisor.types.FeatureKey) : Required()
     data class WithVariation(val required: RequiredWithVariation) : Required()
 }
 
