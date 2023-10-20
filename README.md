@@ -53,7 +53,7 @@ We are breaking down the various parts that we need to migrate to Swift in the s
 |                     | SDK's `datafileReader.ts` ➡️ `DatafileReader.kt` | ✅      |
 |                     | SDK's `emitter.ts` ➡️ `Emitter.kt`               | ✅      |
 |                     | SDK's `feature.ts` ➡️ `Instance+Feature.kt`      | ✅      |
-|                     | SDK's `instance.ts` ➡️ `Instance.kt`             | 🟠     |
+|                     | SDK's `instance.ts` ➡️ `Instance.kt`             | ✅      |
 |                     | SDK's `logger.ts` ➡️ `Logger.kt`                 | ✅      |
 |                     | SDK's `segments.ts` ➡️ `Instance+Segments.kt`    | ✅      |
 |                     |                                                  |        |
