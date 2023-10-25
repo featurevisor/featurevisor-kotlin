@@ -20,13 +20,10 @@ data class InstanceOptions(
     val onReady: Listener? = null,
     val onRefresh: Listener? = null,
     val onUpdate: Listener? = null,
-    val refreshInterval: Double? = null, // seconds
+    val refreshInterval: Long? = null, // seconds
     val stickyFeatures: StickyFeatures? = null,
 ) {
     companion object {
         private const val defaultBucketKeySeparator = "."
-
-        // An instance of `InstanceOptions` with sane defaults. This is a singleton instance.
-        val default: InstanceOptions = InstanceOptions()
     }
 }

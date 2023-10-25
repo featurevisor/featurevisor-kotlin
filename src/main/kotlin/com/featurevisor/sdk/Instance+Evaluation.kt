@@ -63,6 +63,7 @@ data class Evaluation(
         } catch (e: Exception) {
             emptyMap()
         }
+
         return data
     }
 }
@@ -119,7 +120,6 @@ fun FeaturevisorInstance.evaluateVariation(featureKey: FeatureKey, context: Cont
         )
 
         logger?.warn("feature not found", evaluation.toDictionary())
-
         return evaluation
     }
 

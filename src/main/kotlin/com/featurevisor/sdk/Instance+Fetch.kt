@@ -9,7 +9,7 @@ import java.lang.IllegalArgumentException
 
 // MARK: - Fetch datafile content
 @Throws(IOException::class)
-fun FeaturevisorInstance.fetchDatafileContent(
+internal fun FeaturevisorInstance.fetchDatafileContent(
     url: String,
     handleDatafileFetch: DatafileFetchHandler? = null,
     completion: (Result<DatafileContent>) -> Unit,

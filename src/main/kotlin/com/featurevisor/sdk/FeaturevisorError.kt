@@ -4,7 +4,6 @@ sealed class FeaturevisorError(message: String) : Throwable(message = message) {
 
     /// Thrown when attempting to init Featurevisor instance without passing datafile and datafileUrl.
     /// At least one of them is required to init the SDK correctly
-    /// - Parameter string: The invalid URL string.
     object MissingDatafileOptions : FeaturevisorError("Missing data file options")
 
     class FetchingDataFileFailed(val result: String) : FeaturevisorError("Fetching data file failed")
@@ -18,4 +17,6 @@ sealed class FeaturevisorError(message: String) : Throwable(message = message) {
     /// Thrown when attempting to construct an invalid URL.
     /// - Parameter string: The invalid URL string.
     class InvalidUrl(val url: String?) : FeaturevisorError("Invalid URL")
+
+    object MissingDatafileUrlWhileRefreshing : FeaturevisorError("Missing datafile url need to refresh")
 }

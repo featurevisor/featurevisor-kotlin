@@ -9,10 +9,10 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.encodeToJsonElement
 
-fun FeaturevisorInstance.getVariable(
+internal fun FeaturevisorInstance.getVariable(
     featureKey: FeatureKey,
     variableKey: VariableKey,
-    context: Context = emptyMap()
+    context: Context = emptyMap(),
 ): VariableValue? {
     val evaluation = evaluateVariable(
         featureKey = featureKey,
@@ -23,50 +23,50 @@ fun FeaturevisorInstance.getVariable(
     return evaluation.variableValue
 }
 
-fun FeaturevisorInstance.getVariableBoolean(
+internal fun FeaturevisorInstance.getVariableBoolean(
     featureKey: FeatureKey,
     variableKey: VariableKey,
-    context: Context
+    context: Context,
 ): Boolean? {
     return (getVariable(featureKey, variableKey, context) as? BooleanValue)?.value
 }
 
-fun FeaturevisorInstance.getVariableString(
+internal fun FeaturevisorInstance.getVariableString(
     featureKey: FeatureKey,
     variableKey: VariableKey,
-    context: Context
+    context: Context,
 ): String? {
     return (getVariable(featureKey, variableKey, context) as? StringValue)?.value
 }
 
-fun FeaturevisorInstance.getVariableInteger(
+internal fun FeaturevisorInstance.getVariableInteger(
     featureKey: FeatureKey,
     variableKey: VariableKey,
-    context: Context
+    context: Context,
 ): Int? {
     return (getVariable(featureKey, variableKey, context) as? IntValue)?.value
 }
 
-fun FeaturevisorInstance.getVariableDouble(
+internal fun FeaturevisorInstance.getVariableDouble(
     featureKey: FeatureKey,
     variableKey: VariableKey,
-    context: Context
+    context: Context,
 ): Double? {
     return (getVariable(featureKey, variableKey, context) as? DoubleValue)?.value
 }
 
-fun FeaturevisorInstance.getVariableArray(
+internal fun FeaturevisorInstance.getVariableArray(
     featureKey: FeatureKey,
     variableKey: VariableKey,
-    context: Context
+    context: Context,
 ): List<String>? {
     return (getVariable(featureKey, variableKey, context) as? ArrayValue)?.values
 }
 
-inline fun <reified T : Any> FeaturevisorInstance.getVariableObject(
+internal inline fun <reified T : Any> FeaturevisorInstance.getVariableObject(
     featureKey: FeatureKey,
     variableKey: VariableKey,
-    context: Context
+    context: Context,
 ): T? {
     val objectValue = getVariable(featureKey, variableKey, context) as? ObjectValue
     return try {
@@ -77,10 +77,10 @@ inline fun <reified T : Any> FeaturevisorInstance.getVariableObject(
     }
 }
 
-inline fun <reified T : Any> FeaturevisorInstance.getVariableJSON(
+internal inline fun <reified T : Any> FeaturevisorInstance.getVariableJSON(
     featureKey: FeatureKey,
     variableKey: VariableKey,
-    context: Context
+    context: Context,
 ): T? {
     val json = getVariable(featureKey, variableKey, context) as? JsonValue
     return try {

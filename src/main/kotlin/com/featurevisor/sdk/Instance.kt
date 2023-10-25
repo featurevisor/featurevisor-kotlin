@@ -24,14 +24,6 @@ typealias ConfigureBucketValue = (Feature, Context, BucketValue) -> BucketValue
 typealias InterceptContext = (Context) -> Context
 typealias DatafileFetchHandler = (datafileUrl: String) -> Result<DatafileContent>
 
-val emptyDatafile = DatafileContent(
-    schemaVersion = "1",
-    revision = "unknown",
-    attributes = emptyList(),
-    segments = emptyList(),
-    features = emptyList()
-)
-
 class FeaturevisorInstance private constructor(options: InstanceOptions) {
 
     companion object {
@@ -40,13 +32,14 @@ class FeaturevisorInstance private constructor(options: InstanceOptions) {
         }
     }
 
-    //    private val on: (EventName, Listener) -> Unit
-    //    private val off: (EventName) -> Unit
+    private val on: (EventName, Listener) -> Unit
+    private val off: (EventName) -> Unit
     private val addListener: (EventName, Listener) -> Unit
     private val removeListener: (EventName) -> Unit
     private val removeAllListeners: () -> Unit
 
     internal val statuses = Statuses(ready = false, refreshInProgress = false)
+
     internal val logger = options.logger
     internal val initialFeatures = options.initialFeatures
     internal val interceptContext = options.interceptContext
@@ -54,7 +47,9 @@ class FeaturevisorInstance private constructor(options: InstanceOptions) {
     internal val datafileUrl = options.datafileUrl
     internal val handleDatafileFetch = options.handleDatafileFetch
     internal val refreshInterval = options.refreshInterval
+
     internal lateinit var datafileReader: DatafileReader
+
     internal var stickyFeatures = options.stickyFeatures
     internal var bucketKeySeparator = options.bucketKeySeparator
     internal var configureBucketKey = options.configureBucketKey
@@ -64,41 +59,45 @@ class FeaturevisorInstance private constructor(options: InstanceOptions) {
     init {
         with(options) {
             if (onReady != null) {
-                emitter.addListener(READY, onReady)
-            }
-            if (onRefresh != null) {
-                emitter.addListener(REFRESH, onRefresh)
-            }
-            if (onUpdate != null) {
-                emitter.addListener(UPDATE, onUpdate)
-            }
-            if (onActivation != null) {
-                emitter.addListener(ACTIVATION, onActivation)
+                emitter.addListener(event = READY, listener = onReady)
             }
 
-            // TODO: Needed?
-//        on = emitter::addListener
-//        off = emitter::removeListener
+            if (onRefresh != null) {
+                emitter.addListener(
+                    REFRESH, onRefresh
+                )
+            }
+            if (onUpdate != null) {
+                emitter.addListener(
+                    UPDATE, onUpdate
+                )
+            }
+            if (onActivation != null) {
+                emitter.addListener(
+                    ACTIVATION, onActivation
+                )
+            }
+
+            on = emitter::addListener
+            off = emitter::removeListener
             addListener = emitter::addListener
             removeListener = emitter::removeListener
             removeAllListeners = emitter::removeAllListeners
 
             when {
                 datafile != null -> {
-                    datafileReader = DatafileReader(datafileJson = datafile)
+                    datafileReader = DatafileReader(datafile)
                     statuses.ready = true
                     emitter.emit(READY)
                 }
 
                 datafileUrl != null -> {
-                    fetchDatafileContent(datafileUrl) { result: Result<DatafileContent> ->
+                    fetchDatafileContent(datafileUrl) { result ->
                         if (result.isSuccess) {
-                            datafileReader = DatafileReader(datafileJson = result.getOrThrow())
+                            datafileReader = DatafileReader(result.getOrThrow())
                             statuses.ready = true
                             emitter.emit(READY)
-                            if (refreshInterval != null) {
-                                startRefreshing()
-                            }
+                            if (refreshInterval != null) startRefreshing()
                         } else {
                             logger?.error("Failed to fetch datafile: $result")
                             throw FetchingDataFileFailed(result.toString())
@@ -109,7 +108,6 @@ class FeaturevisorInstance private constructor(options: InstanceOptions) {
                 else -> throw MissingDatafileOptions
             }
         }
-
     }
 
     fun setDatafile(datafileJSON: String) {

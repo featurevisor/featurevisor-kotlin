@@ -1,5 +1,6 @@
 package com.featurevisor.sdk
 
+import com.featurevisor.sdk.FeaturevisorError.*
 import com.featurevisor.types.EventName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -7,74 +8,20 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
-fun FeaturevisorInstance.refresh() {
-    logger?.debug("refreshing datafile")
-
-    if (statuses.refreshInProgress) {
-        logger?.warn("refresh in progress, skipping")
-        return
-    }
-
-    if (datafileUrl == null) {
-        logger?.error("cannot refresh since `datafileUrl` is not provided")
-        return
-    }
-
-    statuses.refreshInProgress = true
-
-    fetchDatafileContent(
-        datafileUrl,
-        handleDatafileFetch,
-    ) { result ->
-        val self = this // To capture the instance in a closure
-        if (self == null) {
-            return@fetchDatafileContent
-        }
-
-        if (result.isSuccess) {
-            val datafileContent = result.getOrThrow()
-            val currentRevision = self.getRevision()
-            val newRevision = datafileContent.revision
-            val isNotSameRevision = currentRevision != newRevision
-
-            self.datafileReader = DatafileReader(datafileContent)
-            logger?.info("refreshed datafile")
-
-            self.emitter.emit(EventName.REFRESH)
-
-            if (isNotSameRevision) {
-                self.emitter.emit(EventName.UPDATE)
-            }
-
-            self.statuses.refreshInProgress = false
-        } else {
-            self.logger?.error("failed to refresh datafile", mapOf("error" to result))
-            self.statuses.refreshInProgress = false
-        }
-    }
-}
-
-fun FeaturevisorInstance.startRefreshing() {
-    val datafileUrl = datafileUrl
-    if (datafileUrl == null) {
+fun FeaturevisorInstance.startRefreshing() = when {
+    datafileUrl == null -> {
         logger?.error("cannot start refreshing since `datafileUrl` is not provided")
-        return
+        throw MissingDatafileUrlWhileRefreshing
     }
 
-    if (refreshJob != null) {
-        logger?.warn("refreshing has already started")
-        return
-    }
-
-    if (refreshInterval == null) {
-        logger?.warn("no `refreshInterval` option provided")
-        return
-    }
-
-    refreshJob = CoroutineScope(Dispatchers.Unconfined).launch {
-        while (isActive) {
-            refresh()
-            delay(refreshInterval.toLong())
+    refreshJob != null -> logger?.warn("refreshing has already started")
+    refreshInterval == null -> logger?.warn("no `refreshInterval` option provided")
+    else -> {
+        refreshJob = CoroutineScope(Dispatchers.Unconfined).launch {
+            while (isActive) {
+                refresh()
+                delay(refreshInterval)
+            }
         }
     }
 }
@@ -82,6 +29,44 @@ fun FeaturevisorInstance.startRefreshing() {
 fun FeaturevisorInstance.stopRefreshing() {
     refreshJob?.cancel()
     refreshJob = null
-
     logger?.warn("refreshing has stopped")
+}
+
+private fun FeaturevisorInstance.refresh() {
+    logger?.debug("refreshing datafile")
+    when {
+        statuses.refreshInProgress -> logger?.warn("refresh in progress, skipping")
+        datafileUrl.isNullOrBlank() -> logger?.error("cannot refresh since `datafileUrl` is not provided")
+        else -> {
+            statuses.refreshInProgress = true
+            fetchDatafileContent(
+                datafileUrl,
+                handleDatafileFetch,
+            ) { result ->
+
+                if (result.isSuccess) {
+                    val datafileContent = result.getOrThrow()
+                    val currentRevision = getRevision()
+                    val newRevision = datafileContent.revision
+                    val isNotSameRevision = currentRevision != newRevision
+
+                    datafileReader = DatafileReader(datafileContent)
+                    logger?.info("refreshed datafile")
+
+                    emitter.emit(EventName.REFRESH)
+                    if (isNotSameRevision) {
+                        emitter.emit(EventName.UPDATE)
+                    }
+
+                    statuses.refreshInProgress = false
+                } else {
+                    logger?.error(
+                        "failed to refresh datafile",
+                        mapOf("error" to result)
+                    )
+                    statuses.refreshInProgress = false
+                }
+            }
+        }
+    }
 }

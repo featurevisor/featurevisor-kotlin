@@ -7,11 +7,11 @@ import com.featurevisor.types.Feature
 import com.featurevisor.types.Force
 import com.featurevisor.types.Traffic
 
-fun FeaturevisorInstance.getFeatureByKey(featureKey: String): Feature? {
+internal fun FeaturevisorInstance.getFeatureByKey(featureKey: String): Feature? {
     return datafileReader.getFeature(featureKey)
 }
 
-fun FeaturevisorInstance.findForceFromFeature(
+internal fun FeaturevisorInstance.findForceFromFeature(
     feature: Feature,
     context: Context,
     datafileReader: DatafileReader,
@@ -20,13 +20,18 @@ fun FeaturevisorInstance.findForceFromFeature(
     return feature.force?.firstOrNull { force ->
         when {
             force.conditions != null -> allConditionsAreMatched(force.conditions, context)
-            force.segments != null -> allGroupSegmentsAreMatched(force.segments, context, datafileReader)
+            force.segments != null -> allGroupSegmentsAreMatched(
+                force.segments,
+                context,
+                datafileReader
+            )
+
             else -> false
         }
     }
 }
 
-fun FeaturevisorInstance.getMatchedTraffic(
+internal fun FeaturevisorInstance.getMatchedTraffic(
     traffic: List<Traffic>,
     context: Context,
     datafileReader: DatafileReader,
@@ -37,7 +42,7 @@ fun FeaturevisorInstance.getMatchedTraffic(
     }
 }
 
-fun FeaturevisorInstance.getMatchedAllocation(
+internal fun FeaturevisorInstance.getMatchedAllocation(
     traffic: Traffic,
     bucketValue: Int,
 ): Allocation? {
@@ -54,7 +59,7 @@ data class MatchedTrafficAndAllocation(
     val matchedAllocation: Allocation?,
 )
 
-fun FeaturevisorInstance.getMatchedTrafficAndAllocation(
+internal fun FeaturevisorInstance.getMatchedTrafficAndAllocation(
     traffic: List<Traffic>,
     context: Context,
     bucketValue: Int,

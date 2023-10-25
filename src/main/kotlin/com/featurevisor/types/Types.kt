@@ -1,9 +1,9 @@
 package com.featurevisor.types
 
+import java.time.LocalDate
+
 typealias Context = Map<AttributeKey, AttributeValue>
-
 typealias VariationValue = String
-
 typealias VariableKey = String
 
 enum class VariableType(val value: String) {
@@ -89,12 +89,9 @@ data class Group(
 )
 
 typealias BucketKey = String
-
 // 0 to 100,000
 typealias BucketValue = Int
-
 typealias StickyFeatures = Map<FeatureKey, OverrideFeature>
-
 typealias InitialFeatures = Map<FeatureKey, OverrideFeature>
 
 /**
@@ -102,9 +99,7 @@ typealias InitialFeatures = Map<FeatureKey, OverrideFeature>
  */
 // 0 to 100
 typealias Weight = Double
-
 typealias EnvironmentKey = String
-
 typealias RuleKey = String
 
 data class Rule(
@@ -178,3 +173,193 @@ sealed class Test {
     data class Feature(val value: TestFeature) : Test()
     data class Segment(val value: TestSegment) : Test()
 }
+
+typealias AttributeKey = String
+
+data class Attribute(
+    val key: AttributeKey,
+    val type: String,
+    val archived: Boolean?,
+    val capture: Boolean?,
+)
+
+sealed class AttributeValue {
+    data class StringValue(val value: String) : AttributeValue()
+    data class IntValue(val value: Int) : AttributeValue()
+    data class DoubleValue(val value: Double) : AttributeValue()
+    data class BooleanValue(val value: Boolean) : AttributeValue()
+    data class DateValue(val value: LocalDate) : AttributeValue()
+}
+
+sealed class Condition {
+    data class Plain(
+        val attributeKey: AttributeKey,
+        val operator: Operator,
+        val value: ConditionValue,
+    ) : Condition()
+
+    data class And(val and: List<Condition>) : Condition()
+    data class Or(val or: List<Condition>) : Condition()
+    data class Not(val not: List<Condition>) : Condition()
+}
+
+sealed class ConditionValue {
+    data class StringValue(val value: String) : ConditionValue()
+    data class IntValue(val value: Int) : ConditionValue()
+    data class DoubleValue(val value: Double) : ConditionValue()
+    data class BooleanValue(val value: Boolean) : ConditionValue()
+    data class ArrayValue(val values: List<String>) : ConditionValue()
+    data class DateTimeValue(val value: LocalDate) : ConditionValue()
+}
+
+typealias SegmentKey = String
+
+data class Segment(
+    val archived: Boolean?,
+    val key: SegmentKey,
+    val conditions: Condition,
+)
+
+typealias PlainGroupSegment = SegmentKey
+
+data class AndGroupSegment(
+    val and: List<GroupSegment>,
+)
+
+data class OrGroupSegment(
+    val or: List<GroupSegment>,
+)
+
+data class NotGroupSegment(
+    val not: List<GroupSegment>,
+)
+
+sealed class GroupSegment {
+    data class Plain(val segment: PlainGroupSegment) : GroupSegment()
+    data class Multiple(val segments: List<GroupSegment>) : GroupSegment()
+
+    data class And(val segment: AndGroupSegment) : GroupSegment()
+    data class Or(val segment: OrGroupSegment) : GroupSegment()
+    data class Not(val segment: NotGroupSegment) : GroupSegment()
+}
+
+enum class Operator(val value: String) {
+    EQUALS("equals"),
+    NOT_EQUALS("notEquals"),
+
+    // numeric
+    GREATER_THAN("greaterThan"),
+    GREATER_THAN_OR_EQUAL("greaterThanOrEqual"),
+    LESS_THAN("lessThan"),
+    LESS_THAN_OR_EQUAL("lessThanOrEqual"),
+
+    // string
+    CONTAINS("contains"),
+    NOT_CONTAINS("notContains"),
+    STARTS_WITH("startsWith"),
+    ENDS_WITH("endsWith"),
+
+    // semver (string)
+    SEMVER_EQUALS("semverEquals"),
+    SEMVER_NOT_EQUALS("semverNotEquals"),
+    SEMVER_GREATER_THAN("semverGreaterThan"),
+    SEMVER_GREATER_THAN_OR_EQUAL("semverGreaterThanOrEqual"),
+    SEMVER_LESS_THAN("semverLessThan"),
+    SEMVER_LESS_THAN_OR_EQUAL("semverLessThanOrEqual"),
+
+    // date comparisons
+    BEFORE("before"),
+    AFTER("after"),
+
+    // array of strings
+    IN_ARRAY("inArray"),
+    NOT_IN_ARRAY("notInArray");
+}
+
+enum class EventName {
+    READY,
+    REFRESH,
+    UPDATE,
+    ACTIVATION,
+}
+
+
+/**
+ * Datafile-only types
+ */
+// 0 to 100,000
+typealias Percentage = Int
+
+data class Range(
+    val start: Percentage,
+    val end: Percentage,
+)
+
+data class Allocation(
+    val variation: VariationValue,
+    val range: Range,
+)
+
+data class Traffic(
+    val key: RuleKey,
+    val segments: GroupSegment,
+    val percentage: Percentage,
+
+    val enabled: Boolean?,
+    val variation: VariationValue?,
+    val variables: VariableValues?,
+
+    val allocation: List<Allocation>,
+)
+
+typealias PlainBucketBy = String
+
+typealias AndBucketBy = List<String>
+
+data class OrBucketBy(
+    val or: List<String>,
+)
+
+sealed class BucketBy {
+    data class Single(val bucketBy: PlainBucketBy) : BucketBy()
+    data class And(val bucketBy: AndBucketBy) : BucketBy()
+    data class Or(val bucketBy: OrBucketBy) : BucketBy()
+}
+
+data class RequiredWithVariation(
+    val key: FeatureKey,
+    val variation: VariationValue,
+)
+
+sealed class Required {
+    data class FeatureKey(val required: com.featurevisor.types.FeatureKey) : Required()
+    data class WithVariation(val required: RequiredWithVariation) : Required()
+}
+
+data class Feature(
+    val key: FeatureKey,
+    val deprecated: Boolean?,
+    val variablesSchema: List<VariableSchema>?,
+    val variations: List<Variation>?,
+    val bucketBy: BucketBy,
+    val required: List<Required>?,
+    val traffic: List<Traffic>,
+    val force: List<Force>?,
+
+    // if in a Group (mutex), these are available slot ranges
+    val ranges: List<Range>?,
+)
+
+data class DatafileContent(
+    val schemaVersion: String,
+    val revision: String,
+    val attributes: List<Attribute>,
+    val segments: List<Segment>,
+    val features: List<Feature>,
+)
+
+data class OverrideFeature(
+    val enabled: Boolean,
+    val variation: VariationValue?,
+    val variables: VariableValues?,
+)

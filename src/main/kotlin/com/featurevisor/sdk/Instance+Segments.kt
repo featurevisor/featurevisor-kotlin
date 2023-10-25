@@ -8,7 +8,10 @@ import com.featurevisor.types.GroupSegment.*
 import com.featurevisor.types.Segment
 import com.featurevisor.types.VariationValue
 
-fun FeaturevisorInstance.segmentIsMatched(featureKey: FeatureKey, context: Context): VariationValue? {
+internal fun FeaturevisorInstance.segmentIsMatched(
+    featureKey: FeatureKey,
+    context: Context,
+): VariationValue? {
     val evaluation = evaluateVariation(featureKey, context)
 
     if (evaluation.variationValue != null) {
@@ -22,14 +25,14 @@ fun FeaturevisorInstance.segmentIsMatched(featureKey: FeatureKey, context: Conte
     return null
 }
 
-fun FeaturevisorInstance.segmentIsMatched(segment: Segment, context: Context): Boolean {
+internal fun FeaturevisorInstance.segmentIsMatched(segment: Segment, context: Context): Boolean {
     return allConditionsAreMatched(segment.conditions, context)
 }
 
-fun FeaturevisorInstance.allGroupSegmentsAreMatched(
+internal fun FeaturevisorInstance.allGroupSegmentsAreMatched(
     groupSegments: GroupSegment,
     context: Context,
-    datafileReader: DatafileReader
+    datafileReader: DatafileReader,
 ): Boolean {
     return when (groupSegments) {
         is Plain -> {
@@ -42,21 +45,25 @@ fun FeaturevisorInstance.allGroupSegmentsAreMatched(
                 } ?: false
             }
         }
+
         is Multiple -> {
             groupSegments.segments.all {
                 allGroupSegmentsAreMatched(it, context, datafileReader)
             }
         }
+
         is And -> {
             groupSegments.segment.and.all {
                 allGroupSegmentsAreMatched(it, context, datafileReader)
             }
         }
+
         is Or -> {
             groupSegments.segment.or.any {
                 allGroupSegmentsAreMatched(it, context, datafileReader)
             }
         }
+
         is Not -> {
             groupSegments.segment.not.all {
                 allGroupSegmentsAreMatched(it, context, datafileReader).not()
