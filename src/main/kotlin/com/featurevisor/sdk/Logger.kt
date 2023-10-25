@@ -21,8 +21,8 @@ class Logger(
         fun createLogger(
             levels: List<LogLevel> = defaultLogLevels,
             handle: LogHandler = defaultLogHandler,
-        ) {
-            Logger(levels, handle)
+        ): Logger {
+            return Logger(levels, handle)
         }
     }
 

@@ -1,9 +1,9 @@
 package com.featurevisor.sdk
 
-import com.featurevisor.sdk.LogLevel.DEBUG
-import com.featurevisor.sdk.LogLevel.ERROR
-import com.featurevisor.sdk.LogLevel.INFO
-import com.featurevisor.sdk.LogLevel.WARN
+import com.featurevisor.sdk.Logger.LogLevel.DEBUG
+import com.featurevisor.sdk.Logger.LogLevel.ERROR
+import com.featurevisor.sdk.Logger.LogLevel.INFO
+import com.featurevisor.sdk.Logger.LogLevel.WARN
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -17,7 +17,7 @@ class LoggerTest {
         every { this@mockk(any(), any(), any()) } answers { nothing }
     }
 
-    private val systemUnderTest = Logger.createLogger(
+    private val systemUnderTest: Logger = Logger.createLogger(
         handle = mockLogHandler,
     )
 

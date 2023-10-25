@@ -82,13 +82,3 @@ tasks.named<Test>("test") {
         showStandardStreams = true
     }
 }
-
-// TODO: Remove excludes when tests are fixed
-sourceSets {
-    test {
-        kotlin {
-            exclude("com/featurevisor/sdk/InstanceTest.kt")
-            exclude("com/featurevisor/sdk/EmitterTest.kt")
-        }
-    }
-}
