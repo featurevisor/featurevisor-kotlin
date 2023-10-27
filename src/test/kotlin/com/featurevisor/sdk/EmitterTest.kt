@@ -12,17 +12,17 @@ import org.junit.jupiter.api.Test
 
 class EmitterTest {
 
-    private val readyCallback: () -> Unit = mockk {
-        every { this@mockk() } answers { nothing }
+    private val readyCallback: Listener = mockk {
+        every { this@mockk(emptyArray()) } answers { nothing }
     }
-    private val refreshCallback: () -> Unit = mockk {
-        every { this@mockk() } answers { nothing }
+    private val refreshCallback: Listener = mockk {
+        every { this@mockk(emptyArray()) } answers { nothing }
     }
-    private val updateCallback: () -> Unit = mockk {
-        every { this@mockk() } answers { nothing }
+    private val updateCallback: Listener = mockk {
+        every { this@mockk(emptyArray()) } answers { nothing }
     }
-    private val activationCallback: () -> Unit = mockk {
-        every { this@mockk() } answers { nothing }
+    private val activationCallback: Listener = mockk {
+        every { this@mockk(emptyArray()) } answers { nothing }
     }
 
     private val systemUnderTest = Emitter()
@@ -39,10 +39,10 @@ class EmitterTest {
         }
 
         verify(exactly = 1) {
-            readyCallback()
-            refreshCallback()
-            updateCallback()
-            activationCallback()
+            readyCallback(any())
+            refreshCallback(any())
+            updateCallback(any())
+            activationCallback(any())
         }
     }
 
@@ -58,11 +58,11 @@ class EmitterTest {
         }
 
         verify(exactly = 1) {
-            readyCallback()
-            updateCallback()
+            readyCallback(any())
+            updateCallback(any())
         }
         verify(exactly = 0) {
-            refreshCallback()
+            refreshCallback(any())
         }
     }
 
@@ -79,10 +79,10 @@ class EmitterTest {
         }
 
         verify(exactly = 0) {
-            readyCallback()
-            refreshCallback()
-            updateCallback()
-            activationCallback()
+            readyCallback(any())
+            refreshCallback(any())
+            updateCallback(any())
+            activationCallback(any())
         }
     }
 }

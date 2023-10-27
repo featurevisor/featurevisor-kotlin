@@ -31,6 +31,7 @@ import com.featurevisor.types.Operator.STARTS_WITH
 import net.swiftzer.semver.SemVer
 
 object Conditions {
+
     fun conditionIsMatched(condition: Plain, context: Context): Boolean {
         val (attributeKey, operator, conditionValue) = condition
         val attributeValue = context.getOrDefault(attributeKey, null) ?: return false
@@ -44,12 +45,36 @@ object Conditions {
                     NOT_CONTAINS -> attributeValue.value.contains(conditionValue.value).not()
                     STARTS_WITH -> attributeValue.value.startsWith(conditionValue.value)
                     ENDS_WITH -> attributeValue.value.endsWith(conditionValue.value)
-                    SEMVER_EQUALS -> compareVersions(attributeValue.value, conditionValue.value) == 0
-                    SEMVER_NOT_EQUALS -> compareVersions(attributeValue.value, conditionValue.value) != 0
-                    SEMVER_GREATER_THAN -> compareVersions(attributeValue.value, conditionValue.value) == 1
-                    SEMVER_GREATER_THAN_OR_EQUAL -> compareVersions(attributeValue.value, conditionValue.value) >= 0
-                    SEMVER_LESS_THAN -> compareVersions(attributeValue.value, conditionValue.value) == -1
-                    SEMVER_LESS_THAN_OR_EQUAL -> compareVersions(attributeValue.value, conditionValue.value) <= 0
+                    SEMVER_EQUALS -> compareVersions(
+                        attributeValue.value,
+                        conditionValue.value,
+                    ) == 0
+
+                    SEMVER_NOT_EQUALS -> compareVersions(
+                        attributeValue.value,
+                        conditionValue.value,
+                    ) != 0
+
+                    SEMVER_GREATER_THAN -> compareVersions(
+                        attributeValue.value,
+                        conditionValue.value
+                    ) == 1
+
+                    SEMVER_GREATER_THAN_OR_EQUAL -> compareVersions(
+                        attributeValue.value,
+                        conditionValue.value
+                    ) >= 0
+
+                    SEMVER_LESS_THAN -> compareVersions(
+                        attributeValue.value,
+                        conditionValue.value
+                    ) == -1
+
+                    SEMVER_LESS_THAN_OR_EQUAL -> compareVersions(
+                        attributeValue.value,
+                        conditionValue.value
+                    ) <= 0
+
                     else -> false
                 }
             }
@@ -107,23 +132,16 @@ object Conditions {
         }
     }
 
-    fun allConditionsAreMatched(condition: Condition, context: Context): Boolean =
-        when (condition) {
+    fun allConditionsAreMatched(condition: Condition, context: Context): Boolean {
+        return when (condition) {
             is Plain -> conditionIsMatched(condition, context)
-
-            is And -> condition.and.all {
-                allConditionsAreMatched(it, context)
-            }
-
-            is Or -> condition.or.any {
-                allConditionsAreMatched(it, context)
-            }
-
-            is Not -> condition.not.all {
-                allConditionsAreMatched(it, context)
-            }.not()
+            is And -> condition.and.all { allConditionsAreMatched(it, context) }
+            is Or -> condition.or.any { allConditionsAreMatched(it, context) }
+            is Not -> condition.not.all { allConditionsAreMatched(it, context) }.not()
         }
+    }
 
-    private fun compareVersions(actual: String, condition: String): Int =
-        SemVer.parse(actual).compareTo(SemVer.parse(condition))
+    private fun compareVersions(actual: String, condition: String): Int {
+        return SemVer.parse(actual).compareTo(SemVer.parse(condition))
+    }
 }

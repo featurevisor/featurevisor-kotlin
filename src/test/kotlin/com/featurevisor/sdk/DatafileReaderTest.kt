@@ -4,9 +4,9 @@ import com.featurevisor.sdk.factory.DatafileContentFactory
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 
-class DataFileReaderTest {
+class DatafileReaderTest {
 
-    private val systemUnderTest = DataFileReader(
+    private val systemUnderTest = DatafileReader(
         datafileJson = DatafileContentFactory.get()
     )
 
