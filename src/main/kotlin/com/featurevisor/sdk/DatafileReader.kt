@@ -1,13 +1,5 @@
 package com.featurevisor.sdk
 
-import com.featurevisor.types.Attribute
-import com.featurevisor.types.AttributeKey
-import com.featurevisor.types.DatafileContent
-import com.featurevisor.types.Feature
-import com.featurevisor.types.FeatureKey
-import com.featurevisor.types.Segment
-import com.featurevisor.types.SegmentKey
-
 class DatafileReader constructor(
     datafileJson: DatafileContent,
 ) {
@@ -34,7 +26,7 @@ class DatafileReader constructor(
         return attributes.find { attribute -> attribute.key == attributeKey }
     }
 
-    fun getSegment(segmentKey: SegmentKey): Segment? {
+    fun getSegment(segmentKey: String): Segment? {
         return segments.find { segment -> segment.key == segmentKey }
     }
 

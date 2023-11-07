@@ -1,5 +1,10 @@
-package com.featurevisor.types
+package com.featurevisor.sdk
 
+import com.featurevisor.sdk.serializers.BucketBySerializer
+import com.featurevisor.sdk.serializers.ConditionSerializer
+import com.featurevisor.sdk.serializers.ConditionValueSerializer
+import com.featurevisor.sdk.serializers.GroupSegmentSerializer
+import kotlinx.serialization.Serializable
 import java.time.LocalDate
 
 typealias Context = Map<AttributeKey, AttributeValue>
@@ -18,6 +23,7 @@ enum class VariableType(val value: String) {
 
 typealias VariableObjectValue = Map<String, VariableValue>
 
+@Serializable
 sealed class VariableValue {
     data class BooleanValue(val value: Boolean) : VariableValue()
     data class StringValue(val value: String) : VariableValue()
@@ -28,6 +34,7 @@ sealed class VariableValue {
     data class JsonValue(val value: String) : VariableValue()
 }
 
+@Serializable
 data class VariableOverride(
     val value: VariableValue,
 
@@ -36,12 +43,14 @@ data class VariableOverride(
     val segments: GroupSegment?,
 )
 
+@Serializable
 data class Variable(
     val key: VariableKey,
     val value: VariableValue,
     val overrides: List<VariableOverride>?,
 )
 
+@Serializable
 data class Variation(
     // only available in YAML
     val description: String?,
@@ -54,6 +63,7 @@ data class Variation(
     val variables: List<Variable>?,
 )
 
+@Serializable
 data class VariableSchema(
     val key: VariableKey,
     val type: VariableType,
@@ -64,6 +74,7 @@ typealias FeatureKey = String
 
 typealias VariableValues = Map<VariableKey, VariableValue>
 
+@Serializable
 data class Force(
     // one of the below must be present in YAML
     val conditions: Condition?,
@@ -165,7 +176,7 @@ data class SegmentAssertion(
 )
 
 data class TestSegment(
-    val key: SegmentKey,
+    val key: String,
     val assertions: List<SegmentAssertion>,
 )
 
@@ -176,11 +187,12 @@ sealed class Test {
 
 typealias AttributeKey = String
 
+@Serializable
 data class Attribute(
     val key: AttributeKey,
     val type: String,
-    val archived: Boolean?,
-    val capture: Boolean?,
+    val archived: Boolean? = null,
+    val capture: Boolean? = null,
 )
 
 sealed class AttributeValue {
@@ -191,6 +203,7 @@ sealed class AttributeValue {
     data class DateValue(val value: LocalDate) : AttributeValue()
 }
 
+@Serializable(with = ConditionSerializer::class)
 sealed class Condition {
     data class Plain(
         val attributeKey: AttributeKey,
@@ -203,6 +216,9 @@ sealed class Condition {
     data class Not(val not: List<Condition>) : Condition()
 }
 
+const val TAG = "FeaturevisorService"
+
+@Serializable(with = ConditionValueSerializer::class)
 sealed class ConditionValue {
     data class StringValue(val value: String) : ConditionValue()
     data class IntValue(val value: Int) : ConditionValue()
@@ -212,15 +228,12 @@ sealed class ConditionValue {
     data class DateTimeValue(val value: LocalDate) : ConditionValue()
 }
 
-typealias SegmentKey = String
-
+@Serializable
 data class Segment(
-    val archived: Boolean?,
-    val key: SegmentKey,
+    val archived: Boolean? = null,
+    val key: String,
     val conditions: Condition,
 )
-
-typealias PlainGroupSegment = SegmentKey
 
 data class AndGroupSegment(
     val and: List<GroupSegment>,
@@ -234,10 +247,10 @@ data class NotGroupSegment(
     val not: List<GroupSegment>,
 )
 
+@Serializable(with = GroupSegmentSerializer::class)
 sealed class GroupSegment {
-    data class Plain(val segment: PlainGroupSegment) : GroupSegment()
+    data class Plain(val segment: String) : GroupSegment()
     data class Multiple(val segments: List<GroupSegment>) : GroupSegment()
-
     data class And(val segment: AndGroupSegment) : GroupSegment()
     data class Or(val segment: OrGroupSegment) : GroupSegment()
     data class Not(val segment: NotGroupSegment) : GroupSegment()
@@ -272,8 +285,8 @@ enum class Operator(val value: String) {
     AFTER("after"),
 
     // array of strings
-    IN_ARRAY("inArray"),
-    NOT_IN_ARRAY("notInArray");
+    IN_ARRAY("in"),
+    NOT_IN_ARRAY("notIn");
 }
 
 enum class EventName {
@@ -283,47 +296,42 @@ enum class EventName {
     ACTIVATION,
 }
 
-
 /**
  * Datafile-only types
  */
 // 0 to 100,000
 typealias Percentage = Int
 
+@Serializable
 data class Range(
     val start: Percentage,
     val end: Percentage,
 )
 
+@Serializable
 data class Allocation(
     val variation: VariationValue,
     val range: Range,
 )
 
+@Serializable
 data class Traffic(
     val key: RuleKey,
     val segments: GroupSegment,
     val percentage: Percentage,
 
-    val enabled: Boolean?,
-    val variation: VariationValue?,
-    val variables: VariableValues?,
+    val enabled: Boolean? = null,
+    val variation: VariationValue? = null,
+    val variables: VariableValues? = null,
 
     val allocation: List<Allocation>,
 )
 
-typealias PlainBucketBy = String
-
-typealias AndBucketBy = List<String>
-
-data class OrBucketBy(
-    val or: List<String>,
-)
-
+@Serializable(with = BucketBySerializer::class)
 sealed class BucketBy {
-    data class Single(val bucketBy: PlainBucketBy) : BucketBy()
-    data class And(val bucketBy: AndBucketBy) : BucketBy()
-    data class Or(val bucketBy: OrBucketBy) : BucketBy()
+    data class Single(val bucketBy: String) : BucketBy()
+    data class And(val bucketBy: List<String>) : BucketBy()
+    data class Or(val bucketBy: List<String>) : BucketBy()
 }
 
 data class RequiredWithVariation(
@@ -331,25 +339,28 @@ data class RequiredWithVariation(
     val variation: VariationValue,
 )
 
+@Serializable
 sealed class Required {
-    data class FeatureKey(val required: com.featurevisor.types.FeatureKey) : Required()
+    data class FeatureKey(val required: com.featurevisor.sdk.FeatureKey) : Required()
     data class WithVariation(val required: RequiredWithVariation) : Required()
 }
 
+@Serializable
 data class Feature(
     val key: FeatureKey,
-    val deprecated: Boolean?,
-    val variablesSchema: List<VariableSchema>?,
-    val variations: List<Variation>?,
+    val deprecated: Boolean? = null,
+    val variablesSchema: List<VariableSchema>? = null,
+    val variations: List<Variation>? = null,
     val bucketBy: BucketBy,
-    val required: List<Required>?,
+    val required: List<Required>? = null,
     val traffic: List<Traffic>,
-    val force: List<Force>?,
+    val force: List<Force>? = null,
 
     // if in a Group (mutex), these are available slot ranges
-    val ranges: List<Range>?,
+    val ranges: List<Range>? = null,
 )
 
+@Serializable
 data class DatafileContent(
     val schemaVersion: String,
     val revision: String,
@@ -358,8 +369,9 @@ data class DatafileContent(
     val features: List<Feature>,
 )
 
+@Serializable
 data class OverrideFeature(
     val enabled: Boolean,
-    val variation: VariationValue?,
-    val variables: VariableValues?,
+    val variation: VariationValue? = null,
+    val variables: VariableValues? = null,
 )

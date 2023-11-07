@@ -1,9 +1,5 @@
 package com.featurevisor.sdk
 
-import com.featurevisor.types.Context
-import com.featurevisor.types.FeatureKey
-import com.featurevisor.types.VariationValue
-
 internal fun FeaturevisorInstance.getVariation(featureKey: FeatureKey, context: Context): VariationValue? {
     val evaluation = evaluateVariation(featureKey, context)
     return when {

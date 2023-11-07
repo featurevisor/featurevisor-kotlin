@@ -1,9 +1,5 @@
 package com.featurevisor.sdk
 
-import com.featurevisor.types.DatafileContent
-import com.featurevisor.types.InitialFeatures
-import com.featurevisor.types.StickyFeatures
-
 typealias Listener = (Array<out Any>) -> Unit
 
 data class InstanceOptions(

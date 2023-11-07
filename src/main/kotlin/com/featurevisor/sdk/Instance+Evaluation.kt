@@ -2,23 +2,6 @@ package com.featurevisor.sdk
 
 import com.featurevisor.sdk.Conditions.allConditionsAreMatched
 import com.featurevisor.sdk.EvaluationReason.*
-import com.featurevisor.types.AttributeKey
-import com.featurevisor.types.AttributeValue
-import com.featurevisor.types.BucketBy
-import com.featurevisor.types.BucketKey
-import com.featurevisor.types.BucketValue
-import com.featurevisor.types.Context
-import com.featurevisor.types.Feature
-import com.featurevisor.types.FeatureKey
-import com.featurevisor.types.OverrideFeature
-import com.featurevisor.types.Required
-import com.featurevisor.types.RuleKey
-import com.featurevisor.types.Traffic
-import com.featurevisor.types.VariableKey
-import com.featurevisor.types.VariableSchema
-import com.featurevisor.types.VariableValue
-import com.featurevisor.types.Variation
-import com.featurevisor.types.VariationValue
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromJsonElement
@@ -612,7 +595,7 @@ private fun FeaturevisorInstance.getBucketKey(feature: Feature, context: Context
 
         is BucketBy.Or -> {
             type = "or"
-            attributeKeys = bucketBy.bucketBy.or
+            attributeKeys = bucketBy.bucketBy
         }
     }
 

@@ -1,12 +1,7 @@
 package com.featurevisor.sdk
 
 import com.featurevisor.sdk.Conditions.allConditionsAreMatched
-import com.featurevisor.types.Context
-import com.featurevisor.types.FeatureKey
-import com.featurevisor.types.GroupSegment
-import com.featurevisor.types.GroupSegment.*
-import com.featurevisor.types.Segment
-import com.featurevisor.types.VariationValue
+import com.featurevisor.sdk.GroupSegment.*
 
 internal fun FeaturevisorInstance.segmentIsMatched(
     featureKey: FeatureKey,

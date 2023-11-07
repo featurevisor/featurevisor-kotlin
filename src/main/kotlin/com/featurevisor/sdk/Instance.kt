@@ -5,17 +5,10 @@ package com.featurevisor.sdk
 
 import com.featurevisor.sdk.FeaturevisorError.FetchingDataFileFailed
 import com.featurevisor.sdk.FeaturevisorError.MissingDatafileOptions
-import com.featurevisor.types.BucketKey
-import com.featurevisor.types.BucketValue
-import com.featurevisor.types.Context
-import com.featurevisor.types.DatafileContent
-import com.featurevisor.types.EventName
-import com.featurevisor.types.EventName.ACTIVATION
-import com.featurevisor.types.EventName.READY
-import com.featurevisor.types.EventName.REFRESH
-import com.featurevisor.types.EventName.UPDATE
-import com.featurevisor.types.Feature
-import com.featurevisor.types.StickyFeatures
+import com.featurevisor.sdk.EventName.ACTIVATION
+import com.featurevisor.sdk.EventName.READY
+import com.featurevisor.sdk.EventName.REFRESH
+import com.featurevisor.sdk.EventName.UPDATE
 import kotlinx.coroutines.Job
 import kotlinx.serialization.json.Json
 
@@ -96,7 +89,7 @@ class FeaturevisorInstance private constructor(options: InstanceOptions) {
                         if (result.isSuccess) {
                             datafileReader = DatafileReader(result.getOrThrow())
                             statuses.ready = true
-                            emitter.emit(READY)
+                            emitter.emit(READY, result.getOrThrow())
                             if (refreshInterval != null) startRefreshing()
                         } else {
                             logger?.error("Failed to fetch datafile: $result")

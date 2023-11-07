@@ -1,13 +1,8 @@
 package com.featurevisor.sdk
 
 import com.featurevisor.sdk.Conditions.allConditionsAreMatched
-import com.featurevisor.types.Allocation
-import com.featurevisor.types.Context
-import com.featurevisor.types.Feature
-import com.featurevisor.types.Force
-import com.featurevisor.types.Traffic
 
-internal fun FeaturevisorInstance.getFeatureByKey(featureKey: String): Feature? {
+fun FeaturevisorInstance.getFeatureByKey(featureKey: String): Feature? {
     return datafileReader.getFeature(featureKey)
 }
 
