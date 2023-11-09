@@ -5,6 +5,7 @@ import com.featurevisor.sdk.Condition
 import com.featurevisor.sdk.ConditionValue
 import com.featurevisor.sdk.GroupSegment
 import com.featurevisor.sdk.Operator
+import com.featurevisor.sdk.VariableValue
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerializationException
@@ -192,6 +193,45 @@ object ConditionValueSerializer : KSerializer<ConditionValue> {
     }
 
     override fun serialize(encoder: Encoder, value: ConditionValue) {
+        // TODO: Later if needed
+    }
+}
+
+@OptIn(InternalSerializationApi::class)
+@Serializer(forClass = VariableValue::class)
+object VariableValueSerializer : KSerializer<VariableValue> {
+    override val descriptor: SerialDescriptor =
+        buildSerialDescriptor("package.VariableValue", PolymorphicKind.SEALED)
+
+    override fun deserialize(decoder: Decoder): VariableValue {
+        val input = decoder as? JsonDecoder
+            ?: throw SerializationException("This class can be decoded only by Json format")
+        return when (val tree = input.decodeJsonElement()) {
+            is JsonPrimitive -> {
+                tree.intOrNull?.let {
+                    VariableValue.IntValue(it)
+                } ?: tree.booleanOrNull?.let {
+                    VariableValue.BooleanValue(it)
+                } ?: tree.doubleOrNull?.let {
+                    VariableValue.DoubleValue(it)
+                } ?: tree.content.let {
+                    VariableValue.StringValue(it)
+                    // TODO:
+//                    VariableValue.DateTimeValue
+                }
+            }
+
+            is JsonArray -> {
+                VariableValue.ArrayValue(tree.jsonArray.map { jsonElement -> jsonElement.jsonPrimitive.content })
+            }
+
+            is JsonObject -> {
+                throw NotImplementedError("VariableValue does not support JsonObject")
+            }
+        }
+    }
+
+    override fun serialize(encoder: Encoder, value: VariableValue) {
         // TODO: Later if needed
     }
 }

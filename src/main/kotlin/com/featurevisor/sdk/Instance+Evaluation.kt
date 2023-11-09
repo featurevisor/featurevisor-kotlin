@@ -615,9 +615,9 @@ private fun FeaturevisorInstance.getBucketKey(feature: Feature, context: Context
 
     bucketKey.add(AttributeValue.StringValue(featureKey))
 
-    val result = bucketKey.map {
+    val result = bucketKey.joinToString(separator = bucketKeySeparator) {
         it.toString()
-    }.joinToString(separator = bucketKeySeparator)
+    }
 
     configureBucketKey?.let { configureBucketKey ->
         return configureBucketKey(feature, context, result)

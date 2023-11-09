@@ -23,6 +23,8 @@ class FeaturevisorInstance private constructor(options: InstanceOptions) {
         fun createInstance(options: InstanceOptions): FeaturevisorInstance {
             return FeaturevisorInstance(options)
         }
+
+        var companionLogger: Logger? = null
     }
 
     private val on: (EventName, Listener) -> Unit
@@ -51,6 +53,7 @@ class FeaturevisorInstance private constructor(options: InstanceOptions) {
 
     init {
         with(options) {
+            companionLogger = logger
             if (onReady != null) {
                 emitter.addListener(event = READY, listener = onReady)
             }

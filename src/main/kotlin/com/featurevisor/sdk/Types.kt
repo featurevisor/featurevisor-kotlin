@@ -4,6 +4,8 @@ import com.featurevisor.sdk.serializers.BucketBySerializer
 import com.featurevisor.sdk.serializers.ConditionSerializer
 import com.featurevisor.sdk.serializers.ConditionValueSerializer
 import com.featurevisor.sdk.serializers.GroupSegmentSerializer
+import com.featurevisor.sdk.serializers.VariableValueSerializer
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import java.time.LocalDate
 
@@ -11,19 +13,27 @@ typealias Context = Map<AttributeKey, AttributeValue>
 typealias VariationValue = String
 typealias VariableKey = String
 
-enum class VariableType(val value: String) {
-    BOOLEAN("boolean"),
-    STRING("string"),
-    INTEGER("integer"),
-    DOUBLE("double"),
-    ARRAY("array"),
-    OBJECT("object"),
-    JSON("json");
+@Serializable
+enum class VariableType {
+    @SerialName("boolean")
+    BOOLEAN,
+    @SerialName("string")
+    STRING,
+    @SerialName("integer")
+    INTEGER,
+    @SerialName("double")
+    DOUBLE,
+    @SerialName("array")
+    ARRAY,
+    @SerialName("object")
+    OBJECT,
+    @SerialName("json")
+    JSON
 }
 
 typealias VariableObjectValue = Map<String, VariableValue>
 
-@Serializable
+@Serializable(with = VariableValueSerializer::class)
 sealed class VariableValue {
     data class BooleanValue(val value: Boolean) : VariableValue()
     data class StringValue(val value: String) : VariableValue()

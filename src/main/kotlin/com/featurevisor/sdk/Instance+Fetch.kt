@@ -56,6 +56,7 @@ private inline fun fetch(
                     }
                 }
                 val responseBodyString = responseBody.string()
+                FeaturevisorInstance.companionLogger?.debug(responseBodyString)
                 val content = json.decodeFromString<DatafileContent>(responseBodyString)
                 completion(Result.success(content))
             } else {
