@@ -1,14 +1,14 @@
 package com.featurevisor.sdk.factory
 
-import com.featurevisor.sdk.types.Attribute
-import com.featurevisor.sdk.types.BucketBy
-import com.featurevisor.sdk.types.Condition
-import com.featurevisor.sdk.types.ConditionValue
-import com.featurevisor.sdk.types.DatafileContent
-import com.featurevisor.sdk.types.Feature
-import com.featurevisor.sdk.types.Operator.EQUALS
-import com.featurevisor.sdk.types.Operator.NOT_EQUALS
-import com.featurevisor.sdk.types.Segment
+import com.featurevisor.types.Attribute
+import com.featurevisor.types.BucketBy
+import com.featurevisor.types.Condition
+import com.featurevisor.types.ConditionValue
+import com.featurevisor.types.DatafileContent
+import com.featurevisor.types.Feature
+import com.featurevisor.types.Operator.EQUALS
+import com.featurevisor.types.Operator.NOT_EQUALS
+import com.featurevisor.types.Segment
 
 object DatafileContentFactory {
 

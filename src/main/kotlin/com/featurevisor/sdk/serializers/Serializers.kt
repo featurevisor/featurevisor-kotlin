@@ -1,11 +1,11 @@
 package com.featurevisor.sdk.serializers
 
-import com.featurevisor.sdk.types.BucketBy
-import com.featurevisor.sdk.types.Condition
-import com.featurevisor.sdk.types.ConditionValue
-import com.featurevisor.sdk.types.GroupSegment
-import com.featurevisor.sdk.types.Operator
-import com.featurevisor.sdk.types.VariableValue
+import com.featurevisor.types.BucketBy
+import com.featurevisor.types.Condition
+import com.featurevisor.types.ConditionValue
+import com.featurevisor.types.GroupSegment
+import com.featurevisor.types.Operator
+import com.featurevisor.types.VariableValue
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerializationException

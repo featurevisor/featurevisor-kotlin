@@ -1,7 +1,7 @@
 package com.featurevisor.sdk
 
 import com.featurevisor.sdk.FeaturevisorError.*
-import com.featurevisor.sdk.types.EventName
+import com.featurevisor.types.EventName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay

@@ -1,6 +1,6 @@
 package com.featurevisor.sdk
 
-import com.featurevisor.sdk.types.EventName
+import com.featurevisor.types.EventName
 
 class Emitter {
 

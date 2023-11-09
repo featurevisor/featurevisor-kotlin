@@ -5,17 +5,17 @@ package com.featurevisor.sdk
 
 import com.featurevisor.sdk.FeaturevisorError.FetchingDataFileFailed
 import com.featurevisor.sdk.FeaturevisorError.MissingDatafileOptions
-import com.featurevisor.sdk.types.BucketKey
-import com.featurevisor.sdk.types.BucketValue
-import com.featurevisor.sdk.types.Context
-import com.featurevisor.sdk.types.DatafileContent
-import com.featurevisor.sdk.types.EventName
-import com.featurevisor.sdk.types.EventName.ACTIVATION
-import com.featurevisor.sdk.types.EventName.READY
-import com.featurevisor.sdk.types.EventName.REFRESH
-import com.featurevisor.sdk.types.EventName.UPDATE
-import com.featurevisor.sdk.types.Feature
-import com.featurevisor.sdk.types.StickyFeatures
+import com.featurevisor.types.BucketKey
+import com.featurevisor.types.BucketValue
+import com.featurevisor.types.Context
+import com.featurevisor.types.DatafileContent
+import com.featurevisor.types.EventName
+import com.featurevisor.types.EventName.ACTIVATION
+import com.featurevisor.types.EventName.READY
+import com.featurevisor.types.EventName.REFRESH
+import com.featurevisor.types.EventName.UPDATE
+import com.featurevisor.types.Feature
+import com.featurevisor.types.StickyFeatures
 import kotlinx.coroutines.Job
 import kotlinx.serialization.json.Json
 

@@ -1,4 +1,4 @@
-package com.featurevisor.sdk.types
+package com.featurevisor.types
 
 import com.featurevisor.sdk.serializers.BucketBySerializer
 import com.featurevisor.sdk.serializers.ConditionSerializer
@@ -351,7 +351,7 @@ data class RequiredWithVariation(
 
 @Serializable
 sealed class Required {
-    data class FeatureKey(val required: com.featurevisor.sdk.types.FeatureKey) : Required()
+    data class FeatureKey(val required: com.featurevisor.types.FeatureKey) : Required()
     data class WithVariation(val required: RequiredWithVariation) : Required()
 }
 

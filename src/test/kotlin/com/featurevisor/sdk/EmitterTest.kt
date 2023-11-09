@@ -1,10 +1,10 @@
 package com.featurevisor.sdk
 
-import com.featurevisor.sdk.types.EventName.ACTIVATION
-import com.featurevisor.sdk.types.EventName.READY
-import com.featurevisor.sdk.types.EventName.REFRESH
-import com.featurevisor.sdk.types.EventName.UPDATE
-import com.featurevisor.sdk.types.EventName.values
+import com.featurevisor.types.EventName.ACTIVATION
+import com.featurevisor.types.EventName.READY
+import com.featurevisor.types.EventName.REFRESH
+import com.featurevisor.types.EventName.UPDATE
+import com.featurevisor.types.EventName.values
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
