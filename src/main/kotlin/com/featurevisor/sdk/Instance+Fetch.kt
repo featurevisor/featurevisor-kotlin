@@ -1,5 +1,6 @@
 package com.featurevisor.sdk
 
+import com.featurevisor.sdk.types.DatafileContent
 import java.io.IOException
 import okhttp3.*
 import kotlinx.serialization.json.Json

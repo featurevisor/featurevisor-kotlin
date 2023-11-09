@@ -1,5 +1,12 @@
 package com.featurevisor.sdk
 
+import com.featurevisor.sdk.types.Attribute
+import com.featurevisor.sdk.types.AttributeKey
+import com.featurevisor.sdk.types.DatafileContent
+import com.featurevisor.sdk.types.Feature
+import com.featurevisor.sdk.types.FeatureKey
+import com.featurevisor.sdk.types.Segment
+
 class DatafileReader constructor(
     datafileJson: DatafileContent,
 ) {

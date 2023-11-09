@@ -1,6 +1,10 @@
 package com.featurevisor.sdk
 
-import com.featurevisor.sdk.VariableValue.*
+import com.featurevisor.sdk.types.Context
+import com.featurevisor.sdk.types.FeatureKey
+import com.featurevisor.sdk.types.VariableKey
+import com.featurevisor.sdk.types.VariableValue
+import com.featurevisor.sdk.types.VariableValue.*
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.encodeToJsonElement
