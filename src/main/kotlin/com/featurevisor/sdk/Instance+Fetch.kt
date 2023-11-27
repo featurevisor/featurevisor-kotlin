@@ -52,9 +52,6 @@ private inline fun fetch(
             if (response.isSuccessful) {
                 val json = Json {
                     ignoreUnknownKeys = true
-//                    serializersModule = this.serializersModule.apply {
-//
-//                    }
                 }
                 val responseBodyString = responseBody.string()
                 FeaturevisorInstance.companionLogger?.debug(responseBodyString)

@@ -217,6 +217,8 @@ fun FeaturevisorInstance.evaluateVariation(featureKey: FeatureKey, context: Cont
 }
 
 fun FeaturevisorInstance.evaluateFlag(featureKey: FeatureKey, context: Context = emptyMap()): Evaluation {
+    logger?.debug("evaluate flag: $featureKey")
+
     val evaluation: Evaluation
 
     // sticky
@@ -323,6 +325,8 @@ fun FeaturevisorInstance.evaluateFlag(featureKey: FeatureKey, context: Context =
 
     // bucketing
     val bucketValue = getBucketValue(feature = feature, context = finalContext)
+
+    logger?.debug("traffic: ${feature.traffic}, bucketValue: $bucketValue")
 
     val matchedTraffic = getMatchedTraffic(
         traffic = feature.traffic,
@@ -504,6 +508,13 @@ fun FeaturevisorInstance.evaluateVariable(
             datafileReader = datafileReader,
             logger = logger
         )
+
+        logger?.debug("variable, traffic: ${feature.traffic}")
+
+        logger?.debug("variable, matchedTrafficAndAllocation: ${matchedTrafficAndAllocation}")
+
+        logger?.debug("variable, matchedTraffic: ${matchedTrafficAndAllocation.matchedTraffic}")
+
 
         matchedTrafficAndAllocation.matchedTraffic?.let { matchedTraffic ->
             // override from rule

@@ -38,6 +38,7 @@ internal fun FeaturevisorInstance.getMatchedTraffic(
 ): Traffic? {
 
     return traffic.firstOrNull { trafficItem ->
+        logger?.debug("trafficItem.segments: ${trafficItem.segments}")
         allGroupSegmentsAreMatched(trafficItem.segments, context, datafileReader)
     }
 }
@@ -69,11 +70,13 @@ internal fun FeaturevisorInstance.getMatchedTrafficAndAllocation(
 
     var matchedAllocation: Allocation? = null
     val matchedTraffic = traffic.firstOrNull { trafficItem ->
-        if (allGroupSegmentsAreMatched(trafficItem.segments, context, datafileReader).not()) {
-            false
-        } else {
+        if (allGroupSegmentsAreMatched(trafficItem.segments, context, datafileReader)) {
+            logger?.debug("getMatchedTrafficAndAllocation, traffic: $trafficItem, allGroupSegmentsAreMatched")
             matchedAllocation = getMatchedAllocation(trafficItem, bucketValue)
-            matchedAllocation != null
+            true
+        } else {
+            logger?.debug("getMatchedTrafficAndAllocation, traffic: $trafficItem, allGroupSegmentsAreMatched.not()")
+            false
         }
     }
 

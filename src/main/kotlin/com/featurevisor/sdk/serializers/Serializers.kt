@@ -1,10 +1,13 @@
 package com.featurevisor.sdk.serializers
 
+import com.featurevisor.types.AndGroupSegment
 import com.featurevisor.types.BucketBy
 import com.featurevisor.types.Condition
 import com.featurevisor.types.ConditionValue
 import com.featurevisor.types.GroupSegment
+import com.featurevisor.types.NotGroupSegment
 import com.featurevisor.types.Operator
+import com.featurevisor.types.OrGroupSegment
 import com.featurevisor.types.VariableValue
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.KSerializer
@@ -91,12 +94,43 @@ object GroupSegmentSerializer : KSerializer<GroupSegment> {
             })
 
             is JsonObject -> {
-                // TODO:
-                GroupSegment.Plain("")
+                when {
+                    tree.containsKey("and") -> GroupSegment.And(
+                        AndGroupSegment(
+                            tree["and"]!!.jsonArray.map {
+                                input.json.decodeFromJsonElement(
+                                    GroupSegment::class.serializer(),
+                                    it
+                                )
+                            }
+                        )
+                    )
+                    tree.containsKey("or") -> GroupSegment.Or(
+                        OrGroupSegment(
+                            tree["or"]!!.jsonArray.map {
+                                input.json.decodeFromJsonElement(
+                                    GroupSegment::class.serializer(),
+                                    it
+                                )
+                            }
+                        )
+                    )
+                    tree.containsKey("not") -> GroupSegment.Not(
+                        NotGroupSegment(
+                            tree["not"]!!.jsonArray.map {
+                                input.json.decodeFromJsonElement(
+                                    GroupSegment::class.serializer(),
+                                    it
+                                )
+                            }
+                        )
+                    )
+                    else -> throw Exception("Unexpected GroupSegment element content")
+                }
             }
 
             is JsonPrimitive -> {
-                val isString = tree.content.none {it in setOf('{', '}', ':', '[', ']')}
+                val isString = tree.content.none { it in setOf('{', '}', ':', '[', ']') }
                 if (isString) {
                     GroupSegment.Plain(tree.content)
                 } else {
@@ -140,7 +174,7 @@ object BucketBySerializer : KSerializer<BucketBy> {
             }
 
             is JsonPrimitive -> {
-                val isString = tree.content.none {it in setOf('{', '}', ':', '[', ']')}
+                val isString = tree.content.none { it in setOf('{', '}', ':', '[', ']') }
                 if (isString) {
                     BucketBy.Single(tree.content)
                 } else {
