@@ -137,7 +137,7 @@ object Conditions {
             is Plain -> conditionIsMatched(condition, context)
             is And -> condition.and.all { allConditionsAreMatched(it, context) }
             is Or -> condition.or.any { allConditionsAreMatched(it, context) }
-            is Not -> condition.not.all { allConditionsAreMatched(it, context) }.not()
+            is Not -> condition.not.all { allConditionsAreMatched(it, context).not() }
         }
     }
 

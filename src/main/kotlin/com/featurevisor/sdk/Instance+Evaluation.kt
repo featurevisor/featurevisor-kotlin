@@ -169,7 +169,7 @@ fun FeaturevisorInstance.evaluateVariation(featureKey: FeatureKey, context: Cont
 
     // override from rule
     if (matchedTraffic?.variation != null) {
-        val variation = feature.variations?.firstOrNull { it.value == matchedTraffic.variation }
+        val variation = feature.variations.firstOrNull { it.value == matchedTraffic.variation }
         if (variation != null) {
             evaluation = Evaluation(
                 featureKey = feature.key,
