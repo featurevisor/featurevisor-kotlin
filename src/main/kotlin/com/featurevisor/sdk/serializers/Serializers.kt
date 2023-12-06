@@ -1,5 +1,6 @@
 package com.featurevisor.sdk.serializers
 
+import com.featurevisor.sdk.FeaturevisorInstance
 import com.featurevisor.types.AndGroupSegment
 import com.featurevisor.types.BucketBy
 import com.featurevisor.types.Condition
@@ -51,14 +52,44 @@ object ConditionSerializer : KSerializer<Condition> {
             }
 
             is JsonObject -> {
-                Condition.Plain(
-                    attributeKey = tree["attribute"]?.jsonPrimitive?.content ?: "",
-                    operator = mapOperator(tree["operator"]?.jsonPrimitive?.content ?: ""),
-                    value = input.json.decodeFromJsonElement(
-                        ConditionValue::class.serializer(),
-                        tree["value"]!!
-                    ),
-                )
+                FeaturevisorInstance.companionLogger?.debug("Segment deserializing: ${tree["attribute"]?.jsonPrimitive?.content}, tree: $tree")
+                when {
+                    tree.containsKey("and") -> Condition.And(
+                        tree["and"]!!.jsonArray.map {
+                            input.json.decodeFromJsonElement(
+                                Condition::class.serializer(),
+                                it
+                            )
+                        }
+                    )
+
+                    tree.containsKey("or") -> Condition.Or(
+                        tree["or"]!!.jsonArray.map {
+                            input.json.decodeFromJsonElement(
+                                Condition::class.serializer(),
+                                it
+                            )
+                        }
+                    )
+
+                    tree.containsKey("not") -> Condition.Not(
+                        tree["not"]!!.jsonArray.map {
+                            input.json.decodeFromJsonElement(
+                                Condition::class.serializer(),
+                                it
+                            )
+                        }
+                    )
+
+                    else -> Condition.Plain(
+                        attributeKey = tree["attribute"]?.jsonPrimitive?.content ?: "",
+                        operator = mapOperator(tree["operator"]?.jsonPrimitive?.content ?: ""),
+                        value = input.json.decodeFromJsonElement(
+                            ConditionValue::class.serializer(),
+                            tree["value"]!!
+                        ),
+                    )
+                }
             }
 
             is JsonPrimitive -> {
@@ -105,6 +136,7 @@ object GroupSegmentSerializer : KSerializer<GroupSegment> {
                             }
                         )
                     )
+
                     tree.containsKey("or") -> GroupSegment.Or(
                         OrGroupSegment(
                             tree["or"]!!.jsonArray.map {
@@ -115,6 +147,7 @@ object GroupSegmentSerializer : KSerializer<GroupSegment> {
                             }
                         )
                     )
+
                     tree.containsKey("not") -> GroupSegment.Not(
                         NotGroupSegment(
                             tree["not"]!!.jsonArray.map {
@@ -125,6 +158,7 @@ object GroupSegmentSerializer : KSerializer<GroupSegment> {
                             }
                         )
                     )
+
                     else -> throw Exception("Unexpected GroupSegment element content")
                 }
             }
