@@ -418,6 +418,7 @@ fun FeaturevisorInstance.evaluateVariable(
     context: Context = emptyMap(),
 ): Evaluation {
 
+    FeaturevisorInstance.companionLogger?.debug("evaluateVariable, featureKey: $featureKey, variableKey: $variableKey")
     val evaluation: Evaluation
     val flag = evaluateFlag(featureKey, context)
     if (flag.enabled == false) {

@@ -22,6 +22,7 @@ import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonDecoder
+import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.booleanOrNull
@@ -284,7 +285,11 @@ object VariableValueSerializer : KSerializer<VariableValue> {
                 } ?: tree.doubleOrNull?.let {
                     VariableValue.DoubleValue(it)
                 } ?: tree.content.let {
-                    VariableValue.StringValue(it)
+                    if (isValidJson(it)) {
+                        VariableValue.JsonValue(it)
+                    } else {
+                        VariableValue.StringValue(it)
+                    }
                     // TODO:
 //                    VariableValue.DateTimeValue
                 }
@@ -295,6 +300,7 @@ object VariableValueSerializer : KSerializer<VariableValue> {
             }
 
             is JsonObject -> {
+                FeaturevisorInstance.companionLogger?.debug("VariableValueSerializer, JsonObject, tree.jsonObject: ${tree.jsonObject}, tree: $tree")
                 VariableValue.JsonValue(tree.jsonObject.toString())
             }
         }
@@ -302,6 +308,16 @@ object VariableValueSerializer : KSerializer<VariableValue> {
 
     override fun serialize(encoder: Encoder, value: VariableValue) {
         // TODO: Later if needed
+    }
+}
+
+fun isValidJson(jsonString: String): Boolean {
+    return try {
+        // Attempt to parse the string
+        Json.decodeFromString<Map<String, JsonElement>>(jsonString)
+        true
+    } catch (e: Exception) {
+        false
     }
 }
 
