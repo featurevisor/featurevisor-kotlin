@@ -278,20 +278,22 @@ object VariableValueSerializer : KSerializer<VariableValue> {
             ?: throw SerializationException("This class can be decoded only by Json format")
         return when (val tree = input.decodeJsonElement()) {
             is JsonPrimitive -> {
-                tree.intOrNull?.let {
-                    VariableValue.IntValue(it)
-                } ?: tree.booleanOrNull?.let {
-                    VariableValue.BooleanValue(it)
-                } ?: tree.doubleOrNull?.let {
-                    VariableValue.DoubleValue(it)
-                } ?: tree.content.let {
-                    if (isValidJson(it)) {
-                        VariableValue.JsonValue(it)
+                if (tree.isString) {
+                    if (isValidJson(tree.content)) {
+                        VariableValue.JsonValue(tree.content)
                     } else {
+                        VariableValue.StringValue(tree.content)
+                    }
+                } else {
+                    tree.intOrNull?.let {
+                        VariableValue.IntValue(it)
+                    } ?: tree.booleanOrNull?.let {
+                        VariableValue.BooleanValue(it)
+                    } ?: tree.doubleOrNull?.let {
+                        VariableValue.DoubleValue(it)
+                    } ?: tree.content.let {
                         VariableValue.StringValue(it)
                     }
-                    // TODO:
-//                    VariableValue.DateTimeValue
                 }
             }
 
