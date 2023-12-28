@@ -354,7 +354,7 @@ private fun mapOperator(value: String): Operator {
 
         // array of strings
         "in" -> Operator.IN_ARRAY
-        "not" -> Operator.NOT_IN_ARRAY
+        "notIn" -> Operator.NOT_IN_ARRAY
         else -> throw Exception("Unexpected value of operator: $value")
     }
 }
