@@ -304,6 +304,7 @@ enum class EventName {
     REFRESH,
     UPDATE,
     ACTIVATION,
+    ERROR,
 }
 
 /**

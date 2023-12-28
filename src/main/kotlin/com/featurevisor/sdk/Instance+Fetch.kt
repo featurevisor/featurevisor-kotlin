@@ -56,8 +56,19 @@ private inline fun fetch(
                 }
                 val responseBodyString = responseBody.string()
                 FeaturevisorInstance.companionLogger?.debug(responseBodyString)
-                val content = json.decodeFromString<DatafileContent>(responseBodyString)
-                completion(Result.success(content))
+                try {
+                    val content = json.decodeFromString<DatafileContent>(responseBodyString)
+                    completion(Result.success(content))
+                } catch(throwable: Throwable) {
+                    completion(
+                        Result.failure(
+                            FeaturevisorError.UnparsableJson(
+                                responseBody.string(),
+                                response.message
+                            )
+                        )
+                    )
+                }
             } else {
                 completion(
                     Result.failure(

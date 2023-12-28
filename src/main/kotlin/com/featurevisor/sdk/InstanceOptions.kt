@@ -20,6 +20,7 @@ data class InstanceOptions(
     val onReady: Listener? = null,
     val onRefresh: Listener? = null,
     val onUpdate: Listener? = null,
+    val onError: Listener? = null,
     val refreshInterval: Long? = null, // seconds
     val stickyFeatures: StickyFeatures? = null,
 ) {

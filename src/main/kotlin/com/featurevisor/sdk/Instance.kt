@@ -10,10 +10,7 @@ import com.featurevisor.types.BucketValue
 import com.featurevisor.types.Context
 import com.featurevisor.types.DatafileContent
 import com.featurevisor.types.EventName
-import com.featurevisor.types.EventName.ACTIVATION
-import com.featurevisor.types.EventName.READY
-import com.featurevisor.types.EventName.REFRESH
-import com.featurevisor.types.EventName.UPDATE
+import com.featurevisor.types.EventName.*
 import com.featurevisor.types.Feature
 import com.featurevisor.types.StickyFeatures
 import kotlinx.coroutines.Job
@@ -81,6 +78,11 @@ class FeaturevisorInstance private constructor(options: InstanceOptions) {
                     ACTIVATION, onActivation
                 )
             }
+            if (onError != null) {
+                emitter.addListener(
+                    ERROR, onError
+                )
+            }
 
             on = emitter::addListener
             off = emitter::removeListener
@@ -104,7 +106,7 @@ class FeaturevisorInstance private constructor(options: InstanceOptions) {
                             if (refreshInterval != null) startRefreshing()
                         } else {
                             logger?.error("Failed to fetch datafile: $result")
-                            throw FetchingDataFileFailed(result.toString())
+                            emitter.emit(ERROR)
                         }
                     }
                 }
