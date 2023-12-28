@@ -169,7 +169,7 @@ fun FeaturevisorInstance.evaluateVariation(featureKey: FeatureKey, context: Cont
 
     // override from rule
     if (matchedTraffic?.variation != null) {
-        val variation = feature.variations?.firstOrNull { it.value == matchedTraffic.variation }
+        val variation = feature.variations.firstOrNull { it.value == matchedTraffic.variation }
         if (variation != null) {
             evaluation = Evaluation(
                 featureKey = feature.key,
@@ -217,6 +217,8 @@ fun FeaturevisorInstance.evaluateVariation(featureKey: FeatureKey, context: Cont
 }
 
 fun FeaturevisorInstance.evaluateFlag(featureKey: FeatureKey, context: Context = emptyMap()): Evaluation {
+    logger?.debug("evaluate flag: $featureKey")
+
     val evaluation: Evaluation
 
     // sticky
@@ -324,6 +326,8 @@ fun FeaturevisorInstance.evaluateFlag(featureKey: FeatureKey, context: Context =
     // bucketing
     val bucketValue = getBucketValue(feature = feature, context = finalContext)
 
+//    logger?.debug("traffic: ${feature.traffic}, bucketValue: $bucketValue")
+
     val matchedTraffic = getMatchedTraffic(
         traffic = feature.traffic,
         context = finalContext,
@@ -414,6 +418,7 @@ fun FeaturevisorInstance.evaluateVariable(
     context: Context = emptyMap(),
 ): Evaluation {
 
+    FeaturevisorInstance.companionLogger?.debug("evaluateVariable, featureKey: $featureKey, variableKey: $variableKey")
     val evaluation: Evaluation
     val flag = evaluateFlag(featureKey, context)
     if (flag.enabled == false) {
@@ -504,6 +509,13 @@ fun FeaturevisorInstance.evaluateVariable(
             datafileReader = datafileReader,
             logger = logger
         )
+
+//        logger?.debug("variable, traffic: ${feature.traffic}")
+//
+//        logger?.debug("variable, matchedTrafficAndAllocation: ${matchedTrafficAndAllocation}")
+//
+//        logger?.debug("variable, matchedTraffic: ${matchedTrafficAndAllocation.matchedTraffic}")
+
 
         matchedTrafficAndAllocation.matchedTraffic?.let { matchedTraffic ->
             // override from rule
@@ -612,7 +624,7 @@ private fun FeaturevisorInstance.getBucketKey(feature: Feature, context: Context
 
         is BucketBy.Or -> {
             type = "or"
-            attributeKeys = bucketBy.bucketBy.or
+            attributeKeys = bucketBy.bucketBy
         }
     }
 
@@ -632,9 +644,9 @@ private fun FeaturevisorInstance.getBucketKey(feature: Feature, context: Context
 
     bucketKey.add(AttributeValue.StringValue(featureKey))
 
-    val result = bucketKey.map {
+    val result = bucketKey.joinToString(separator = bucketKeySeparator) {
         it.toString()
-    }.joinToString(separator = bucketKeySeparator)
+    }
 
     configureBucketKey?.let { configureBucketKey ->
         return configureBucketKey(feature, context, result)
