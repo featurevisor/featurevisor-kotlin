@@ -11,6 +11,7 @@ import com.featurevisor.types.VariableValue.IntValue
 import com.featurevisor.types.VariableValue.JsonValue
 import com.featurevisor.types.VariableValue.ObjectValue
 import com.featurevisor.types.VariableValue.StringValue
+import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.encodeToJsonElement

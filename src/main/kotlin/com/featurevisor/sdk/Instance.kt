@@ -17,6 +17,7 @@ import com.featurevisor.types.EventName.UPDATE
 import com.featurevisor.types.Feature
 import com.featurevisor.types.StickyFeatures
 import kotlinx.coroutines.Job
+import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 
 typealias ConfigureBucketKey = (Feature, Context, BucketKey) -> BucketKey
