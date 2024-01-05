@@ -116,4 +116,4 @@ $ featurevisor-kotlin test
 
 ## License
 
-MIT © [Fahad Heylaal](https://fahad19.com)
+[MIT](./LICENSE)
