@@ -186,7 +186,7 @@ data class SegmentAssertion(
 )
 
 data class TestSegment(
-    val key: String,
+    val key: SegmentKey,
     val assertions: List<SegmentAssertion>,
 )
 
@@ -238,10 +238,12 @@ sealed class ConditionValue {
     data class DateTimeValue(val value: LocalDate) : ConditionValue()
 }
 
+typealias SegmentKey = String
+
 @Serializable
 data class Segment(
     val archived: Boolean? = null,
-    val key: String,
+    val key: SegmentKey,
     val conditions: Condition,
 )
 
@@ -259,7 +261,7 @@ data class NotGroupSegment(
 
 @Serializable(with = GroupSegmentSerializer::class)
 sealed class GroupSegment {
-    data class Plain(val segment: String) : GroupSegment()
+    data class Plain(val segment: SegmentKey) : GroupSegment()
     data class Multiple(val segments: List<GroupSegment>) : GroupSegment()
     data class And(val segment: AndGroupSegment) : GroupSegment()
     data class Or(val segment: OrGroupSegment) : GroupSegment()
