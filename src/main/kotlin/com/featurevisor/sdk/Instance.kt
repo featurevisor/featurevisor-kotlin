@@ -10,13 +10,11 @@ import com.featurevisor.types.BucketValue
 import com.featurevisor.types.Context
 import com.featurevisor.types.DatafileContent
 import com.featurevisor.types.EventName
-import com.featurevisor.types.EventName.ACTIVATION
-import com.featurevisor.types.EventName.READY
-import com.featurevisor.types.EventName.REFRESH
-import com.featurevisor.types.EventName.UPDATE
+import com.featurevisor.types.EventName.*
 import com.featurevisor.types.Feature
 import com.featurevisor.types.StickyFeatures
 import kotlinx.coroutines.Job
+import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 
 typealias ConfigureBucketKey = (Feature, Context, BucketKey) -> BucketKey
@@ -30,6 +28,8 @@ class FeaturevisorInstance private constructor(options: InstanceOptions) {
         fun createInstance(options: InstanceOptions): FeaturevisorInstance {
             return FeaturevisorInstance(options)
         }
+
+        var companionLogger: Logger? = null
     }
 
     private val on: (EventName, Listener) -> Unit
@@ -58,6 +58,7 @@ class FeaturevisorInstance private constructor(options: InstanceOptions) {
 
     init {
         with(options) {
+            companionLogger = logger
             if (onReady != null) {
                 emitter.addListener(event = READY, listener = onReady)
             }
@@ -75,6 +76,11 @@ class FeaturevisorInstance private constructor(options: InstanceOptions) {
             if (onActivation != null) {
                 emitter.addListener(
                     ACTIVATION, onActivation
+                )
+            }
+            if (onError != null) {
+                emitter.addListener(
+                    ERROR, onError
                 )
             }
 
@@ -96,11 +102,11 @@ class FeaturevisorInstance private constructor(options: InstanceOptions) {
                         if (result.isSuccess) {
                             datafileReader = DatafileReader(result.getOrThrow())
                             statuses.ready = true
-                            emitter.emit(READY)
+                            emitter.emit(READY, result.getOrThrow())
                             if (refreshInterval != null) startRefreshing()
                         } else {
                             logger?.error("Failed to fetch datafile: $result")
-                            throw FetchingDataFileFailed(result.toString())
+                            emitter.emit(ERROR)
                         }
                     }
                 }

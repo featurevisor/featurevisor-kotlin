@@ -1,6 +1,7 @@
 package com.featurevisor.sdk
 
 import com.featurevisor.types.DatafileContent
+import kotlinx.serialization.decodeFromString
 import java.io.IOException
 import okhttp3.*
 import kotlinx.serialization.json.Json
@@ -39,21 +40,44 @@ private fun fetchDatafileContentFromUrl(
     }
 }
 
-private inline fun <reified T> fetch(
+const val BODY_BYTE_COUNT = 1000000L
+private inline fun fetch(
     request: Request,
-    crossinline completion: (Result<T>) -> Unit,
+    crossinline completion: (Result<DatafileContent>) -> Unit,
 ) {
     val client = OkHttpClient()
     val call = client.newCall(request)
     call.enqueue(object : Callback {
         override fun onResponse(call: Call, response: Response) {
-            val responseBody = response.body
-            if (response.isSuccessful && responseBody != null) {
-                val json = Json { ignoreUnknownKeys = true }
-                val content = json.decodeFromString<T>(responseBody.string())
-                completion(Result.success(content))
+            val responseBody = response.peekBody(BODY_BYTE_COUNT)
+            if (response.isSuccessful) {
+                val json = Json {
+                    ignoreUnknownKeys = true
+                }
+                val responseBodyString = responseBody.string()
+                FeaturevisorInstance.companionLogger?.debug(responseBodyString)
+                try {
+                    val content = json.decodeFromString<DatafileContent>(responseBodyString)
+                    completion(Result.success(content))
+                } catch(throwable: Throwable) {
+                    completion(
+                        Result.failure(
+                            FeaturevisorError.UnparsableJson(
+                                responseBody.string(),
+                                response.message
+                            )
+                        )
+                    )
+                }
             } else {
-                completion(Result.failure(FeaturevisorError.UnparsableJson(responseBody?.string(), response.message)))
+                completion(
+                    Result.failure(
+                        FeaturevisorError.UnparsableJson(
+                            responseBody.string(),
+                            response.message
+                        )
+                    )
+                )
             }
         }
 

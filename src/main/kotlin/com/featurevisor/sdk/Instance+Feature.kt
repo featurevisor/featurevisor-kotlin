@@ -7,7 +7,7 @@ import com.featurevisor.types.Feature
 import com.featurevisor.types.Force
 import com.featurevisor.types.Traffic
 
-internal fun FeaturevisorInstance.getFeatureByKey(featureKey: String): Feature? {
+fun FeaturevisorInstance.getFeatureByKey(featureKey: String): Feature? {
     return datafileReader.getFeature(featureKey)
 }
 
@@ -69,11 +69,11 @@ internal fun FeaturevisorInstance.getMatchedTrafficAndAllocation(
 
     var matchedAllocation: Allocation? = null
     val matchedTraffic = traffic.firstOrNull { trafficItem ->
-        if (allGroupSegmentsAreMatched(trafficItem.segments, context, datafileReader).not()) {
-            false
-        } else {
+        if (allGroupSegmentsAreMatched(trafficItem.segments, context, datafileReader)) {
             matchedAllocation = getMatchedAllocation(trafficItem, bucketValue)
-            matchedAllocation != null
+            true
+        } else {
+            false
         }
     }
 

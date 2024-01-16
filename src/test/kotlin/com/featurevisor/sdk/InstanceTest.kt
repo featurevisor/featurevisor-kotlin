@@ -3,31 +3,41 @@
  */
 package com.featurevisor.sdk
 
-//TODO: Add unit tests for Instance.kt later
-//class InstanceTest {
-//
-//    private val systemUnderTest = FeaturevisorInstance.createInstance(
-//        options = InstanceOptions(
-//            bucketKeySeparator = "",
-//            configureBucketKey = { feature: Feature, map: Map, s: String -> },
-//            configureBucketValue = { feature: Feature, map: Map, i: Int -> },
-//            datafile = null,
-//            datafileUrl = null,
-//            handleDatafileFetch = {},
-//            initialFeatures = mapOf(),
-//            interceptContext = {},
-//            logger = null,
-//            onActivation = {},
-//            onReady = {},
-//            onRefresh = {},
-//            onUpdate = {},
-//            refreshInterval = null,
-//            stickyFeatures = mapOf()
-//        )
-//    )
-//
-//    @Test
-//    fun `instance initialised properly`() {
-//
-//    }
-//}
+import com.featurevisor.types.DatafileContent
+import io.kotest.matchers.shouldBe
+import org.junit.jupiter.api.Test
+
+class InstanceTest {
+
+    private val systemUnderTest = FeaturevisorInstance.createInstance(
+        options = InstanceOptions(
+            bucketKeySeparator = "",
+            configureBucketKey = null,
+            configureBucketValue = null,
+            datafile = DatafileContent(
+                schemaVersion = "0",
+                revision = "0",
+                attributes = listOf(),
+                segments = listOf(),
+                features = listOf()
+            ),
+            datafileUrl = null,
+            handleDatafileFetch = null,
+            initialFeatures = mapOf(),
+            interceptContext = null,
+            logger = null,
+            onActivation = {},
+            onReady = {},
+            onRefresh = {},
+            onUpdate = {},
+            refreshInterval = null,
+            stickyFeatures = mapOf(),
+            onError = {},
+        )
+    )
+
+    @Test
+    fun `instance initialised properly`() {
+        systemUnderTest.statuses.ready shouldBe true
+    }
+}
