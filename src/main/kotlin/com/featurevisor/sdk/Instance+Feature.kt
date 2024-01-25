@@ -49,7 +49,7 @@ internal fun FeaturevisorInstance.getMatchedAllocation(
 
     return traffic.allocation.firstOrNull { allocation ->
         with(allocation.range) {
-            bucketValue in start..end
+            bucketValue in this.first()..this.last()
         }
     }
 }

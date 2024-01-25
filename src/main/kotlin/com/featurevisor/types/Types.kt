@@ -49,7 +49,7 @@ data class VariableOverride(
     val value: VariableValue,
 
     // one of the below must be present in YAML
-    val conditions: Condition?,
+    val conditions: Condition? = null,
     val segments: GroupSegment?,
 )
 
@@ -63,7 +63,7 @@ data class Variable(
 @Serializable
 data class Variation(
     // only available in YAML
-    val description: String?,
+    val description: String? = null,
 
     val value: VariationValue,
 
@@ -87,12 +87,12 @@ typealias VariableValues = Map<VariableKey, VariableValue>
 @Serializable
 data class Force(
     // one of the below must be present in YAML
-    val conditions: Condition?,
-    val segments: GroupSegment?,
+    val conditions: Condition? = null,
+    val segments: GroupSegment? = null,
 
-    val enabled: Boolean?,
-    val variation: VariationValue?,
-    val variables: VariableValues?,
+    val enabled: Boolean? = null,
+    val variation: VariationValue? = null,
+    val variables: VariableValues? = null,
 )
 
 data class Slot(
@@ -324,7 +324,7 @@ data class Range(
 @Serializable
 data class Allocation(
     val variation: VariationValue,
-    val range: Range,
+    val range: List<Int>,
 )
 
 @Serializable
