@@ -383,7 +383,7 @@ fun FeaturevisorInstance.evaluateFlag(featureKey: FeatureKey, context: Context =
         }
 
         // treated as enabled because of matched traffic
-        if (bucketValue < matchedTraffic.percentage) {
+        if (bucketValue <= matchedTraffic.percentage) {
             // @TODO: verify if range check should be inclusive or not
             evaluation = Evaluation(
                 featureKey = feature.key,

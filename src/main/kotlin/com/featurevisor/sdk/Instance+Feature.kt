@@ -11,6 +11,10 @@ fun FeaturevisorInstance.getFeatureByKey(featureKey: String): Feature? {
     return datafileReader.getFeature(featureKey)
 }
 
+fun FeaturevisorInstance.getFeature(featureKey: String): Feature?{
+    return datafileReader.getFeature(featureKey)
+}
+
 internal fun FeaturevisorInstance.findForceFromFeature(
     feature: Feature,
     context: Context,
