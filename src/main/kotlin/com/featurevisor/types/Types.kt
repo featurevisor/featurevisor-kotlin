@@ -274,9 +274,9 @@ enum class Operator(val value: String) {
 
     // numeric
     GREATER_THAN("greaterThan"),
-    GREATER_THAN_OR_EQUAL("greaterThanOrEqual"),
+    GREATER_THAN_OR_EQUALS("greaterThanOrEquals"),
     LESS_THAN("lessThan"),
-    LESS_THAN_OR_EQUAL("lessThanOrEqual"),
+    LESS_THAN_OR_EQUALS("lessThanOrEquals"),
 
     // string
     CONTAINS("contains"),
@@ -288,9 +288,9 @@ enum class Operator(val value: String) {
     SEMVER_EQUALS("semverEquals"),
     SEMVER_NOT_EQUALS("semverNotEquals"),
     SEMVER_GREATER_THAN("semverGreaterThan"),
-    SEMVER_GREATER_THAN_OR_EQUAL("semverGreaterThanOrEqual"),
+    SEMVER_GREATER_THAN_OR_EQUALS("semverGreaterThanOrEquals"),
     SEMVER_LESS_THAN("semverLessThan"),
-    SEMVER_LESS_THAN_OR_EQUAL("semverLessThanOrEqual"),
+    SEMVER_LESS_THAN_OR_EQUALS("semverLessThanOrEquals"),
 
     // date comparisons
     BEFORE("before"),

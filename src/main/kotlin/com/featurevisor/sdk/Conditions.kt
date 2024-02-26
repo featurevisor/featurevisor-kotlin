@@ -14,18 +14,18 @@ import com.featurevisor.types.Operator.CONTAINS
 import com.featurevisor.types.Operator.ENDS_WITH
 import com.featurevisor.types.Operator.EQUALS
 import com.featurevisor.types.Operator.GREATER_THAN
-import com.featurevisor.types.Operator.GREATER_THAN_OR_EQUAL
+import com.featurevisor.types.Operator.GREATER_THAN_OR_EQUALS
 import com.featurevisor.types.Operator.IN_ARRAY
 import com.featurevisor.types.Operator.LESS_THAN
-import com.featurevisor.types.Operator.LESS_THAN_OR_EQUAL
+import com.featurevisor.types.Operator.LESS_THAN_OR_EQUALS
 import com.featurevisor.types.Operator.NOT_CONTAINS
 import com.featurevisor.types.Operator.NOT_EQUALS
 import com.featurevisor.types.Operator.NOT_IN_ARRAY
 import com.featurevisor.types.Operator.SEMVER_EQUALS
 import com.featurevisor.types.Operator.SEMVER_GREATER_THAN
-import com.featurevisor.types.Operator.SEMVER_GREATER_THAN_OR_EQUAL
+import com.featurevisor.types.Operator.SEMVER_GREATER_THAN_OR_EQUALS
 import com.featurevisor.types.Operator.SEMVER_LESS_THAN
-import com.featurevisor.types.Operator.SEMVER_LESS_THAN_OR_EQUAL
+import com.featurevisor.types.Operator.SEMVER_LESS_THAN_OR_EQUALS
 import com.featurevisor.types.Operator.SEMVER_NOT_EQUALS
 import com.featurevisor.types.Operator.STARTS_WITH
 import net.swiftzer.semver.SemVer
@@ -60,7 +60,7 @@ object Conditions {
                         conditionValue.value
                     ) == 1
 
-                    SEMVER_GREATER_THAN_OR_EQUAL -> compareVersions(
+                    SEMVER_GREATER_THAN_OR_EQUALS -> compareVersions(
                         attributeValue.value,
                         conditionValue.value
                     ) >= 0
@@ -70,7 +70,7 @@ object Conditions {
                         conditionValue.value
                     ) == -1
 
-                    SEMVER_LESS_THAN_OR_EQUAL -> compareVersions(
+                    SEMVER_LESS_THAN_OR_EQUALS -> compareVersions(
                         attributeValue.value,
                         conditionValue.value
                     ) <= 0
@@ -84,9 +84,9 @@ object Conditions {
                     EQUALS -> attributeValue.value == conditionValue.value
                     NOT_EQUALS -> attributeValue.value != conditionValue.value
                     GREATER_THAN -> attributeValue.value > conditionValue.value
-                    GREATER_THAN_OR_EQUAL -> attributeValue.value >= conditionValue.value
+                    GREATER_THAN_OR_EQUALS -> attributeValue.value >= conditionValue.value
                     LESS_THAN -> attributeValue.value < conditionValue.value
-                    LESS_THAN_OR_EQUAL -> attributeValue.value <= conditionValue.value
+                    LESS_THAN_OR_EQUALS -> attributeValue.value <= conditionValue.value
                     else -> false
                 }
             }
@@ -96,9 +96,9 @@ object Conditions {
                     EQUALS -> attributeValue.value == conditionValue.value
                     NOT_EQUALS -> attributeValue.value != conditionValue.value
                     GREATER_THAN -> attributeValue.value > conditionValue.value
-                    GREATER_THAN_OR_EQUAL -> attributeValue.value >= conditionValue.value
+                    GREATER_THAN_OR_EQUALS -> attributeValue.value >= conditionValue.value
                     LESS_THAN -> attributeValue.value < conditionValue.value
-                    LESS_THAN_OR_EQUAL -> attributeValue.value <= conditionValue.value
+                    LESS_THAN_OR_EQUALS -> attributeValue.value <= conditionValue.value
                     else -> false
                 }
             }
