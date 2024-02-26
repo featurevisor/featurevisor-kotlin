@@ -50,14 +50,14 @@ data class VariableOverride(
 
     // one of the below must be present in YAML
     val conditions: Condition? = null,
-    val segments: GroupSegment?,
+    val segments: GroupSegment?=null,
 )
 
 @Serializable
 data class Variable(
     val key: VariableKey,
     val value: VariableValue,
-    val overrides: List<VariableOverride>?,
+    val overrides: List<VariableOverride>? = null,
 )
 
 @Serializable
@@ -68,9 +68,9 @@ data class Variation(
     val value: VariationValue,
 
     // 0 to 100 (available from parsed YAML, but not in datafile)
-    val weight: Double?,
+    val weight: Double? = null,
 
-    val variables: List<Variable>?,
+    val variables: List<Variable>? = null,
 )
 
 @Serializable
@@ -97,7 +97,7 @@ data class Force(
 
 data class Slot(
     // @TODO: allow false?
-    val feature: FeatureKey?,
+    val feature: FeatureKey? = null,
 
     // 0 to 100
     val percentage: Weight,
@@ -128,15 +128,15 @@ data class Rule(
     val segments: GroupSegment,
     val percentage: Weight,
 
-    val enabled: Boolean?,
-    val variation: VariationValue?,
-    val variables: VariableValues?,
+    val enabled: Boolean? = null,
+    val variation: VariationValue? = null,
+    val variables: VariableValues? = null,
 )
 
 data class Environment(
-    val expose: Boolean?,
+    val expose: Boolean? = null,
     val rules: List<Rule>,
-    val force: List<Force>?,
+    val force: List<Force>? = null,
 )
 
 typealias Environments = Map<EnvironmentKey, Environment>

@@ -39,7 +39,7 @@ class ConditionSerializerTest {
                     "value": "1.2.3"
                 }, {
                     "attribute": "age",
-                    "operator": "greaterThanOrEqual",
+                    "operator": "greaterThanOrEquals",
                     "value": "18"
                 }]
             }
@@ -70,7 +70,7 @@ class ConditionSerializerTest {
                     "value": "1.2.3"
                 }, {
                     "attribute": "age",
-                    "operator": "greaterThanOrEqual",
+                    "operator": "greaterThanOrEquals",
                     "value": "18"
                 }]
             }
