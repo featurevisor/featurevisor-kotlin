@@ -9,17 +9,17 @@ import com.featurevisor.types.Operator.CONTAINS
 import com.featurevisor.types.Operator.ENDS_WITH
 import com.featurevisor.types.Operator.EQUALS
 import com.featurevisor.types.Operator.GREATER_THAN
-import com.featurevisor.types.Operator.GREATER_THAN_OR_EQUAL
+import com.featurevisor.types.Operator.GREATER_THAN_OR_EQUALS
 import com.featurevisor.types.Operator.IN_ARRAY
 import com.featurevisor.types.Operator.LESS_THAN
-import com.featurevisor.types.Operator.LESS_THAN_OR_EQUAL
+import com.featurevisor.types.Operator.LESS_THAN_OR_EQUALS
 import com.featurevisor.types.Operator.NOT_EQUALS
 import com.featurevisor.types.Operator.NOT_IN_ARRAY
 import com.featurevisor.types.Operator.SEMVER_EQUALS
 import com.featurevisor.types.Operator.SEMVER_GREATER_THAN
-import com.featurevisor.types.Operator.SEMVER_GREATER_THAN_OR_EQUAL
+import com.featurevisor.types.Operator.SEMVER_GREATER_THAN_OR_EQUALS
 import com.featurevisor.types.Operator.SEMVER_LESS_THAN
-import com.featurevisor.types.Operator.SEMVER_LESS_THAN_OR_EQUAL
+import com.featurevisor.types.Operator.SEMVER_LESS_THAN_OR_EQUALS
 import com.featurevisor.types.Operator.SEMVER_NOT_EQUALS
 import com.featurevisor.types.Operator.STARTS_WITH
 import io.kotest.matchers.shouldBe
@@ -112,7 +112,7 @@ class ConditionsTest {
         val condition =
             Condition.Plain(
                 attributeKey = "age",
-                operator = GREATER_THAN_OR_EQUAL,
+                operator = GREATER_THAN_OR_EQUALS,
                 value = ConditionValue.IntValue(18)
             )
 
@@ -137,7 +137,7 @@ class ConditionsTest {
         val condition =
             Condition.Plain(
                 attributeKey = "age",
-                operator = LESS_THAN_OR_EQUAL,
+                operator = LESS_THAN_OR_EQUALS,
                 value = ConditionValue.IntValue(18)
             )
 
@@ -299,7 +299,7 @@ class ConditionsTest {
     fun `SEMVER_GREATER_THAN_OR_EQUAL operator works for strings`() {
         val condition = Condition.Plain(
             attributeKey = "version",
-            operator = SEMVER_GREATER_THAN_OR_EQUAL,
+            operator = SEMVER_GREATER_THAN_OR_EQUALS,
             value = ConditionValue.StringValue("1.2.3")
         )
 
@@ -347,7 +347,7 @@ class ConditionsTest {
     fun `SEMVER_LESS_THAN_OR_EQUAL operator works for strings`() {
         val condition = Condition.Plain(
             attributeKey = "version",
-            operator = SEMVER_LESS_THAN_OR_EQUAL,
+            operator = SEMVER_LESS_THAN_OR_EQUALS,
             value = ConditionValue.StringValue("1.2.3")
         )
 

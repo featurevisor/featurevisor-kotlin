@@ -331,9 +331,9 @@ private fun mapOperator(value: String): Operator {
 
         // numeric
         "greaterThan" -> Operator.GREATER_THAN
-        "greaterThanOrEqual" -> Operator.GREATER_THAN_OR_EQUAL
+        "greaterThanOrEquals" -> Operator.GREATER_THAN_OR_EQUALS
         "lessThan" -> Operator.LESS_THAN
-        "lessThanOrEqual" -> Operator.LESS_THAN_OR_EQUAL
+        "lessThanOrEquals" -> Operator.LESS_THAN_OR_EQUALS
 
         // string
         "contains" -> Operator.CONTAINS
@@ -345,9 +345,9 @@ private fun mapOperator(value: String): Operator {
         "semverEquals" -> Operator.SEMVER_EQUALS
         "semverNotEquals" -> Operator.SEMVER_NOT_EQUALS
         "semverGreaterThan" -> Operator.SEMVER_GREATER_THAN
-        "semverGreaterThanOrEquals" -> Operator.SEMVER_GREATER_THAN_OR_EQUAL
+        "semverGreaterThanOrEquals" -> Operator.SEMVER_GREATER_THAN_OR_EQUALS
         "semverLessThan" -> Operator.SEMVER_LESS_THAN
-        "semverLessThanOrEquals" -> Operator.SEMVER_LESS_THAN_OR_EQUAL
+        "semverLessThanOrEquals" -> Operator.SEMVER_LESS_THAN_OR_EQUALS
 
         // date comparisons
         "before" -> Operator.BEFORE

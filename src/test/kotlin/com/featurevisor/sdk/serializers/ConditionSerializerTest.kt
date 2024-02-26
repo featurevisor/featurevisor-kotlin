@@ -55,7 +55,7 @@ class ConditionSerializerTest {
         }
         (condition.and[1] as Condition.Plain).run {
             attributeKey shouldBe "age"
-            operator shouldBe Operator.GREATER_THAN_OR_EQUAL
+            operator shouldBe Operator.GREATER_THAN_OR_EQUALS
             value shouldBe ConditionValue.IntValue(18)
         }
     }
@@ -86,7 +86,7 @@ class ConditionSerializerTest {
         }
         (condition.or[1] as Condition.Plain).run {
             attributeKey shouldBe "age"
-            operator shouldBe Operator.GREATER_THAN_OR_EQUAL
+            operator shouldBe Operator.GREATER_THAN_OR_EQUALS
             value shouldBe ConditionValue.IntValue(18)
         }
     }
