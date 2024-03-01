@@ -64,6 +64,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
     implementation("com.squareup.okhttp3:okhttp:4.11.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+    implementation("org.yaml:snakeyaml:2.2")
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
@@ -83,3 +84,15 @@ tasks.named<Test>("test") {
         showStandardStreams = true
     }
 }
+
+tasks.register<JavaExec>("run-test") {
+    classpath = sourceSets.main.get().runtimeClasspath
+    mainClass = "com.featurevisor.cli.TestExecuter"
+
+    if (project.hasProperty("args")) {
+        val argsList = project.property("args") as String
+        val argsArray = argsList.split("\\s+".toRegex()).toTypedArray()
+        args(*argsArray)
+    }
+}
+

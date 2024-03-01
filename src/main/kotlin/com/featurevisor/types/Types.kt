@@ -388,3 +388,48 @@ data class OverrideFeature(
     val variation: VariationValue? = null,
     val variables: VariableValues? = null,
 )
+
+/*
+* For Assertions used by test Runner
+* */
+
+data class Spec(
+    val feature: String? = null,
+    val segment: String? = null,
+    val assertion: List<Assertion>? = null,
+)
+
+data class Assertion(
+    val description: String? = null,
+    val environment: String? = null,
+    val at: Double? = null,
+    val context: Context,
+    val expectedToBeEnabled: Boolean? = null,
+    val expectedVariables: Map<String, Any?>? = null,
+    val expectedToMatch: Boolean? = null,
+    val expectedVariation: String? = null,
+)
+
+data class TestResultAssertionError(
+    val type: String,
+    val expected: Any?,
+    val actual: Any?,
+    val message: String?,
+    val details: Map<String, Any>?
+)
+
+data class TestResultAssertion(
+    val description: String,
+    val duration: Long,
+    val passed: Boolean,
+    val errors: List<TestResultAssertionError>?
+)
+
+data class TestResult(
+    val type: Test,
+    val key: String,
+    val notFound: Boolean?,
+    val passed: Boolean,
+    val duration: Long,
+    val assertions: List<TestResultAssertion>
+)

@@ -324,7 +324,7 @@ fun isValidJson(jsonString: String): Boolean {
     }
 }
 
-private fun mapOperator(value: String): Operator {
+ fun mapOperator(value: String): Operator {
     return when (value.trim()) {
         "equals" -> Operator.EQUALS
         "notEquals" -> Operator.NOT_EQUALS
