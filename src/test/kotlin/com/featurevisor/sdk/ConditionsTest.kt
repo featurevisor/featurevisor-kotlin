@@ -23,10 +23,16 @@ import com.featurevisor.types.Operator.SEMVER_LESS_THAN_OR_EQUALS
 import com.featurevisor.types.Operator.SEMVER_NOT_EQUALS
 import com.featurevisor.types.Operator.STARTS_WITH
 import io.kotest.matchers.shouldBe
+import java.sql.Date
 import java.time.LocalDate
+import java.util.*
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 
 class ConditionsTest {
+
+    val calendar = Calendar.getInstance()
+
     @Test
     fun `EQUALS operator works for strings`() {
         val condition =
@@ -372,22 +378,22 @@ class ConditionsTest {
         val condition = Condition.Plain(
             attributeKey = "date",
             operator = BEFORE,
-            value = ConditionValue.DateTimeValue(LocalDate.of(2023, 10, 5)),
+            value = ConditionValue.DateTimeValue(Date.valueOf("2023-10-4")),
         )
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("date" to AttributeValue.DateValue(LocalDate.of(2023, 10, 4)))
+            context = mapOf("date" to AttributeValue.DateValue(Date.valueOf("2022-11-4")))
         ) shouldBe true
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("date" to AttributeValue.DateValue(LocalDate.of(2023, 10, 5)))
+            context = mapOf("date" to AttributeValue.DateValue(Date.valueOf("2024-10-4")))
         ) shouldBe false
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("date" to AttributeValue.DateValue(LocalDate.of(2023, 10, 6)))
+            context = mapOf("date" to AttributeValue.DateValue(Date.valueOf("2024-10-4")))
         ) shouldBe false
     }
 
@@ -396,22 +402,22 @@ class ConditionsTest {
         val condition = Condition.Plain(
             attributeKey = "date",
             operator = AFTER,
-            value = ConditionValue.DateTimeValue(LocalDate.of(2023, 10, 5)),
+            value = ConditionValue.DateTimeValue(Date.valueOf("2023-10-4")),
         )
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("date" to AttributeValue.DateValue(LocalDate.of(2023, 10, 4)))
+            context = mapOf("date" to AttributeValue.DateValue(Date.valueOf("2022-10-4")))
         ) shouldBe false
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("date" to AttributeValue.DateValue(LocalDate.of(2023, 10, 5)))
+            context = mapOf("date" to AttributeValue.DateValue(Date.valueOf("2022-10-4")))
         ) shouldBe false
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("date" to AttributeValue.DateValue(LocalDate.of(2023, 10, 6)))
+            context = mapOf("date" to AttributeValue.DateValue(Date.valueOf("2024-10-4")))
         ) shouldBe true
     }
 
@@ -477,7 +483,7 @@ class ConditionsTest {
         val beforeCondition = Condition.Plain(
             attributeKey = "date",
             operator = BEFORE,
-            value = ConditionValue.DateTimeValue(LocalDate.of(2023, 10, 5)),
+            value = ConditionValue.DateTimeValue(Date(1632307200000)),
         )
 
         val inArrayCondition = Condition.Plain(
@@ -511,7 +517,7 @@ class ConditionsTest {
         val context = mapOf(
             "browser_type" to AttributeValue.StringValue("chrome"), // true
             "version" to AttributeValue.StringValue("1.2.4"), // true
-            "date" to AttributeValue.DateValue(LocalDate.of(2023, 10, 6)), // false
+            "date" to AttributeValue.DateValue(Date.valueOf("2023-10-4")), // false
             "letter" to AttributeValue.StringValue("x"), // false
             "age" to AttributeValue.IntValue(19), // true
         )
