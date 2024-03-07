@@ -34,45 +34,45 @@ object Conditions {
 
     fun conditionIsMatched(condition: Plain, context: Context): Boolean {
         val (attributeKey, operator, conditionValue) = condition
-        val attributeValue = context.getOrDefault(attributeKey, null) ?: return false
+        val attributeValue = context.getOrDefault(attributeKey, null)
 
         return when {
             attributeValue is AttributeValue.StringValue && conditionValue is ConditionValue.StringValue -> {
                 when (operator) {
                     EQUALS -> attributeValue.value == conditionValue.value
                     NOT_EQUALS -> attributeValue.value != conditionValue.value
-                    CONTAINS -> attributeValue.value.contains(conditionValue.value)
-                    NOT_CONTAINS -> attributeValue.value.contains(conditionValue.value).not()
-                    STARTS_WITH -> attributeValue.value.startsWith(conditionValue.value)
-                    ENDS_WITH -> attributeValue.value.endsWith(conditionValue.value)
+                    CONTAINS -> attributeValue.value?.contains(conditionValue.value.orEmpty()) ?: false
+                    NOT_CONTAINS -> attributeValue.value?.contains(conditionValue.value.orEmpty())?.not()  ?: false
+                    STARTS_WITH -> attributeValue.value?.startsWith(conditionValue.value.orEmpty()) ?: false
+                    ENDS_WITH -> attributeValue.value?.endsWith(conditionValue.value.orEmpty()) ?: false
                     SEMVER_EQUALS -> compareVersions(
-                        attributeValue.value,
-                        conditionValue.value,
+                        attributeValue.value.orEmpty(),
+                        conditionValue.value.orEmpty(),
                     ) == 0
 
                     SEMVER_NOT_EQUALS -> compareVersions(
-                        attributeValue.value,
-                        conditionValue.value,
+                        attributeValue.value.orEmpty(),
+                        conditionValue.value.orEmpty(),
                     ) != 0
 
                     SEMVER_GREATER_THAN -> compareVersions(
-                        attributeValue.value,
-                        conditionValue.value
+                        attributeValue.value.orEmpty(),
+                        conditionValue.value.orEmpty()
                     ) == 1
 
                     SEMVER_GREATER_THAN_OR_EQUALS -> compareVersions(
-                        attributeValue.value,
-                        conditionValue.value
+                        attributeValue.value.orEmpty(),
+                        conditionValue.value.orEmpty()
                     ) >= 0
 
                     SEMVER_LESS_THAN -> compareVersions(
-                        attributeValue.value,
-                        conditionValue.value
+                        attributeValue.value.orEmpty(),
+                        conditionValue.value.orEmpty()
                     ) == -1
 
                     SEMVER_LESS_THAN_OR_EQUALS -> compareVersions(
-                        attributeValue.value,
-                        conditionValue.value
+                        attributeValue.value.orEmpty(),
+                        conditionValue.value.orEmpty()
                     ) <= 0
 
                     else -> false

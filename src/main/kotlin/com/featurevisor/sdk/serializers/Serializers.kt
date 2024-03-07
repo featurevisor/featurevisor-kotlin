@@ -10,6 +10,7 @@ import com.featurevisor.types.NotGroupSegment
 import com.featurevisor.types.Operator
 import com.featurevisor.types.OrGroupSegment
 import com.featurevisor.types.VariableValue
+import com.featurevisor.types.Required
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerializationException
@@ -33,6 +34,34 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.serializer
+
+
+
+@OptIn(InternalSerializationApi::class)
+@Serializer(forClass = Required::class)
+object RequiredSerializer: KSerializer<Required>{
+    override val descriptor: SerialDescriptor =
+        buildSerialDescriptor("package.Required", PolymorphicKind.SEALED)
+
+    override fun deserialize(decoder: Decoder): Required {
+        val input = decoder as? JsonDecoder
+            ?: throw SerializationException("This class can be decoded only by Json format")
+        return when (val tree = input.decodeJsonElement()) {
+            is JsonPrimitive ->{
+                Required.FeatureKey(tree.content)
+            }
+            is JsonArray -> {
+                Required.FeatureKey(tree.toString())
+            }
+
+            else -> Required.FeatureKey("abc")
+        }
+    }
+}
+
+
+
+
 
 @OptIn(InternalSerializationApi::class)
 @Serializer(forClass = Condition::class)
@@ -324,7 +353,7 @@ fun isValidJson(jsonString: String): Boolean {
     }
 }
 
-private fun mapOperator(value: String): Operator {
+internal fun mapOperator(value: String): Operator {
     return when (value.trim()) {
         "equals" -> Operator.EQUALS
         "notEquals" -> Operator.NOT_EQUALS

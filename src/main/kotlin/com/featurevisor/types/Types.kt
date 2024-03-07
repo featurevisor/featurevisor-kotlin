@@ -1,13 +1,8 @@
 package com.featurevisor.types
 
-import com.featurevisor.sdk.serializers.BucketBySerializer
-import com.featurevisor.sdk.serializers.ConditionSerializer
-import com.featurevisor.sdk.serializers.ConditionValueSerializer
-import com.featurevisor.sdk.serializers.GroupSegmentSerializer
-import com.featurevisor.sdk.serializers.VariableValueSerializer
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
-import java.time.LocalDate
+import com.featurevisor.sdk.serializers.*
+import kotlinx.serialization.*
+import java.util.Date
 
 typealias Context = Map<AttributeKey, AttributeValue>
 typealias VariationValue = String
@@ -160,41 +155,6 @@ data class ParsedFeature(
     val environments: Environments,
 )
 
-/**
- * Tests
- */
-data class FeatureAssertion(
-    val description: String?,
-    val environment: EnvironmentKey,
-    // bucket weight: 0 to 100
-    val at: Weight,
-    val context: Context,
-    val expectedToBeEnabled: Boolean,
-    val expectedVariation: VariationValue?,
-    val expectedVariables: VariableValues?,
-)
-
-data class TestFeature(
-    val key: FeatureKey,
-    val assertions: List<FeatureAssertion>,
-)
-
-data class SegmentAssertion(
-    val description: String?,
-    val context: Context,
-    val expectedToMatch: Boolean,
-)
-
-data class TestSegment(
-    val key: SegmentKey,
-    val assertions: List<SegmentAssertion>,
-)
-
-sealed class Test {
-    data class Feature(val value: TestFeature) : Test()
-    data class Segment(val value: TestSegment) : Test()
-}
-
 typealias AttributeKey = String
 
 @Serializable
@@ -206,11 +166,11 @@ data class Attribute(
 )
 
 sealed class AttributeValue {
-    data class StringValue(val value: String) : AttributeValue()
+    data class StringValue(val value: String?) : AttributeValue()
     data class IntValue(val value: Int) : AttributeValue()
     data class DoubleValue(val value: Double) : AttributeValue()
     data class BooleanValue(val value: Boolean) : AttributeValue()
-    data class DateValue(val value: LocalDate) : AttributeValue()
+    data class DateValue(val value: Date) : AttributeValue()
 }
 
 @Serializable(with = ConditionSerializer::class)
@@ -230,12 +190,12 @@ const val TAG = "FeaturevisorService"
 
 @Serializable(with = ConditionValueSerializer::class)
 sealed class ConditionValue {
-    data class StringValue(val value: String) : ConditionValue()
+    data class StringValue(val value: String?) : ConditionValue()
     data class IntValue(val value: Int) : ConditionValue()
     data class DoubleValue(val value: Double) : ConditionValue()
     data class BooleanValue(val value: Boolean) : ConditionValue()
     data class ArrayValue(val values: List<String>) : ConditionValue()
-    data class DateTimeValue(val value: LocalDate) : ConditionValue()
+    data class DateTimeValue(val value: Date) : ConditionValue()
 }
 
 typealias SegmentKey = String
@@ -315,16 +275,12 @@ enum class EventName {
 // 0 to 100,000
 typealias Percentage = Int
 
-@Serializable
-data class Range(
-    val start: Percentage,
-    val end: Percentage,
-)
+typealias Range = List<Int>
 
 @Serializable
 data class Allocation(
     val variation: VariationValue,
-    val range: List<Int>,
+    val range: Range,
 )
 
 @Serializable
@@ -352,7 +308,7 @@ data class RequiredWithVariation(
     val variation: VariationValue,
 )
 
-@Serializable
+@Serializable(with = RequiredSerializer::class)
 sealed class Required {
     data class FeatureKey(val required: com.featurevisor.types.FeatureKey) : Required()
     data class WithVariation(val required: RequiredWithVariation) : Required()
@@ -387,4 +343,99 @@ data class OverrideFeature(
     val enabled: Boolean,
     val variation: VariationValue? = null,
     val variables: VariableValues? = null,
+)
+
+/**
+ * Tests
+ */
+
+typealias AssertionMatrix = Map<String, List<AttributeValue>>
+
+
+data class FeatureAssertion(
+    var description: String?=null,
+    var environment: EnvironmentKey="staging",
+    // bucket weight: 0 to 100
+    var at: WeightType = WeightType.IntType(40),
+    var context: Context = mapOf("devMode" to AttributeValue.BooleanValue(false)),
+    val expectedToBeEnabled: Boolean?=null,
+    val expectedVariation: VariationValue?=null,
+    val expectedVariables: VariableValues?=null,
+    val matrix: AssertionMatrix? = null
+)
+
+data class TestFeature(
+    val key: FeatureKey,
+    val assertions: List<FeatureAssertion>,
+)
+
+data class SegmentAssertion(
+    var description: String?=null,
+    var context: Context,
+    val expectedToMatch: Boolean,
+    val matrix: AssertionMatrix? = null
+)
+
+data class TestSegment(
+    val key: SegmentKey,
+    val assertions: List<SegmentAssertion>,
+)
+
+sealed class Test {
+    data class Feature(val value: TestFeature) : Test()
+    data class Segment(val value: TestSegment) : Test()
+}
+
+sealed class WeightType{
+    data class IntType(val value: Int):WeightType()
+
+    data class DoubleType(val value: Double):WeightType()
+
+    data class StringType(val value: String):WeightType()
+}
+
+data class Assertion(
+    val description: String? = null,
+    val environment: String? = null,
+    val at: Double? = null,
+    val context: Context,
+    val expectedToBeEnabled: Boolean? = null,
+    val expectedVariables: Map<String, Any?>? = null,
+    val expectedToMatch: Boolean? = null,
+    val expectedVariation: String? = null,
+)
+
+data class TestResultAssertionError(
+    val type: String,
+    val expected: Any?=null,
+    val actual: Any?=null,
+    val message: String?=null,
+    val details: Map<String, Any>?=null
+)
+
+data class TestResultAssertion(
+    val description: String,
+    val environment: EnvironmentKey? = null,
+    val duration: Long,
+    var passed: Boolean,
+    val errors: List<TestResultAssertionError>?
+)
+
+data class TestResult(
+    val type: String,
+    val key: FeatureKey,
+    var notFound: Boolean?=null,
+    var passed: Boolean,
+    val duration: Long,
+    val assertions: List<TestResultAssertion>
+)
+
+data class ExecutionResult(
+    var passed: Boolean,
+    val assertionsCount: AssertionsCount
+)
+
+data class AssertionsCount(
+    var passed: Int=0,
+    var failed: Int=0
 )

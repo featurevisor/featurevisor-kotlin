@@ -337,7 +337,7 @@ fun FeaturevisorInstance.evaluateFlag(featureKey: FeatureKey, context: Context =
         if (feature.ranges.isNullOrEmpty().not()) {
 
             val matchedRange = feature.ranges!!.firstOrNull { range ->
-                bucketValue >= range.start && bucketValue < range.end
+                bucketValue >= range.first() && bucketValue < range.last()
             }
 
             // matched
