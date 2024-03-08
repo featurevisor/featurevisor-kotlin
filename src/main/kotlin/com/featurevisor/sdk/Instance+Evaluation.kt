@@ -286,9 +286,9 @@ fun FeaturevisorInstance.evaluateFlag(featureKey: FeatureKey, context: Context =
 
     // required
     if (feature.required.isNullOrEmpty().not()) {
-        val requiredFeaturesAreEnabled = feature.required!!.all { item ->
-            var requiredKey: FeatureKey
-            var requiredVariation: VariationValue?
+        val requiredFeaturesAreEnabled = feature.required?.all { item ->
+            var requiredKey: FeatureKey? = null
+            var requiredVariation: VariationValue? = null
             when (item) {
                 is Required.FeatureKey -> {
                     requiredKey = item.required
@@ -307,12 +307,16 @@ fun FeaturevisorInstance.evaluateFlag(featureKey: FeatureKey, context: Context =
                 return@all false
             }
 
-            val requiredVariationValue = getVariation(requiredKey, finalContext)
+            if (requiredVariation != null){
+                val requiredVariationValue = getVariation(requiredKey, finalContext)
 
-            return@all requiredVariationValue == requiredVariation
+                return@all requiredVariationValue == requiredVariation
+            }
+
+            return@all true
         }
 
-        if (requiredFeaturesAreEnabled.not()) {
+        if ((requiredFeaturesAreEnabled == false)) {
             evaluation = Evaluation(
                 featureKey = feature.key,
                 reason = REQUIRED,
@@ -337,7 +341,7 @@ fun FeaturevisorInstance.evaluateFlag(featureKey: FeatureKey, context: Context =
         if (feature.ranges.isNullOrEmpty().not()) {
 
             val matchedRange = feature.ranges!!.firstOrNull { range ->
-                bucketValue >= range.start && bucketValue < range.end
+                bucketValue >= range.first() && bucketValue < range.last()
             }
 
             // matched
@@ -482,9 +486,11 @@ fun FeaturevisorInstance.evaluateVariable(
         val finalContext = interceptContext?.invoke(context) ?: context
 
         // forced
-        findForceFromFeature(feature, context, datafileReader)?.let { force ->
-            if (force.variables?.containsKey(variableKey) == true) {
-                val variableValue = force.variables[variableKey]
+     val force =   findForceFromFeature(feature, context, datafileReader)
+
+         force?.let {
+            if (it.variables?.containsKey(variableKey) == true) {
+                val variableValue = it.variables[variableKey]
                 evaluation = Evaluation(
                     featureKey = feature.key,
                     reason = FORCED,
@@ -500,6 +506,7 @@ fun FeaturevisorInstance.evaluateVariable(
 
         // bucketing
         val bucketValue = getBucketValue(feature, finalContext)
+
         val matchedTrafficAndAllocation = getMatchedTrafficAndAllocation(
             traffic = feature.traffic,
             context = finalContext,
@@ -528,8 +535,15 @@ fun FeaturevisorInstance.evaluateVariable(
 
             // regular allocation
             matchedTrafficAndAllocation.matchedAllocation?.let { matchedAllocation ->
+
+               val variationValue: String = if (force?.variation != null) {
+                   force.variation
+               } else {
+                   matchedAllocation.variation
+               }
+
                 val variation = feature.variations?.firstOrNull { variation ->
-                    variation.value == matchedAllocation.variation
+                    variation.value == variationValue
                 }
 
                 val variableFromVariation = variation?.variables?.firstOrNull { variable ->
