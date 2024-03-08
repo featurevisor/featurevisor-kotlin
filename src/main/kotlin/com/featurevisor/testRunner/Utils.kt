@@ -1,4 +1,4 @@
-package com.featurevisor.cli
+package com.featurevisor.testRunner
 
 import com.featurevisor.sdk.FeaturevisorInstance
 import com.featurevisor.sdk.InstanceOptions
@@ -7,7 +7,7 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import java.io.File
-import java.util.Date
+import java.util.*
 
 
 internal const val tick = "\u2713"
@@ -24,7 +24,7 @@ internal val json = Json {
     isLenient = true
 }
 
-internal fun printMessageInGreenColor(message:String) =
+internal fun printMessageInGreenColor(message: String) =
     println("$ANSI_GREEN$message$ANSI_RESET")
 
 internal fun printMessageInRedColor(message: String) =
@@ -43,18 +43,18 @@ internal fun getSdkInstance(datafileContent: DatafileContent?, assertion: Featur
         InstanceOptions(
             datafile = datafileContent,
             configureBucketValue = { _, _, _ ->
-                when(assertion.at){
-                    is WeightType.IntType -> ((assertion.at as WeightType.IntType).value   * (MAX_BUCKETED_NUMBER / 100))
-                    is WeightType.DoubleType -> ((assertion.at as WeightType.DoubleType).value  * (MAX_BUCKETED_NUMBER / 100)).toInt()
+                when (assertion.at) {
+                    is WeightType.IntType -> ((assertion.at as WeightType.IntType).value * (MAX_BUCKETED_NUMBER / 100))
+                    is WeightType.DoubleType -> ((assertion.at as WeightType.DoubleType).value * (MAX_BUCKETED_NUMBER / 100)).toInt()
                     else -> (MAX_BUCKETED_NUMBER / 100)
                 }
             }
         )
     )
 
- internal fun getFileForSpecificPath(path: String) = File(path)
+internal fun getFileForSpecificPath(path: String) = File(path)
 
- internal inline fun <reified R : Any> String.convertToDataClass() = json.decodeFromString<R>(this)
+internal inline fun <reified R : Any> String.convertToDataClass() = json.decodeFromString<R>(this)
 
 internal fun getRootProjectDir(): String {
     var currentDir = File("").absoluteFile
@@ -74,7 +74,7 @@ fun printTestResult(testResult: TestResult) {
     printNormalMessage("Testing: ${testResult.key}")
 
     if (testResult.notFound == true) {
-        println(ANSI_RED + "  => ${testResult.type} ${testResult.key} not found"+ ANSI_RED)
+        println(ANSI_RED + "  => ${testResult.type} ${testResult.key} not found" + ANSI_RED)
         return
     }
 
@@ -91,6 +91,7 @@ fun printTestResult(testResult: TestResult) {
                     error.message != null -> {
                         printMessageInRedColor("    => ${error.message}")
                     }
+
                     error.type == "variable" -> {
                         val variableKey = (error.details as Map<*, *>)["variableKey"]
 
@@ -98,6 +99,7 @@ fun printTestResult(testResult: TestResult) {
                         printMessageInRedColor("       => expected: ${error.expected}")
                         printMessageInRedColor("       => received: ${error.actual}")
                     }
+
                     else -> {
                         printMessageInRedColor(
                             "    => ${error.type}: expected \"${error.expected}\", received \"${error.actual}\""
@@ -110,7 +112,7 @@ fun printTestResult(testResult: TestResult) {
 }
 
 fun getContextValue(contextValue: Any?) =
-    when(contextValue){
+    when (contextValue) {
         is Boolean -> AttributeValue.BooleanValue(contextValue)
         is Int -> AttributeValue.IntValue(contextValue)
         is Double -> AttributeValue.DoubleValue(contextValue)
@@ -121,15 +123,13 @@ fun getContextValue(contextValue: Any?) =
     }
 
 fun getContextValues(contextValue: AttributeValue) =
-    when(contextValue){
+    when (contextValue) {
         is AttributeValue.IntValue -> contextValue.value
         is AttributeValue.DoubleValue -> contextValue.value
         is AttributeValue.StringValue -> contextValue.value
-        is AttributeValue.BooleanValue ->contextValue.value
+        is AttributeValue.BooleanValue -> contextValue.value
         is AttributeValue.DateValue -> contextValue.value
     }
-
-
 
 fun checkIfArraysAreEqual(a: Array<Any>, b: Array<Any>): Boolean {
     if (a.size != b.size) return false
@@ -186,7 +186,7 @@ fun stringToArray(input: String): List<Any>? {
     return null
 }
 
-fun checkMapIsEquals(a: String, b: String): Boolean {
+fun checkJsonIsEquals(a: String, b: String): Boolean {
     val map1 = Json.decodeFromString<Map<String, JsonElement>>(a)
     val map2 = Json.decodeFromString<Map<String, JsonElement>>(b)
     return map1 == map2

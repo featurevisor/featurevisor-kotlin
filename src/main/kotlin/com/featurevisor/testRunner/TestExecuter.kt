@@ -1,6 +1,6 @@
 @file:JvmName("TestExecuter")
 
-package com.featurevisor.cli
+package com.featurevisor.testRunner
 
 import com.featurevisor.types.*
 import java.io.File
@@ -94,7 +94,6 @@ fun testSingleFeature(featureKey: String, projectRootPath: String) {
     val testResult = testFeature(testFeature = (test as Test.Feature).value, projectRootPath)
 
     printTestResult(testResult)
-
 
     if (!testResult.passed) {
         executionResult.passed = false

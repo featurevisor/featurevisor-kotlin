@@ -1,4 +1,4 @@
-package com.featurevisor.cli
+package com.featurevisor.testRunner
 
 import com.featurevisor.types.*
 
@@ -43,8 +43,6 @@ fun applyCombinationToValue(value: Any?, combination: Map<String, Any>): Any? {
             return value
         }
 
-
-
         return variableKeysInValue.fold(value) { acc, result ->
             val key = result.groupValues[1].trim()
             val regex = Regex("""\$\{\{\s*([^\s}]+)\s*}}""")
@@ -68,13 +66,13 @@ fun applyCombinationToFeatureAssertion(
     flattenedAssertion.context =
         flattenedAssertion.context.mapValues { (_, value) ->
             getContextValue(applyCombinationToValue(getContextValues(value), combination))
-    } as Context
+        } as Context
 
     flattenedAssertion.at = applyCombinationToValue(getAtValue(flattenedAssertion.at).toString(), combination)?.let {
         if (it is String) {
-            if (it.contains(".")){
-                WeightType.DoubleType( it.toDouble())
-            }else{
+            if (it.contains(".")) {
+                WeightType.DoubleType(it.toDouble())
+            } else {
                 WeightType.IntType(it.toInt())
             }
         } else it
@@ -95,7 +93,8 @@ fun getFeatureAssertionsFromMatrix(
     if (assertionWithMatrix.matrix == null) {
         val assertion = assertionWithMatrix.copy()
         assertion.description = "Assertion #${aIndex + 1}: (${assertion.environment}) ${
-            assertion.description ?: "at ${getAtValue(assertion.at)}%"}"
+            assertion.description ?: "at ${getAtValue(assertion.at)}%"
+        }"
         return listOf(assertion)
     }
 
@@ -114,7 +113,7 @@ fun getFeatureAssertionsFromMatrix(
 }
 
 @Suppress("IMPLICIT_CAST_TO_ANY")
-fun getAtValue(at:WeightType) =  when (at) {
+fun getAtValue(at: WeightType) = when (at) {
     is WeightType.IntType -> {
         at.value
     }

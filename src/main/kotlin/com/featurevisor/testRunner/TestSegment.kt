@@ -1,9 +1,12 @@
-package com.featurevisor.cli
+package com.featurevisor.testRunner
 
 import com.featurevisor.sdk.segmentIsMatched
-import com.featurevisor.types.*
+import com.featurevisor.types.TestResult
+import com.featurevisor.types.TestResultAssertion
+import com.featurevisor.types.TestResultAssertionError
+import com.featurevisor.types.TestSegment
 
-fun testSegment(test: TestSegment, segmentFilePath:String):TestResult{
+fun testSegment(test: TestSegment, segmentFilePath: String): TestResult {
     val segmentKey = test.key
 
     val testResult = TestResult(
@@ -32,7 +35,7 @@ fun testSegment(test: TestSegment, segmentFilePath:String):TestResult{
             val actual = segmentIsMatched(yamlSegment!!, it.context)
             val passed = actual == expected
 
-            if (!passed){
+            if (!passed) {
                 val testResultAssertionError = TestResultAssertionError(
                     type = "segment",
                     expected = expected,

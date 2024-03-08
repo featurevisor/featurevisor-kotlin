@@ -11,11 +11,7 @@ import com.featurevisor.types.Operator
 import com.featurevisor.types.OrGroupSegment
 import com.featurevisor.types.VariableValue
 import com.featurevisor.types.Required
-import kotlinx.serialization.InternalSerializationApi
-import kotlinx.serialization.KSerializer
-import kotlinx.serialization.SerializationException
-import kotlinx.serialization.Serializer
-import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.*
 import kotlinx.serialization.descriptors.PolymorphicKind
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.descriptors.buildSerialDescriptor
@@ -33,11 +29,9 @@ import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import kotlinx.serialization.serializer
+import java.text.SimpleDateFormat
 
-
-
-@OptIn(InternalSerializationApi::class)
+@OptIn(InternalSerializationApi::class, ExperimentalSerializationApi::class)
 @Serializer(forClass = Required::class)
 object RequiredSerializer: KSerializer<Required>{
     override val descriptor: SerialDescriptor =
@@ -58,10 +52,6 @@ object RequiredSerializer: KSerializer<Required>{
         }
     }
 }
-
-
-
-
 
 @OptIn(InternalSerializationApi::class)
 @Serializer(forClass = Condition::class)
@@ -276,9 +266,13 @@ object ConditionValueSerializer : KSerializer<ConditionValue> {
                 } ?: tree.doubleOrNull?.let {
                     ConditionValue.DoubleValue(it)
                 } ?: tree.content.let {
-                    ConditionValue.StringValue(it)
-                    // TODO:
-//                    ConditionValue.DateTimeValue
+                    try {
+                        val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+                        val date = dateFormat.parse(it)
+                        ConditionValue.DateTimeValue(date)
+                    }catch (e:Exception){
+                        ConditionValue.StringValue(it)
+                    }
                 }
             }
 

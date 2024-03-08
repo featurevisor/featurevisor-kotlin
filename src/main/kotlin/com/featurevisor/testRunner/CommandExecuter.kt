@@ -1,4 +1,4 @@
-package com.featurevisor.cli
+package com.featurevisor.testRunner
 
 import java.io.File
 import java.io.IOException
