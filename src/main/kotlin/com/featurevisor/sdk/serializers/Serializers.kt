@@ -1,15 +1,7 @@
 package com.featurevisor.sdk.serializers
 
 import com.featurevisor.sdk.FeaturevisorInstance
-import com.featurevisor.types.AndGroupSegment
-import com.featurevisor.types.BucketBy
-import com.featurevisor.types.Condition
-import com.featurevisor.types.ConditionValue
-import com.featurevisor.types.GroupSegment
-import com.featurevisor.types.NotGroupSegment
-import com.featurevisor.types.Operator
-import com.featurevisor.types.OrGroupSegment
-import com.featurevisor.types.VariableValue
+import com.featurevisor.types.*
 import com.featurevisor.types.Required
 import kotlinx.serialization.*
 import kotlinx.serialization.descriptors.PolymorphicKind
@@ -45,10 +37,13 @@ object RequiredSerializer: KSerializer<Required>{
                 Required.FeatureKey(tree.content)
             }
             is JsonArray -> {
+                // Never lies in JsonArray block
                 Required.FeatureKey(tree.toString())
             }
-
-            else -> Required.FeatureKey("abc")
+            is JsonObject ->{
+                val requiredWithVariation = RequiredWithVariation(tree["key"]?.jsonPrimitive?.content.orEmpty(),tree["variation"]?.jsonPrimitive?.content.orEmpty())
+                Required.WithVariation(requiredWithVariation)
+            }
         }
     }
 }
