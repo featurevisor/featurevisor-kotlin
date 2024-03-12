@@ -1,5 +1,4 @@
-@file:JvmName("TestExecuter")
-
+//@file:JvmName("TestExecuter")
 package com.featurevisor.testRunner
 
 import com.featurevisor.types.*
@@ -24,7 +23,7 @@ fun main(args: Array<String>) {
     }
 }
 
-internal fun startTest(projectRootPath: String = "", testDirPath: String = "") {
+fun startTest(projectRootPath: String = "", testDirPath: String = "") {
     val rootPath = projectRootPath.ifEmpty {
         getRootProjectDir()
     }
@@ -78,57 +77,65 @@ internal fun getAllFilesInDirectory(projectRootPath: String, testDirPath: String
     }
 }
 
-fun testSingleFeature(featureKey: String, projectRootPath: String) {
-    val test = parseTestFeatureAssertions("$projectRootPath/tests/$featureKey.spec.yml")
+fun testSingleFeature(featureKey: String, projectRootPath: String = "", testDirPath: String = "") {
+    val rootPath = projectRootPath.ifEmpty { getRootProjectDir() }
+    val testDir = testDirPath.ifEmpty { "tests" }
 
-    val executionResult = ExecutionResult(
-        passed = false,
-        assertionsCount = AssertionsCount(0, 0)
-    )
+    val test = parseTestFeatureAssertions("$rootPath/$testDir/$featureKey.feature.yml")
 
-    if (test == null) {
-        println("No File available")
-        return
+    test?.let {
+        val executionResult = ExecutionResult(
+            passed = false,
+            assertionsCount = AssertionsCount(0, 0)
+        )
+
+        val testResult = testFeature(testFeature = (test as Test.Feature).value, projectRootPath)
+
+        printTestResult(testResult)
+
+        if (!testResult.passed) {
+            executionResult.passed = false
+
+            executionResult.assertionsCount.failed = testResult.assertions.count { !it.passed }
+            executionResult.assertionsCount.passed += testResult.assertions.size - executionResult.assertionsCount.failed
+        } else {
+            executionResult.assertionsCount.passed = testResult.assertions.size
+        }
+
+        printMessageInGreenColor("Test Assertion: ${executionResult.assertionsCount.passed} passed, ${executionResult.assertionsCount.failed} failed")
     }
 
-    val testResult = testFeature(testFeature = (test as Test.Feature).value, projectRootPath)
-
-    printTestResult(testResult)
-
-    if (!testResult.passed) {
-        executionResult.passed = false
-
-        executionResult.assertionsCount.failed = testResult.assertions.count { !it.passed }
-        executionResult.assertionsCount.passed += testResult.assertions.size - executionResult.assertionsCount.failed
-    } else {
-        executionResult.assertionsCount.passed = testResult.assertions.size
-    }
-
-    printMessageInGreenColor("Test Assertion: ${executionResult.assertionsCount.passed} passed, ${executionResult.assertionsCount.failed} failed")
 }
 
-fun testSingleSegment(featureKey: String, projectRootPath: String) {
-    val test = parseTestFeatureAssertions("$projectRootPath/tests/$featureKey.segment.yml")
+fun testSingleSegment(segmentKey: String, projectRootPath: String = "", testDirPath: String = "") {
 
-    val executionResult = ExecutionResult(
-        passed = false,
-        assertionsCount = AssertionsCount(0, 0)
-    )
+    val rootPath = projectRootPath.ifEmpty { getRootProjectDir() }
+    val testDir = testDirPath.ifEmpty { "tests" }
 
-    val testResult = testSegment(test = (test as Test.Segment).value, projectRootPath)
+    val test = parseTestFeatureAssertions("$rootPath/$testDir/$segmentKey.segment.yml")
 
-    printTestResult(testResult)
+    test?.let {
+        val executionResult = ExecutionResult(
+            passed = false,
+            assertionsCount = AssertionsCount(0, 0)
+        )
 
-    if (!testResult.passed) {
-        executionResult.passed = false
+        val testResult = testSegment(test = (test as Test.Segment).value, projectRootPath)
 
-        executionResult.assertionsCount.failed = testResult.assertions.count { !it.passed }
-        executionResult.assertionsCount.passed += testResult.assertions.size - executionResult.assertionsCount.failed
-    } else {
-        executionResult.assertionsCount.passed = testResult.assertions.size
+        printTestResult(testResult)
+
+        if (!testResult.passed) {
+            executionResult.passed = false
+
+            executionResult.assertionsCount.failed = testResult.assertions.count { !it.passed }
+            executionResult.assertionsCount.passed += testResult.assertions.size - executionResult.assertionsCount.failed
+        } else {
+            executionResult.assertionsCount.passed = testResult.assertions.size
+        }
+
+        printMessageInGreenColor("Test Assertion: ${executionResult.assertionsCount.passed} passed, ${executionResult.assertionsCount.failed} failed")
+
     }
-
-    printMessageInGreenColor("Test Assertion: ${executionResult.assertionsCount.passed} passed, ${executionResult.assertionsCount.failed} failed")
 }
 
 private fun testAssertion(filePath: String, projectRootPath: String): ExecutionResult {
