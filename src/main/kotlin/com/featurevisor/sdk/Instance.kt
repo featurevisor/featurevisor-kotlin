@@ -3,16 +3,9 @@
  */
 package com.featurevisor.sdk
 
-import com.featurevisor.sdk.FeaturevisorError.FetchingDataFileFailed
 import com.featurevisor.sdk.FeaturevisorError.MissingDatafileOptions
-import com.featurevisor.types.BucketKey
-import com.featurevisor.types.BucketValue
-import com.featurevisor.types.Context
-import com.featurevisor.types.DatafileContent
-import com.featurevisor.types.EventName
+import com.featurevisor.types.*
 import com.featurevisor.types.EventName.*
-import com.featurevisor.types.Feature
-import com.featurevisor.types.StickyFeatures
 import kotlinx.coroutines.Job
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
@@ -114,6 +107,10 @@ class FeaturevisorInstance private constructor(options: InstanceOptions) {
                 else -> throw MissingDatafileOptions
             }
         }
+    }
+
+    fun setLogLevels(levels: List<Logger.LogLevel>) {
+        this.logger?.setLevels(levels)
     }
 
     fun setDatafile(datafileJSON: String) {

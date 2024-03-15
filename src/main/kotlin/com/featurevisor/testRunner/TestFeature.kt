@@ -1,5 +1,6 @@
 package com.featurevisor.testRunner
 
+import com.featurevisor.sdk.Logger
 import com.featurevisor.sdk.getVariable
 import com.featurevisor.sdk.getVariation
 import com.featurevisor.sdk.isEnabled
@@ -8,7 +9,8 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 
-fun testFeature(testFeature: TestFeature, projectRootPath: String): TestResult {
+fun testFeature(testFeature: TestFeature, dataFile: DataFile, option: TestProjectOption): TestResult {
+    val testStartTime = System.currentTimeMillis()
     val featureKey = testFeature.key
 
     val testResult = TestResult(
@@ -24,6 +26,7 @@ fun testFeature(testFeature: TestFeature, projectRootPath: String): TestResult {
         val assertions = getFeatureAssertionsFromMatrix(index, assertion)
 
         assertions.forEach {
+            val assertionStartTime = System.currentTimeMillis()
 
             val testResultAssertion = TestResultAssertion(
                 description = it.description.orEmpty(),
@@ -33,16 +36,40 @@ fun testFeature(testFeature: TestFeature, projectRootPath: String): TestResult {
                 errors = mutableListOf()
             )
 
+            if (option.assertionPattern.isNotEmpty() && !it.description.orEmpty().contains(option.assertionPattern)) {
+                return@forEach
+            }
 
-            val datafileContent = getDataFileContent(
-                featureName = testFeature.key,
-                environment = it.environment,
-                projectRootPath = projectRootPath
-            )
+            val datafileContent = if (option.fast) {
+                if (it.environment.equals("staging", true)) dataFile.stagingDataFiles else dataFile.productionDataFiles
+            } else {
+                getDataFileContent(
+                    featureName = testFeature.key,
+                    environment = it.environment,
+                    projectRootPath = option.projectRootPath
+                )
+            }
+
+            if (option.showDatafile) {
+                printNormalMessage("")
+                printNormalMessage(datafileContent.toString())
+                printNormalMessage("")
+            }
 
             if (datafileContent != null) {
 
-                val featurevisorInstance = getSdkInstance(datafileContent, it)
+                val sdk = getSdkInstance(datafileContent, it)
+
+                if (option.verbose) {
+                    sdk.setLogLevels(
+                        listOf(
+                            Logger.LogLevel.DEBUG,
+                            Logger.LogLevel.INFO,
+                            Logger.LogLevel.WARN,
+                            Logger.LogLevel.ERROR
+                        )
+                    )
+                }
 
                 if (testFeature.key.isEmpty()) {
                     testResult.notFound = true
@@ -53,7 +80,7 @@ fun testFeature(testFeature: TestFeature, projectRootPath: String): TestResult {
 
                 // isEnabled
                 if (it.expectedToBeEnabled != null) {
-                    val isEnabled = featurevisorInstance.isEnabled(testFeature.key, it.context)
+                    val isEnabled = sdk.isEnabled(testFeature.key, it.context)
 
                     if (isEnabled != it.expectedToBeEnabled) {
                         testResult.passed = false
@@ -71,7 +98,7 @@ fun testFeature(testFeature: TestFeature, projectRootPath: String): TestResult {
 
                 //Variation
                 if (!it.expectedVariation.isNullOrEmpty()) {
-                    val variation = featurevisorInstance.getVariation(testFeature.key, it.context)
+                    val variation = sdk.getVariation(testFeature.key, it.context)
 
                     if (variation != it.expectedVariation) {
                         testResult.passed = false
@@ -89,9 +116,8 @@ fun testFeature(testFeature: TestFeature, projectRootPath: String): TestResult {
 
                 //Variables
                 if (assertion.expectedVariables is Map<*, *>) {
-
                     assertion.expectedVariables.forEach { (variableKey, expectedValue) ->
-                        val actualValue = featurevisorInstance.getVariable(featureKey, variableKey, it.context)
+                        val actualValue = sdk.getVariable(featureKey, variableKey, it.context)
                         val passed: Boolean
 
                         val variableSchema = datafileContent.features.find { feature ->
@@ -104,7 +130,6 @@ fun testFeature(testFeature: TestFeature, projectRootPath: String): TestResult {
                             testResult.passed = false
                             testResultAssertion.passed = false
 
-
                             (testResultAssertion.errors as MutableList<TestResultAssertionError>).add(
                                 TestResultAssertionError(
                                     type = "variable",
@@ -115,7 +140,6 @@ fun testFeature(testFeature: TestFeature, projectRootPath: String): TestResult {
                             )
                             return@forEach
                         }
-
 
                         if (variableSchema.type == VariableType.JSON) {
                             // JSON type
@@ -211,8 +235,10 @@ fun testFeature(testFeature: TestFeature, projectRootPath: String): TestResult {
                     )
                 )
             }
+            testResultAssertion.duration = System.currentTimeMillis() - assertionStartTime
             (testResult.assertions as MutableList<TestResultAssertion>).add(testResultAssertion)
         }
     }
+    testResult.duration = System.currentTimeMillis() - testStartTime
     return testResult
 }

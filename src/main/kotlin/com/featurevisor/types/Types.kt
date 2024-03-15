@@ -1,8 +1,9 @@
 package com.featurevisor.types
 
 import com.featurevisor.sdk.serializers.*
-import kotlinx.serialization.*
-import java.util.Date
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import java.util.*
 
 typealias Context = Map<AttributeKey, AttributeValue>
 typealias VariationValue = String
@@ -394,17 +395,6 @@ sealed class WeightType{
     data class StringType(val value: String):WeightType()
 }
 
-data class Assertion(
-    val description: String? = null,
-    val environment: String? = null,
-    val at: Double? = null,
-    val context: Context,
-    val expectedToBeEnabled: Boolean? = null,
-    val expectedVariables: Map<String, Any?>? = null,
-    val expectedToMatch: Boolean? = null,
-    val expectedVariation: String? = null,
-)
-
 data class TestResultAssertionError(
     val type: String,
     val expected: Any?=null,
@@ -416,7 +406,7 @@ data class TestResultAssertionError(
 data class TestResultAssertion(
     val description: String,
     val environment: EnvironmentKey? = null,
-    val duration: Long,
+    var duration: Long,
     var passed: Boolean,
     val errors: List<TestResultAssertionError>?
 )
@@ -426,7 +416,7 @@ data class TestResult(
     val key: FeatureKey,
     var notFound: Boolean?=null,
     var passed: Boolean,
-    val duration: Long,
+    var duration: Long,
     val assertions: List<TestResultAssertion>
 )
 
@@ -438,4 +428,9 @@ data class ExecutionResult(
 data class AssertionsCount(
     var passed: Int=0,
     var failed: Int=0
+)
+
+data class DataFile(
+    val stagingDataFiles: DatafileContent? = null,
+    val productionDataFiles: DatafileContent? = null
 )

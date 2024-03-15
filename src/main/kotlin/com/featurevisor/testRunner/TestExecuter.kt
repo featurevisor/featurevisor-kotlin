@@ -1,144 +1,89 @@
-//@file:JvmName("TestExecuter")
 package com.featurevisor.testRunner
 
 import com.featurevisor.types.*
 import java.io.File
 
-fun main(args: Array<String>) {
-    when (args.size) {
-        0 -> {
-            startTest()
-        }
+data class TestProjectOption(
+    val keyPattern: String = "",
+    val assertionPattern: String = "",
+    val verbose: Boolean = false,
+    val showDatafile: Boolean = false,
+    val onlyFailures: Boolean = false,
+    val fast: Boolean = false,
+    val testDirPath: String = "tests",
+    val projectRootPath: String = getRootProjectDir()
+)
 
-        1 -> {
-            val rootPathInParam = args[0]
-            startTest(rootPathInParam)
-        }
-
-        else -> {
-            val rootPathInParam = args[0]
-            val testDirInParam = args[1]
-            startTest(rootPathInParam, testDirInParam)
-        }
-    }
-}
-
-fun startTest(projectRootPath: String = "", testDirPath: String = "") {
-    val rootPath = projectRootPath.ifEmpty {
-        getRootProjectDir()
-    }
-    val testDir = testDirPath.ifEmpty {
-        "tests"
-    }
-    getAllFilesInDirectory(rootPath, testDir)
-}
-
-internal fun getAllFilesInDirectory(projectRootPath: String, testDirPath: String) {
-    val folder = File("$projectRootPath/$testDirPath")
+fun startTest(option: TestProjectOption) {
+    var hasError = false
+    val folder = File("${option.projectRootPath}/${option.testDirPath}")
     val listOfFiles = folder.listFiles()
     var executionResult: ExecutionResult? = null
-
+    val startTime = System.currentTimeMillis()
     var passedTestsCount = 0
     var failedTestsCount = 0
-
     var passedAssertionsCount = 0
     var failedAssertionsCount = 0
 
     if (!listOfFiles.isNullOrEmpty()) {
+        val datafile =
+            if (option.fast) buildDataFileForBothEnvironments(projectRootPath = option.projectRootPath) else DataFile(
+                null,
+                null
+            )
+        if (option.fast && (datafile.stagingDataFiles == null || datafile.productionDataFiles == null)) {
+            return
+        }
         for (file in listOfFiles) {
             if (file.isFile) {
                 if (file.extension.equals("yml", true)) {
                     val filePath = file.absoluteFile.path
                     try {
-                        executionResult = testAssertion(filePath, projectRootPath)
+                        executionResult = executeTest(filePath, dataFile = datafile, option)
                     } catch (e: Exception) {
                         printMessageInRedColor("Exception in $filePath --> ${e.message}")
                     }
 
+                    if (executionResult == null) {
+                        return
+                    }
 
-                    if (executionResult?.passed == true) {
+                    if (executionResult.passed) {
                         passedTestsCount++
                     } else {
+                        hasError = true
                         failedTestsCount++
                     }
 
-                    passedAssertionsCount += executionResult?.assertionsCount?.passed ?: 0
-                    failedAssertionsCount += executionResult?.assertionsCount?.failed ?: 0
-
+                    passedAssertionsCount += executionResult.assertionsCount.passed
+                    failedAssertionsCount += executionResult.assertionsCount.failed
                 } else {
                     printMessageInRedColor("The file is not valid yml file")
                 }
             }
         }
-        printMessageInGreenColor("Test specs: $passedTestsCount passed, $failedTestsCount failed")
-        printMessageInGreenColor("Test Assertion: $passedAssertionsCount passed, $failedAssertionsCount failed")
+
+        val endTime = System.currentTimeMillis() - startTime
+
+        if (!option.onlyFailures || hasError) {
+            printNormalMessage("\n----")
+        }
+        printNormalMessage("")
+
+        if (hasError) {
+            printMessageInRedColor("\n\nTest specs: $passedTestsCount passed, $failedTestsCount failed")
+            printMessageInRedColor("Test Assertion: $passedAssertionsCount passed, $failedAssertionsCount failed")
+        } else {
+            printMessageInGreenColor("\n\nTest specs: $passedTestsCount passed, $failedTestsCount failed")
+            printMessageInGreenColor("Test Assertion: $passedAssertionsCount passed, $failedAssertionsCount failed")
+        }
+        printBoldMessage("Time:       ${prettyDuration(endTime)}")
     } else {
         printMessageInRedColor("Directory is Empty or not exists")
     }
 }
 
-fun testSingleFeature(featureKey: String, projectRootPath: String = "", testDirPath: String = "") {
-    val rootPath = projectRootPath.ifEmpty { getRootProjectDir() }
-    val testDir = testDirPath.ifEmpty { "tests" }
-
-    val test = parseTestFeatureAssertions("$rootPath/$testDir/$featureKey.feature.yml")
-
-    test?.let {
-        val executionResult = ExecutionResult(
-            passed = false,
-            assertionsCount = AssertionsCount(0, 0)
-        )
-
-        val testResult = testFeature(testFeature = (test as Test.Feature).value, projectRootPath)
-
-        printTestResult(testResult)
-
-        if (!testResult.passed) {
-            executionResult.passed = false
-
-            executionResult.assertionsCount.failed = testResult.assertions.count { !it.passed }
-            executionResult.assertionsCount.passed += testResult.assertions.size - executionResult.assertionsCount.failed
-        } else {
-            executionResult.assertionsCount.passed = testResult.assertions.size
-        }
-
-        printMessageInGreenColor("Test Assertion: ${executionResult.assertionsCount.passed} passed, ${executionResult.assertionsCount.failed} failed")
-    }
-
-}
-
-fun testSingleSegment(segmentKey: String, projectRootPath: String = "", testDirPath: String = "") {
-
-    val rootPath = projectRootPath.ifEmpty { getRootProjectDir() }
-    val testDir = testDirPath.ifEmpty { "tests" }
-
-    val test = parseTestFeatureAssertions("$rootPath/$testDir/$segmentKey.segment.yml")
-
-    test?.let {
-        val executionResult = ExecutionResult(
-            passed = false,
-            assertionsCount = AssertionsCount(0, 0)
-        )
-
-        val testResult = testSegment(test = (test as Test.Segment).value, projectRootPath)
-
-        printTestResult(testResult)
-
-        if (!testResult.passed) {
-            executionResult.passed = false
-
-            executionResult.assertionsCount.failed = testResult.assertions.count { !it.passed }
-            executionResult.assertionsCount.passed += testResult.assertions.size - executionResult.assertionsCount.failed
-        } else {
-            executionResult.assertionsCount.passed = testResult.assertions.size
-        }
-
-        printMessageInGreenColor("Test Assertion: ${executionResult.assertionsCount.passed} passed, ${executionResult.assertionsCount.failed} failed")
-
-    }
-}
-
-private fun testAssertion(filePath: String, projectRootPath: String): ExecutionResult {
+private fun executeTest(filePath: String, dataFile: DataFile, option: TestProjectOption): ExecutionResult {
     val test = parseTestFeatureAssertions(filePath)
 
     val executionResult = ExecutionResult(
@@ -147,17 +92,32 @@ private fun testAssertion(filePath: String, projectRootPath: String): ExecutionR
     )
 
     test?.let {
+        val key = when (test) {
+            is Test.Feature -> test.value.key
+            is Test.Segment -> test.value.key
+        }
+
+        if (option.keyPattern.isNotEmpty() && !key.contains(option.keyPattern)) {
+            return@let
+        }
+
         val testResult: TestResult = when (test) {
             is Test.Feature -> {
-                testFeature(test.value, projectRootPath)
+                testFeature(test.value, dataFile = dataFile, option)
             }
 
             is Test.Segment -> {
-                testSegment(test.value, projectRootPath)
+                testSegment(test.value, option.projectRootPath)
             }
         }
 
-        printTestResult(testResult)
+        if (!option.onlyFailures) {
+            printTestResult(testResult)
+        } else {
+            if (!testResult.passed) {
+                printTestResult(testResult)
+            }
+        }
 
         if (!testResult.passed) {
             executionResult.passed = false
