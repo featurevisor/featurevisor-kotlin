@@ -6,14 +6,25 @@ import java.util.concurrent.TimeUnit
 
 internal fun getJsonForFeatureUsingCommand(featureName: String, environment: String, projectRootPath: String) =
     try {
-        createCommand(featureName, environment).runCommand(getFileForSpecificPath(projectRootPath))
+        createCommandForSpecificFeature(featureName, environment).runCommand(getFileForSpecificPath(projectRootPath))
     } catch (e: Exception) {
         printMessageInRedColor("Exception in Commandline execution --> ${e.message}")
         null
     }
 
-private fun createCommand(featureName: String, environment: String) =
+fun getJsonForDataFile(environment: String, projectRootPath: String) =
+    try {
+        createCommandAccordingToEnvironment(environment).runCommand(getFileForSpecificPath(projectRootPath))
+    } catch (e: Exception) {
+        printMessageInRedColor("Exception in Commandline execution --> ${e.message}")
+        null
+    }
+
+private fun createCommandForSpecificFeature(featureName: String, environment: String) =
     "npx featurevisor build --feature=$featureName --environment=$environment --print --pretty"
+
+private fun createCommandAccordingToEnvironment(environment: String) =
+    "npx featurevisor build --environment=$environment --print --pretty"
 
 private fun String.runCommand(workingDir: File): String? =
     try {

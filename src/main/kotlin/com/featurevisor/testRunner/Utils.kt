@@ -8,6 +8,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import java.io.File
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 
 internal const val tick = "\u2713"
@@ -38,6 +39,8 @@ internal fun printAssertionFailedMessage(message: String) =
 
 internal fun printNormalMessage(message: String) = println(message)
 
+internal fun printBoldMessage(message: String) = println("\u001b[1m$message\u001b[0m")
+
 internal fun getSdkInstance(datafileContent: DatafileContent?, assertion: FeatureAssertion) =
     FeaturevisorInstance.createInstance(
         InstanceOptions(
@@ -57,7 +60,7 @@ internal fun getFileForSpecificPath(path: String) = File(path)
 internal inline fun <reified R : Any> String.convertToDataClass() = json.decodeFromString<R>(this)
 
 internal fun getRootProjectDir(): String {
-    var currentDir = File("").absoluteFile
+    var currentDir = File("../").absoluteFile
     while (currentDir.parentFile != null) {
         if (File(currentDir, "build.gradle.kts").exists()) {
             return currentDir.absolutePath
@@ -67,11 +70,20 @@ internal fun getRootProjectDir(): String {
     throw IllegalStateException("Root project directory not found.")
 }
 
+fun prettyDuration(timestamp: Long): String {
+    val millis = timestamp % 1000
+    val seconds = TimeUnit.MILLISECONDS.toSeconds(timestamp)
+    return if (seconds == 0L) {
+        "$millis ms"
+    } else {
+        "$seconds s $millis ms"
+    }
+}
 
-fun printTestResult(testResult: TestResult) {
+internal fun printTestResult(testResult: TestResult) {
     println("")
 
-    printNormalMessage("Testing: ${testResult.key}")
+    printNormalMessage("Testing: ${testResult.key} ( ${prettyDuration(testResult.duration)})")
 
     if (testResult.notFound == true) {
         println(ANSI_RED + "  => ${testResult.type} ${testResult.key} not found" + ANSI_RED)
@@ -80,11 +92,11 @@ fun printTestResult(testResult: TestResult) {
 
     printNormalMessage("  ${testResult.type} \"${testResult.key}\":")
 
-    testResult.assertions.forEachIndexed { index, assertion ->
+    testResult.assertions.forEachIndexed { _, assertion ->
         if (assertion.passed) {
-            printAssertionSuccessfulMessage(assertion.description)
+            printAssertionSuccessfulMessage("${assertion.description} ( ${prettyDuration(assertion.duration)} )")
         } else {
-            printAssertionFailedMessage(assertion.description)
+            printAssertionFailedMessage("${assertion.description} ( ${prettyDuration(assertion.duration)} )")
 
             assertion.errors?.forEach { error ->
                 when {
@@ -190,6 +202,32 @@ fun checkJsonIsEquals(a: String, b: String): Boolean {
     val map1 = Json.decodeFromString<Map<String, JsonElement>>(a)
     val map2 = Json.decodeFromString<Map<String, JsonElement>>(b)
     return map1 == map2
+}
+
+fun buildDataFileForBothEnvironments(projectRootPath: String): DataFile {
+    val dataFileForStaging = try {
+        getJsonForDataFile(environment = "staging", projectRootPath = projectRootPath)?.run {
+            convertToDataClass<DatafileContent>()
+        }
+    } catch (e: Exception) {
+        printMessageInRedColor("Unable to parse staging data file")
+        null
+    }
+
+    val dataFileForProduction = try {
+        getJsonForDataFile(environment = "production", projectRootPath = projectRootPath)?.run {
+            convertToDataClass<DatafileContent>()
+        }
+
+    } catch (e: Exception) {
+        printMessageInRedColor("Unable to parse production data file")
+        null
+    }
+
+    return DataFile(
+        stagingDataFiles = dataFileForStaging,
+        productionDataFiles = dataFileForProduction
+    )
 }
 
 
