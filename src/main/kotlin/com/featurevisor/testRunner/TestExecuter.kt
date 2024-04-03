@@ -132,19 +132,6 @@ private fun executeTest(filePath: String, dataFile: DataFile, option: TestProjec
     return executionResult
 }
 
-fun getDataFileContent(featureName: String, environment: String, projectRootPath: String) =
-    try {
-        getJsonForFeatureUsingCommand(
-            featureName = featureName,
-            environment = environment,
-            projectRootPath = projectRootPath
-        )?.run {
-            convertToDataClass<DatafileContent>()
-        }
-    } catch (e: Exception) {
-        printMessageInRedColor("Exception while parsing data file --> ${e.message}")
-        null
-    }
 
 
 
