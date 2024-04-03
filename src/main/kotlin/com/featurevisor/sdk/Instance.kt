@@ -91,7 +91,7 @@ class FeaturevisorInstance private constructor(options: InstanceOptions) {
                 }
 
                 datafileUrl != null -> {
-                    fetchDatafileContent(datafileUrl) { result ->
+                    fetchDatafileContent(datafileUrl, handleDatafileFetch) { result ->
                         if (result.isSuccess) {
                             datafileReader = DatafileReader(result.getOrThrow())
                             statuses.ready = true

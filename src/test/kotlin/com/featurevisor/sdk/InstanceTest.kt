@@ -5,39 +5,67 @@ package com.featurevisor.sdk
 
 import com.featurevisor.types.DatafileContent
 import io.kotest.matchers.shouldBe
+import io.mockk.coEvery
+import io.mockk.spyk
+import io.mockk.verify
 import org.junit.jupiter.api.Test
 
 class InstanceTest {
-
+    private val datafileUrl = "https://www.testmock.com"
+    private val fetchHandler = object : (String) -> Result<DatafileContent> {
+        override fun invoke(param: String): Result<DatafileContent> = Result.failure(Throwable())
+    }
+    private val mockDatafileFetchHandler: DatafileFetchHandler = spyk(fetchHandler)
+    private val datafileContent = DatafileContent(
+        schemaVersion = "0",
+        revision = "0",
+        attributes = listOf(),
+        segments = listOf(),
+        features = listOf()
+    )
+    private var instanceOptions = InstanceOptions(
+        bucketKeySeparator = "",
+        configureBucketKey = null,
+        configureBucketValue = null,
+        datafile = datafileContent,
+        datafileUrl = null,
+        handleDatafileFetch = null,
+        initialFeatures = mapOf(),
+        interceptContext = null,
+        logger = null,
+        onActivation = {},
+        onReady = {},
+        onRefresh = {},
+        onUpdate = {},
+        refreshInterval = null,
+        stickyFeatures = mapOf(),
+        onError = {},
+    )
     private val systemUnderTest = FeaturevisorInstance.createInstance(
-        options = InstanceOptions(
-            bucketKeySeparator = "",
-            configureBucketKey = null,
-            configureBucketValue = null,
-            datafile = DatafileContent(
-                schemaVersion = "0",
-                revision = "0",
-                attributes = listOf(),
-                segments = listOf(),
-                features = listOf()
-            ),
-            datafileUrl = null,
-            handleDatafileFetch = null,
-            initialFeatures = mapOf(),
-            interceptContext = null,
-            logger = null,
-            onActivation = {},
-            onReady = {},
-            onRefresh = {},
-            onUpdate = {},
-            refreshInterval = null,
-            stickyFeatures = mapOf(),
-            onError = {},
-        )
+        options = instanceOptions
     )
 
     @Test
     fun `instance initialised properly`() {
+        systemUnderTest.statuses.ready shouldBe true
+    }
+
+    @Test
+    fun `instance fetches data using handleDatafileFetch`() {
+        coEvery { mockDatafileFetchHandler(datafileUrl) } returns Result.success(datafileContent)
+        instanceOptions = instanceOptions.copy(
+            datafileUrl = datafileUrl,
+            datafile = null,
+            handleDatafileFetch = mockDatafileFetchHandler,
+        )
+
+        FeaturevisorInstance.createInstance(
+            options = instanceOptions
+        )
+
+        verify(exactly = 1) {
+            mockDatafileFetchHandler(datafileUrl)
+        }
         systemUnderTest.statuses.ready shouldBe true
     }
 }
