@@ -6,8 +6,8 @@ fun generateCombinations(
     keys: List<String>,
     matrix: AssertionMatrix,
     idx: Int,
-    prev: MutableMap<String, Any>,
-    combinations: MutableList<MutableMap<String, Any>>
+    prev: MutableMap<String, AttributeValue>,
+    combinations: MutableList<MutableMap<String, AttributeValue>>
 ) {
     val key = keys[idx]
     val values = matrix[key] ?: emptyList()
@@ -23,19 +23,19 @@ fun generateCombinations(
     }
 }
 
-fun getMatrixCombinations(matrix: AssertionMatrix): List<MutableMap<String, Any>> {
+fun getMatrixCombinations(matrix: AssertionMatrix): List<MutableMap<String, AttributeValue>> {
     val keys = matrix.keys.toList()
 
     if (keys.isEmpty()) {
         return emptyList()
     }
 
-    val combinations = mutableListOf<MutableMap<String, Any>>()
+    val combinations = mutableListOf<MutableMap<String, AttributeValue>>()
     generateCombinations(keys, matrix, 0, mutableMapOf(), combinations)
     return combinations
 }
 
-fun applyCombinationToValue(value: Any?, combination: Map<String, Any>): Any? {
+fun applyCombinationToValue(value: Any?, combination: Map<String, AttributeValue>): Any? {
     if (value is String) {
         val variableKeysInValue = Regex("""\$\{\{\s*([^\s}]+)\s*}}""").findAll(value)
 
@@ -46,14 +46,14 @@ fun applyCombinationToValue(value: Any?, combination: Map<String, Any>): Any? {
         return variableKeysInValue.fold(value) { acc, result ->
             val key = result.groupValues[1].trim()
             val regex = Regex("""\$\{\{\s*([^\s}]+)\s*}}""")
-            acc.replace(regex, combination[key].toString())
+            acc.replace(regex, getContextValues(combination[key]).toString())
         }
     }
     return value
 }
 
 fun applyCombinationToFeatureAssertion(
-    combination: Map<String, Any>,
+    combination: Map<String, AttributeValue>,
     assertion: FeatureAssertion
 ): FeatureAssertion {
     val flattenedAssertion = assertion.copy()
@@ -92,7 +92,7 @@ fun getFeatureAssertionsFromMatrix(
 ): List<FeatureAssertion> {
     if (assertionWithMatrix.matrix == null) {
         val assertion = assertionWithMatrix.copy()
-        assertion.description = "Assertion #${aIndex + 1}: (${assertion.environment}) ${
+        assertion.description = "Assertion #${ nextCount()}: (${assertion.environment}) ${
             assertion.description ?: "at ${getAtValue(assertion.at)}%"
         }"
         return listOf(assertion)
@@ -103,7 +103,7 @@ fun getFeatureAssertionsFromMatrix(
 
     for (combination in combinations) {
         val assertion = applyCombinationToFeatureAssertion(combination, assertionWithMatrix)
-        assertion.description = "Assertion #${aIndex + 1}: (${assertion.environment}) ${
+        assertion.description = "Assertion #${ nextCount()}: (${assertion.environment}) ${
             assertion.description ?: "at ${getAtValue(assertion.at)}%"
         }"
         assertions.add(assertion)
@@ -128,7 +128,7 @@ fun getAtValue(at: WeightType) = when (at) {
 }
 
 fun applyCombinationToSegmentAssertion(
-    combination: Map<String, Any>,
+    combination: Map<String, AttributeValue>,
     assertion: SegmentAssertion
 ): SegmentAssertion {
     val flattenedAssertion = assertion.copy()
@@ -151,7 +151,8 @@ fun getSegmentAssertionsFromMatrix(
 ): List<SegmentAssertion> {
     if (assertionWithMatrix.matrix == null) {
         val assertion = assertionWithMatrix.copy()
-        assertion.description = "Assertion #${aIndex + 1}: ${assertion.description ?: "#${aIndex + 1}"}"
+        val assertionCount = nextCount()
+        assertion.description = "Assertion #${assertionCount}: ${assertion.description ?: "#${assertionCount}"}"
         return listOf(assertion)
     }
 
@@ -159,8 +160,9 @@ fun getSegmentAssertionsFromMatrix(
     val combinations = getMatrixCombinations(assertionWithMatrix.matrix)
 
     for (combination in combinations) {
+        val assertionCount = nextCount()
         val assertion = applyCombinationToSegmentAssertion(combination, assertionWithMatrix)
-        assertion.description = "Assertion #${aIndex + 1}: ${assertion.description ?: "#${aIndex + 1}"}"
+        assertion.description = "Assertion #${assertionCount}: ${assertion.description ?: "#${assertionCount}"}"
         assertions.add(assertion)
     }
 

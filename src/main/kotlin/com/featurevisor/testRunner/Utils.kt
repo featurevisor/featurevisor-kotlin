@@ -25,6 +25,17 @@ internal val json = Json {
     isLenient = true
 }
 
+private var count = 0
+
+internal fun nextCount(): Int {
+    count++
+    return count
+}
+
+internal fun setCount(counter:Int){
+    count = counter
+}
+
 internal fun printMessageInGreenColor(message: String) =
     println("$ANSI_GREEN$message$ANSI_RESET")
 
@@ -134,13 +145,14 @@ fun getContextValue(contextValue: Any?) =
         else -> throw Exception("Unsupported context value")
     }
 
-fun getContextValues(contextValue: AttributeValue) =
+fun getContextValues(contextValue: AttributeValue?) =
     when (contextValue) {
         is AttributeValue.IntValue -> contextValue.value
         is AttributeValue.DoubleValue -> contextValue.value
         is AttributeValue.StringValue -> contextValue.value
         is AttributeValue.BooleanValue -> contextValue.value
         is AttributeValue.DateValue -> contextValue.value
+        null -> null
     }
 
 fun checkIfArraysAreEqual(a: Array<Any>, b: Array<Any>): Boolean {

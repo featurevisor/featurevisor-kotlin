@@ -85,6 +85,7 @@ fun startTest(option: TestProjectOption) {
 
 private fun executeTest(filePath: String, dataFile: DataFile, option: TestProjectOption): ExecutionResult {
     val test = parseTestFeatureAssertions(filePath)
+    setCount(0)
 
     val executionResult = ExecutionResult(
         passed = true,
