@@ -21,7 +21,6 @@ var emptyDatafile = DatafileContent(
     attributes = emptyList(),
     segments = emptyList(),
     features = emptyList(),
-
 )
 
 class FeaturevisorInstance private constructor(options: InstanceOptions) {
