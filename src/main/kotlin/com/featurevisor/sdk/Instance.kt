@@ -9,6 +9,7 @@ import com.featurevisor.types.EventName.*
 import kotlinx.coroutines.Job
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
+import okhttp3.ResponseBody
 
 typealias ConfigureBucketKey = (Feature, Context, BucketKey) -> BucketKey
 typealias ConfigureBucketValue = (Feature, Context, BucketValue) -> BucketValue
@@ -56,6 +57,7 @@ class FeaturevisorInstance private constructor(options: InstanceOptions) {
     internal var configureBucketKey = options.configureBucketKey
     internal var configureBucketValue = options.configureBucketValue
     internal var refreshJob: Job? = null
+    internal var rawResponseReady: (ResponseBody) -> Unit = options.rawResponseReady
 
     init {
         with(options) {
@@ -100,7 +102,7 @@ class FeaturevisorInstance private constructor(options: InstanceOptions) {
 
                 datafileUrl != null -> {
                     datafileReader = DatafileReader(options.datafile?: emptyDatafile)
-                    fetchDatafileContent(datafileUrl, handleDatafileFetch) { result ->
+                    fetchDatafileContent(datafileUrl, handleDatafileFetch, rawResponseReady) { result ->
                         if (result.isSuccess) {
                             datafileReader = DatafileReader(result.getOrThrow())
                             statuses.ready = true

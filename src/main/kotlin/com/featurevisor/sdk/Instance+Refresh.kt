@@ -42,6 +42,7 @@ private fun FeaturevisorInstance.refresh() {
             fetchDatafileContent(
                 datafileUrl,
                 handleDatafileFetch,
+                rawResponseReady,
             ) { result ->
 
                 if (result.isSuccess) {
