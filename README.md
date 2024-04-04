@@ -6,7 +6,31 @@ We are not ready yet. Please come back later.
 
 ## Installation
 
-...
+If you are using groovy, build.gradle
+
+```
+repositories {
+    mavenCentral()
+    maven { url 'https://jitpack.io' }
+}
+
+dependencies {
+    implementation 'com.github.featurevisor:featurevisor-kotlin:LATEST_VERSION'
+}
+```
+
+If you are using Kotlin DSL, build.gradle.kts -   
+
+```
+repositories {
+    mavenCentral()
+    maven("https://jitpack.io")
+}
+
+dependencies {
+    implementation("com.github.featurevisor:featurevisor-kotlin:LATEST_VERSION")
+}
+```
 
 ## Usage
 
