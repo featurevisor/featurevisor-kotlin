@@ -25,17 +25,6 @@ internal val json = Json {
     isLenient = true
 }
 
-private var count = 0
-
-internal fun nextCount(): Int {
-    count++
-    return count
-}
-
-internal fun setCount(counter:Int){
-    count = counter
-}
-
 internal fun printMessageInGreenColor(message: String) =
     println("$ANSI_GREEN$message$ANSI_RESET")
 
