@@ -31,6 +31,7 @@ fun FeaturevisorInstance.getVariable(
 
         evaluation.variableValue
     } catch (e: Exception) {
+        FeaturevisorInstance.companionLogger?.error("Exception in getVariable() -> $e")
         null
     }
 }
@@ -85,6 +86,7 @@ inline fun <reified T : Any> FeaturevisorInstance.getVariableObject(
         val encoded = Json.encodeToJsonElement(objectValue?.value)
         return Json.decodeFromJsonElement<T>(encoded)
     } catch (e: Exception) {
+        FeaturevisorInstance.companionLogger?.error("Exception in getVariableObject() -> $e")
         null
     }
 }
@@ -98,15 +100,10 @@ inline fun <reified T : Any> FeaturevisorInstance.getVariableJSON(
     return try {
         Json.decodeFromString<T>(json!!.value)
     } catch (e: Exception) {
+        FeaturevisorInstance.companionLogger?.error("Exception in getVariableJSON() -> $e")
         null
     }
 }
-
-@Serializable
-data class CountriesWithStringValueAndSeparateDefault(
-    val country: Map<String, String>?,
-    val default: String?,
-)
 
 
 

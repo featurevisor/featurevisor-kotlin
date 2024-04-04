@@ -11,6 +11,7 @@ fun FeaturevisorInstance.getFeatureByKey(featureKey: String): Feature? {
     return try {
         datafileReader.getFeature(featureKey)
     }catch (e:Exception){
+        FeaturevisorInstance.companionLogger?.error("Exception in getFeatureByKey() -> $e")
         null
     }
 }
@@ -19,6 +20,7 @@ fun FeaturevisorInstance.getFeature(featureKey: String): Feature?{
     return try {
         datafileReader.getFeature(featureKey)
     }catch (e:Exception){
+        FeaturevisorInstance.companionLogger?.error("Exception in getFeature() -> $e")
         null
     }
 }
@@ -42,6 +44,7 @@ internal fun FeaturevisorInstance.findForceFromFeature(
             }
         }
     }catch (e:Exception){
+        FeaturevisorInstance.companionLogger?.error("Exception in findForceFromFeature() -> $e")
         null
     }
 }
@@ -56,6 +59,7 @@ internal fun FeaturevisorInstance.getMatchedTraffic(
             allGroupSegmentsAreMatched(trafficItem.segments, context, datafileReader)
         }
     }catch (e:Exception){
+        FeaturevisorInstance.companionLogger?.error("Exception in getMatchedTraffic() -> $e")
         null
     }
 }
@@ -71,6 +75,7 @@ internal fun FeaturevisorInstance.getMatchedAllocation(
             }
         }
     }catch (e:Exception){
+        FeaturevisorInstance.companionLogger?.error("Exception in getMatchedAllocation() -> $e")
         null
     }
 }
@@ -99,6 +104,7 @@ internal fun FeaturevisorInstance.getMatchedTrafficAndAllocation(
         }
          MatchedTrafficAndAllocation(matchedTraffic, matchedAllocation)
     }catch (e:Exception){
-        MatchedTrafficAndAllocation()
+       FeaturevisorInstance.companionLogger?.error("Exception in getMatchedTrafficAndAllocation() -> $e")
+       MatchedTrafficAndAllocation()
     }
 }

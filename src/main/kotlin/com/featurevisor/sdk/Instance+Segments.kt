@@ -26,6 +26,7 @@ internal fun FeaturevisorInstance.segmentIsMatched(
 
         variationValue
     } catch (e: Exception) {
+        FeaturevisorInstance.companionLogger?.error("Exception in segmentIsMatched() -> $e")
         null
     }
 }
@@ -77,6 +78,7 @@ internal fun FeaturevisorInstance.allGroupSegmentsAreMatched(
             }
         }
     }catch (e:Exception){
+        FeaturevisorInstance.companionLogger?.error("Exception in allGroupSegmentsAreMatched() -> $e")
         false
     }
 }

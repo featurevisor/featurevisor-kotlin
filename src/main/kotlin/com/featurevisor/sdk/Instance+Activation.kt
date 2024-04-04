@@ -32,6 +32,7 @@ fun FeaturevisorInstance.activate(featureKey: FeatureKey, context: Context = emp
 
         variationValue
     }catch (e:Exception){
+       FeaturevisorInstance.companionLogger?.error("Exception in activate() -> $e")
         null
     }
 }

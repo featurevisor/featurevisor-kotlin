@@ -13,6 +13,7 @@ internal fun FeaturevisorInstance.getVariation(featureKey: FeatureKey, context: 
             else -> null
         }
     }catch (e:Exception){
-        null
+       FeaturevisorInstance.companionLogger?.error("Exception in getVariation() -> $e")
+       null
     }
 }
