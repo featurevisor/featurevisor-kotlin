@@ -8,7 +8,7 @@ import com.featurevisor.types.FeatureKey
 import com.featurevisor.types.Segment
 import com.featurevisor.types.SegmentKey
 
-class DatafileReader (
+class DatafileReader constructor(
     datafileJson: DatafileContent,
 ) {
 
