@@ -3,9 +3,7 @@ package com.featurevisor.testRunner
 import com.featurevisor.sdk.serializers.isValidJson
 import com.featurevisor.sdk.serializers.mapOperator
 import com.featurevisor.types.*
-import kotlinx.serialization.builtins.MapSerializer
-import kotlinx.serialization.builtins.serializer
-import kotlinx.serialization.json.Json
+import com.google.gson.Gson
 import org.yaml.snakeyaml.Yaml
 import java.io.File
 import java.util.*
@@ -26,7 +24,11 @@ internal fun parseTestFeatureAssertions(yamlFilePath: String) =
                     description = assertionMap["description"] as? String,
                     context = (assertionMap["context"] as Map<AttributeKey, Any?>).mapValues { parseAttributeValue(it.value) },
                     expectedToMatch = assertionMap["expectedToMatch"] as Boolean,
-                    matrix = assertionMap["matrix"] as? AssertionMatrix
+                    matrix = (assertionMap["matrix"] as? Map<String, List<Any>>)?.mapValues {
+                        it.value.map { item ->
+                            mapMatrixValues(item)
+                        }
+                    }
                 )
             }
             val testSegment = TestSegment(key = segment, assertions = segmentAssertion)
@@ -45,7 +47,11 @@ internal fun parseTestFeatureAssertions(yamlFilePath: String) =
                         )
                     },
                     expectedVariation = assertionMap["expectedVariation"] as? String,
-                    matrix = assertionMap["matrix"] as? AssertionMatrix
+                    matrix = (assertionMap["matrix"] as? Map<String, List<Any>>)?.mapValues {
+                        it.value.map { item ->
+                            mapMatrixValues(item)
+                        }
+                    }
                 )
             }
 
@@ -55,8 +61,33 @@ internal fun parseTestFeatureAssertions(yamlFilePath: String) =
             null
         }
     } catch (e: Exception) {
-        printMessageInRedColor("Exception while parsing Yaml Assertion File   --> ${e.message}")
+        printMessageInRedColor("Exception while parsing Yaml Assertion File -- $yamlFilePath --> ${e.message}")
         null
+    }
+
+private fun mapMatrixValues(value: Any) =
+    when(value){
+        is Boolean -> {
+            if (value){
+                AttributeValue.StringValue("yes")
+            }else{
+                AttributeValue.StringValue("no")
+            }
+        }
+        is Int -> {
+            AttributeValue.IntValue(value)
+        }
+        is Double -> {
+            AttributeValue.DoubleValue(value)
+        }
+        is String -> {
+            AttributeValue.StringValue(value)
+        }
+        is Date -> {
+            AttributeValue.DateValue(value)
+        }
+
+        else -> { AttributeValue.StringValue("")}
     }
 
 private fun parseWeightValue(value: Any): WeightType {
@@ -87,9 +118,8 @@ private fun parseVariableValue(value: Any?): VariableValue {
         }
 
         is Map<*, *> -> {
-            val mapData = value as Map<String, String>
-            val json1 = Json.encodeToString(MapSerializer(String.serializer(), String.serializer()), mapData)
-            VariableValue.JsonValue(json1)
+            val json = Gson().toJson(value)
+            VariableValue.JsonValue(json)
         }
 
         else -> throw IllegalArgumentException("Unsupported variable value type")
@@ -121,8 +151,17 @@ private fun parseAttributeValue(value: Any?): AttributeValue {
             AttributeValue.DateValue(value)
         }
 
+        is List<*> -> {
+            AttributeValue.StringValue(value.toString())
+        }
+
+        is Map<*, *> -> {
+            val json = Gson().toJson(value)
+            AttributeValue.StringValue(json)
+        }
+
         else -> {
-            throw IllegalArgumentException("Unsupported attribute value type")
+            throw IllegalArgumentException("Unsupported attribute value type $value")
         }
     }
 }
@@ -199,7 +238,13 @@ private fun parseConditionValue(value: Any?): ConditionValue {
     }
 
     return when (value) {
-        is String -> ConditionValue.StringValue(value)
+        is String -> {
+            value.toIntOrNull()?.let {
+                ConditionValue.IntValue(value.toInt())
+            } ?: value.toDoubleOrNull()?.let {
+                ConditionValue.DoubleValue(value.toDouble())
+            } ?: ConditionValue.StringValue(value)
+        }
         is Int -> ConditionValue.IntValue(value)
         is Double -> ConditionValue.DoubleValue(value)
         is Boolean -> ConditionValue.BooleanValue(value)

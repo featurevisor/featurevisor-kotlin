@@ -134,13 +134,14 @@ fun getContextValue(contextValue: Any?) =
         else -> throw Exception("Unsupported context value")
     }
 
-fun getContextValues(contextValue: AttributeValue) =
+fun getContextValues(contextValue: AttributeValue?) =
     when (contextValue) {
         is AttributeValue.IntValue -> contextValue.value
         is AttributeValue.DoubleValue -> contextValue.value
         is AttributeValue.StringValue -> contextValue.value
         is AttributeValue.BooleanValue -> contextValue.value
         is AttributeValue.DateValue -> contextValue.value
+        null -> null
     }
 
 fun checkIfArraysAreEqual(a: Array<Any>, b: Array<Any>): Boolean {
@@ -229,5 +230,19 @@ fun buildDataFileForBothEnvironments(projectRootPath: String): DataFile {
         productionDataFiles = dataFileForProduction
     )
 }
+
+fun getDataFileContent(featureName: String, environment: String, projectRootPath: String) =
+    try {
+        getJsonForFeatureUsingCommand(
+            featureName = featureName,
+            environment = environment,
+            projectRootPath = projectRootPath
+        )?.run {
+            convertToDataClass<DatafileContent>()
+        }
+    } catch (e: Exception) {
+        printMessageInRedColor("Exception while parsing data file --> ${e.message}")
+        null
+    }
 
 

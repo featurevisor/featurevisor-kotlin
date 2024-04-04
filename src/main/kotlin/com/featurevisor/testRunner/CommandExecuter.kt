@@ -34,7 +34,6 @@ private fun String.runCommand(workingDir: File): String? =
             .redirectOutput(ProcessBuilder.Redirect.PIPE)
             .redirectError(ProcessBuilder.Redirect.PIPE)
             .start()
-        process.waitFor(60, TimeUnit.MINUTES)
         process.inputStream.bufferedReader().readText()
     } catch (e: IOException) {
         printMessageInRedColor("Exception while executing command -> ${e.message}")
