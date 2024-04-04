@@ -15,6 +15,14 @@ typealias ConfigureBucketValue = (Feature, Context, BucketValue) -> BucketValue
 typealias InterceptContext = (Context) -> Context
 typealias DatafileFetchHandler = (datafileUrl: String) -> Result<DatafileContent>
 
+var emptyDatafile = DatafileContent(
+    schemaVersion =  "1",
+    revision = "unknown",
+    attributes = emptyList(),
+    segments = emptyList(),
+    features = emptyList(),
+)
+
 class FeaturevisorInstance private constructor(options: InstanceOptions) {
 
     companion object {
@@ -91,6 +99,7 @@ class FeaturevisorInstance private constructor(options: InstanceOptions) {
                 }
 
                 datafileUrl != null -> {
+                    datafileReader = DatafileReader(options.datafile?: emptyDatafile)
                     fetchDatafileContent(datafileUrl, handleDatafileFetch) { result ->
                         if (result.isSuccess) {
                             datafileReader = DatafileReader(result.getOrThrow())
