@@ -11,6 +11,7 @@ import com.featurevisor.types.VariableValue.IntValue
 import com.featurevisor.types.VariableValue.JsonValue
 import com.featurevisor.types.VariableValue.ObjectValue
 import com.featurevisor.types.VariableValue.StringValue
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromJsonElement
@@ -21,13 +22,17 @@ fun FeaturevisorInstance.getVariable(
     variableKey: VariableKey,
     context: Context = emptyMap(),
 ): VariableValue? {
-    val evaluation = evaluateVariable(
-        featureKey = featureKey,
-        variableKey = variableKey,
-        context = context
-    )
+    return try {
+        val evaluation = evaluateVariable(
+            featureKey = featureKey,
+            variableKey = variableKey,
+            context = context
+        )
 
-    return evaluation.variableValue
+        evaluation.variableValue
+    } catch (e: Exception) {
+        null
+    }
 }
 
 fun FeaturevisorInstance.getVariableBoolean(
@@ -96,4 +101,12 @@ inline fun <reified T : Any> FeaturevisorInstance.getVariableJSON(
         null
     }
 }
+
+@Serializable
+data class CountriesWithStringValueAndSeparateDefault(
+    val country: Map<String, String>?,
+    val default: String?,
+)
+
+
 

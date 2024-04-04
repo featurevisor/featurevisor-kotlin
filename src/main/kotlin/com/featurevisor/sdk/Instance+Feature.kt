@@ -8,11 +8,19 @@ import com.featurevisor.types.Force
 import com.featurevisor.types.Traffic
 
 fun FeaturevisorInstance.getFeatureByKey(featureKey: String): Feature? {
-    return datafileReader.getFeature(featureKey)
+    return try {
+        datafileReader.getFeature(featureKey)
+    }catch (e:Exception){
+        null
+    }
 }
 
 fun FeaturevisorInstance.getFeature(featureKey: String): Feature?{
-    return datafileReader.getFeature(featureKey)
+    return try {
+        datafileReader.getFeature(featureKey)
+    }catch (e:Exception){
+        null
+    }
 }
 
 internal fun FeaturevisorInstance.findForceFromFeature(
@@ -20,18 +28,21 @@ internal fun FeaturevisorInstance.findForceFromFeature(
     context: Context,
     datafileReader: DatafileReader,
 ): Force? {
+    return try {
+        feature.force?.firstOrNull { force ->
+            when {
+                force.conditions != null -> allConditionsAreMatched(force.conditions, context)
+                force.segments != null -> allGroupSegmentsAreMatched(
+                    force.segments,
+                    context,
+                    datafileReader
+                )
 
-    return feature.force?.firstOrNull { force ->
-        when {
-            force.conditions != null -> allConditionsAreMatched(force.conditions, context)
-            force.segments != null -> allGroupSegmentsAreMatched(
-                force.segments,
-                context,
-                datafileReader
-            )
-
-            else -> false
+                else -> false
+            }
         }
+    }catch (e:Exception){
+        null
     }
 }
 
@@ -40,9 +51,12 @@ internal fun FeaturevisorInstance.getMatchedTraffic(
     context: Context,
     datafileReader: DatafileReader,
 ): Traffic? {
-
-    return traffic.firstOrNull { trafficItem ->
-        allGroupSegmentsAreMatched(trafficItem.segments, context, datafileReader)
+    return try {
+        traffic.firstOrNull { trafficItem ->
+            allGroupSegmentsAreMatched(trafficItem.segments, context, datafileReader)
+        }
+    }catch (e:Exception){
+        null
     }
 }
 
@@ -50,17 +64,20 @@ internal fun FeaturevisorInstance.getMatchedAllocation(
     traffic: Traffic,
     bucketValue: Int,
 ): Allocation? {
-
-    return traffic.allocation.firstOrNull { allocation ->
-        with(allocation.range) {
-            bucketValue in this.first()..this.last()
+    return try {
+        traffic.allocation.firstOrNull { allocation ->
+            with(allocation.range) {
+                bucketValue in this.first()..this.last()
+            }
         }
+    }catch (e:Exception){
+        null
     }
 }
 
 data class MatchedTrafficAndAllocation(
-    val matchedTraffic: Traffic?,
-    val matchedAllocation: Allocation?,
+    val matchedTraffic: Traffic?=null,
+    val matchedAllocation: Allocation?=null,
 )
 
 internal fun FeaturevisorInstance.getMatchedTrafficAndAllocation(
@@ -70,16 +87,18 @@ internal fun FeaturevisorInstance.getMatchedTrafficAndAllocation(
     datafileReader: DatafileReader,
     logger: Logger?,
 ): MatchedTrafficAndAllocation {
-
-    var matchedAllocation: Allocation? = null
-    val matchedTraffic = traffic.firstOrNull { trafficItem ->
-        if (allGroupSegmentsAreMatched(trafficItem.segments, context, datafileReader)) {
-            matchedAllocation = getMatchedAllocation(trafficItem, bucketValue)
-            true
-        } else {
-            false
+   return try {
+        var matchedAllocation: Allocation? = null
+        val matchedTraffic = traffic.firstOrNull { trafficItem ->
+            if (allGroupSegmentsAreMatched(trafficItem.segments, context, datafileReader)) {
+                matchedAllocation = getMatchedAllocation(trafficItem, bucketValue)
+                true
+            } else {
+                false
+            }
         }
+         MatchedTrafficAndAllocation(matchedTraffic, matchedAllocation)
+    }catch (e:Exception){
+        MatchedTrafficAndAllocation()
     }
-
-    return MatchedTrafficAndAllocation(matchedTraffic, matchedAllocation)
 }

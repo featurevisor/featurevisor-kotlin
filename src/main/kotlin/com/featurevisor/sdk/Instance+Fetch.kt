@@ -15,11 +15,15 @@ internal fun FeaturevisorInstance.fetchDatafileContent(
     handleDatafileFetch: DatafileFetchHandler? = null,
     completion: (Result<DatafileContent>) -> Unit,
 ) {
-    handleDatafileFetch?.let { handleFetch ->
-        val result = handleFetch(url)
-        completion(result)
-    } ?: run {
-        fetchDatafileContentFromUrl(url, completion)
+    try {
+        handleDatafileFetch?.let { handleFetch ->
+            val result = handleFetch(url)
+            completion(result)
+        } ?: run {
+            fetchDatafileContentFromUrl(url, completion)
+        }
+    }catch (e:Exception){
+        completion(Result.failure(FeaturevisorError.InvalidUrl(url)))
     }
 }
 
