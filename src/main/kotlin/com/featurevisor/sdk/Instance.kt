@@ -7,7 +7,6 @@ import com.featurevisor.sdk.FeaturevisorError.MissingDatafileOptions
 import com.featurevisor.types.*
 import com.featurevisor.types.EventName.*
 import kotlinx.coroutines.Job
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 
@@ -15,6 +14,15 @@ typealias ConfigureBucketKey = (Feature, Context, BucketKey) -> BucketKey
 typealias ConfigureBucketValue = (Feature, Context, BucketValue) -> BucketValue
 typealias InterceptContext = (Context) -> Context
 typealias DatafileFetchHandler = (datafileUrl: String) -> Result<DatafileContent>
+
+var emptyDatafile = DatafileContent(
+    schemaVersion =  "1",
+    revision = "unknown",
+    attributes = emptyList(),
+    segments = emptyList(),
+    features = emptyList(),
+
+)
 
 class FeaturevisorInstance private constructor(options: InstanceOptions) {
 
@@ -92,6 +100,7 @@ class FeaturevisorInstance private constructor(options: InstanceOptions) {
                 }
 
                 datafileUrl != null -> {
+                    datafileReader = DatafileReader(options.datafile?: emptyDatafile)
                     fetchDatafileContent(datafileUrl) { result ->
                         if (result.isSuccess) {
                             datafileReader = DatafileReader(result.getOrThrow())

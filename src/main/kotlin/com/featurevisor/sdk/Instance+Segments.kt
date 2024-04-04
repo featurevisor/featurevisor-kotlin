@@ -12,23 +12,17 @@ internal fun FeaturevisorInstance.segmentIsMatched(
     featureKey: FeatureKey,
     context: Context,
 ): VariationValue? {
-    return try {
-        val evaluation = evaluateVariation(featureKey, context)
-        var variationValue: VariationValue? = null
+    val evaluation = evaluateVariation(featureKey, context)
 
-        if (evaluation.variationValue != null) {
-            variationValue = evaluation.variationValue
-        }
-
-        if (evaluation.variation != null) {
-            variationValue = evaluation.variation.value
-        }
-
-        variationValue
-    } catch (e: Exception) {
-        FeaturevisorInstance.companionLogger?.error("Exception in segmentIsMatched() -> $e")
-        null
+    if (evaluation.variationValue != null) {
+        return evaluation.variationValue
     }
+
+    if (evaluation.variation != null) {
+        return evaluation.variation.value
+    }
+
+    return null
 }
 
 internal fun segmentIsMatched(segment: Segment, context: Context): Boolean {
@@ -40,45 +34,40 @@ internal fun FeaturevisorInstance.allGroupSegmentsAreMatched(
     context: Context,
     datafileReader: DatafileReader,
 ): Boolean {
-    return try {
-        when (groupSegments) {
-            is Plain -> {
-                val segmentKey = groupSegments.segment
-                if (segmentKey == "*") {
-                    true
-                } else {
-                    datafileReader.getSegment(segmentKey)?.let {
-                        segmentIsMatched(it, context)
-                    } ?: false
-                }
-            }
-
-            is Multiple -> {
-                groupSegments.segments.all {
-                    allGroupSegmentsAreMatched(it, context, datafileReader)
-                }
-            }
-
-            is And -> {
-                groupSegments.segment.and.all {
-                    allGroupSegmentsAreMatched(it, context, datafileReader)
-                }
-            }
-
-            is Or -> {
-                groupSegments.segment.or.any {
-                    allGroupSegmentsAreMatched(it, context, datafileReader)
-                }
-            }
-
-            is Not -> {
-                groupSegments.segment.not.all {
-                    allGroupSegmentsAreMatched(it, context, datafileReader).not()
-                }
+    return when (groupSegments) {
+        is Plain -> {
+            val segmentKey = groupSegments.segment
+            if (segmentKey == "*") {
+                true
+            } else {
+                datafileReader.getSegment(segmentKey)?.let {
+                    segmentIsMatched(it, context)
+                } ?: false
             }
         }
-    }catch (e:Exception){
-        FeaturevisorInstance.companionLogger?.error("Exception in allGroupSegmentsAreMatched() -> $e")
-        false
+
+        is Multiple -> {
+            groupSegments.segments.all {
+                allGroupSegmentsAreMatched(it, context, datafileReader)
+            }
+        }
+
+        is And -> {
+            groupSegments.segment.and.all {
+                allGroupSegmentsAreMatched(it, context, datafileReader)
+            }
+        }
+
+        is Or -> {
+            groupSegments.segment.or.any {
+                allGroupSegmentsAreMatched(it, context, datafileReader)
+            }
+        }
+
+        is Not -> {
+            groupSegments.segment.not.all {
+                allGroupSegmentsAreMatched(it, context, datafileReader).not()
+            }
+        }
     }
 }

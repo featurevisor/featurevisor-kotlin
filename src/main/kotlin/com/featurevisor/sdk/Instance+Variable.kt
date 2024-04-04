@@ -11,7 +11,6 @@ import com.featurevisor.types.VariableValue.IntValue
 import com.featurevisor.types.VariableValue.JsonValue
 import com.featurevisor.types.VariableValue.ObjectValue
 import com.featurevisor.types.VariableValue.StringValue
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromJsonElement
@@ -22,18 +21,13 @@ fun FeaturevisorInstance.getVariable(
     variableKey: VariableKey,
     context: Context = emptyMap(),
 ): VariableValue? {
-    return try {
-        val evaluation = evaluateVariable(
-            featureKey = featureKey,
-            variableKey = variableKey,
-            context = context
-        )
+    val evaluation = evaluateVariable(
+        featureKey = featureKey,
+        variableKey = variableKey,
+        context = context
+    )
 
-        evaluation.variableValue
-    } catch (e: Exception) {
-        FeaturevisorInstance.companionLogger?.error("Exception in getVariable() -> $e")
-        null
-    }
+    return evaluation.variableValue
 }
 
 fun FeaturevisorInstance.getVariableBoolean(
@@ -86,7 +80,6 @@ inline fun <reified T : Any> FeaturevisorInstance.getVariableObject(
         val encoded = Json.encodeToJsonElement(objectValue?.value)
         return Json.decodeFromJsonElement<T>(encoded)
     } catch (e: Exception) {
-        FeaturevisorInstance.companionLogger?.error("Exception in getVariableObject() -> $e")
         null
     }
 }
@@ -100,10 +93,7 @@ inline fun <reified T : Any> FeaturevisorInstance.getVariableJSON(
     return try {
         Json.decodeFromString<T>(json!!.value)
     } catch (e: Exception) {
-        FeaturevisorInstance.companionLogger?.error("Exception in getVariableJSON() -> $e")
         null
     }
 }
-
-
 
