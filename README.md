@@ -6,7 +6,7 @@ We are not ready yet. Please come back later.
 
 ## Installation
 
-If you are using groovy, build.gradle
+If you are using groovy, build.gradle -
 
 ```
 repositories {
