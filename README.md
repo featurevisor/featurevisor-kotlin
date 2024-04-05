@@ -1,4 +1,4 @@
-![Static Badge](https://img.shields.io/badge/latest_version-0.0.10-white)
+![GitHub Release](https://img.shields.io/github/v/release/featurevisor/featurevisor-kotlin)
 
 # featurevisor-kotlin
 
