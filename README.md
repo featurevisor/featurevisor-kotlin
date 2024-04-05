@@ -1,3 +1,5 @@
+![Static Badge](https://img.shields.io/badge/latest_version-0.0.10-white)
+
 # featurevisor-kotlin
 
 This repository is a work in progress to port the [Featurevisor](https://featurevisor.com) JavaScript SDK to Kotlin for supporting Android apps.
