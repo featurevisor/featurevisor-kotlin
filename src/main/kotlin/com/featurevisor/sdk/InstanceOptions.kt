@@ -3,7 +3,6 @@ package com.featurevisor.sdk
 import com.featurevisor.types.DatafileContent
 import com.featurevisor.types.InitialFeatures
 import com.featurevisor.types.StickyFeatures
-import okhttp3.ResponseBody
 
 typealias Listener = (Array<out Any>) -> Unit
 
@@ -24,7 +23,6 @@ data class InstanceOptions(
     val onError: Listener? = null,
     val refreshInterval: Long? = null, // seconds
     val stickyFeatures: StickyFeatures? = null,
-    val rawResponseReady: (ResponseBody) -> Unit = {},
 ) {
     companion object {
         private const val defaultBucketKeySeparator = "."
