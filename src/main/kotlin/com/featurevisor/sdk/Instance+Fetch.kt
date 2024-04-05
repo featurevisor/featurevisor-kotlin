@@ -13,18 +13,20 @@ import java.lang.IllegalArgumentException
 internal fun FeaturevisorInstance.fetchDatafileContent(
     url: String,
     handleDatafileFetch: DatafileFetchHandler? = null,
+    rawResponseReady: (ResponseBody) -> Unit,
     completion: (Result<DatafileContent>) -> Unit,
 ) {
     handleDatafileFetch?.let { handleFetch ->
         val result = handleFetch(url)
         completion(result)
     } ?: run {
-        fetchDatafileContentFromUrl(url, completion)
+        fetchDatafileContentFromUrl(url, rawResponseReady, completion)
     }
 }
 
 private fun fetchDatafileContentFromUrl(
     url: String,
+    rawResponseReady: (ResponseBody) -> Unit,
     completion: (Result<DatafileContent>) -> Unit,
 ) {
     try {
@@ -34,7 +36,7 @@ private fun fetchDatafileContentFromUrl(
             .addHeader("Content-Type", "application/json")
             .build()
 
-        fetch(request, completion)
+        fetch(request, rawResponseReady, completion)
     } catch (throwable: IllegalArgumentException) {
         completion(Result.failure(FeaturevisorError.InvalidUrl(url)))
     }
@@ -43,6 +45,7 @@ private fun fetchDatafileContentFromUrl(
 const val BODY_BYTE_COUNT = 1000000L
 private inline fun fetch(
     request: Request,
+    crossinline rawResponseReady: (ResponseBody) -> Unit,
     crossinline completion: (Result<DatafileContent>) -> Unit,
 ) {
     val client = OkHttpClient()
@@ -50,6 +53,7 @@ private inline fun fetch(
     call.enqueue(object : Callback {
         override fun onResponse(call: Call, response: Response) {
             val responseBody = response.peekBody(BODY_BYTE_COUNT)
+            rawResponseReady(responseBody)
             if (response.isSuccessful) {
                 val json = Json {
                     ignoreUnknownKeys = true
