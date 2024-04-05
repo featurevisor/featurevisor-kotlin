@@ -1,3 +1,5 @@
+![GitHub Release](https://img.shields.io/github/v/release/featurevisor/featurevisor-kotlin)
+
 # featurevisor-kotlin
 
 This repository is a work in progress to port the [Featurevisor](https://featurevisor.com) JavaScript SDK to Kotlin for supporting Android apps.
@@ -6,7 +8,31 @@ We are not ready yet. Please come back later.
 
 ## Installation
 
-...
+If you are using groovy, build.gradle -
+
+```
+repositories {
+    mavenCentral()
+    maven { url 'https://jitpack.io' }
+}
+
+dependencies {
+    implementation 'com.github.featurevisor:featurevisor-kotlin:LATEST_VERSION'
+}
+```
+
+If you are using Kotlin DSL, build.gradle.kts -   
+
+```
+repositories {
+    mavenCentral()
+    maven("https://jitpack.io")
+}
+
+dependencies {
+    implementation("com.github.featurevisor:featurevisor-kotlin:LATEST_VERSION")
+}
+```
 
 ## Usage
 
