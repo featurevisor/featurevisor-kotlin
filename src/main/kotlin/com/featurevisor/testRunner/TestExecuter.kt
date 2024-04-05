@@ -45,7 +45,7 @@ fun startTest(option: TestProjectOption) {
                     }
 
                     if (executionResult == null) {
-                        return
+                        continue
                     }
 
                     if (executionResult.passed) {
@@ -83,7 +83,7 @@ fun startTest(option: TestProjectOption) {
     }
 }
 
-private fun executeTest(filePath: String, dataFile: DataFile, option: TestProjectOption): ExecutionResult {
+private fun executeTest(filePath: String, dataFile: DataFile, option: TestProjectOption): ExecutionResult? {
     val test = parseTestFeatureAssertions(filePath)
 
     val executionResult = ExecutionResult(
@@ -91,14 +91,14 @@ private fun executeTest(filePath: String, dataFile: DataFile, option: TestProjec
         assertionsCount = AssertionsCount(0, 0)
     )
 
-    test?.let {
+    if (test != null){
         val key = when (test) {
             is Test.Feature -> test.value.key
             is Test.Segment -> test.value.key
         }
 
         if (option.keyPattern.isNotEmpty() && !key.contains(option.keyPattern)) {
-            return@let
+            return null
         }
 
         val testResult: TestResult = when (test) {
