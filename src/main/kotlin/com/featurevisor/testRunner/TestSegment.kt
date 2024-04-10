@@ -1,12 +1,9 @@
 package com.featurevisor.testRunner
 
 import com.featurevisor.sdk.segmentIsMatched
-import com.featurevisor.types.TestResult
-import com.featurevisor.types.TestResultAssertion
-import com.featurevisor.types.TestResultAssertionError
-import com.featurevisor.types.TestSegment
+import com.featurevisor.types.*
 
-fun testSegment(testSegment: TestSegment, option: TestProjectOption): TestResult {
+fun testSegment(testSegment: TestSegment,configuration: Configuration): TestResult {
     val testStartTime = System.currentTimeMillis()
     val segmentKey = testSegment.key
 
@@ -36,9 +33,9 @@ fun testSegment(testSegment: TestSegment, option: TestProjectOption): TestResult
                 return@forEach
             }
 
-            val yamlSegment = parseYamlSegment("${option.projectRootPath}/segments/$segmentKey.yml")
-            val expected = it.expectedToMatch
-            val actual = segmentIsMatched(yamlSegment!!, it.context)
+            val yamlSegment = parseYamlSegment("${configuration.segmentsDirectoryPath}/$segmentKey.yml")
+            val expected = assertion.expectedToMatch
+            val actual = segmentIsMatched(yamlSegment!!, assertion.context)
             val passed = actual == expected
 
             if (!passed) {

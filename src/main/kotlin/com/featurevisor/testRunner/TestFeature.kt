@@ -46,7 +46,7 @@ fun testFeature(testFeature: TestFeature, dataFile: DataFile, option: TestProjec
                 getDataFileContent(
                     featureName = testFeature.key,
                     environment = it.environment,
-                    projectRootPath = option.projectRootPath
+                    projectRootPath = option.projectRootPath.orEmpty()
                 )
             }
 
