@@ -18,7 +18,7 @@ fun startTest(option: TestProjectOption) {
         val configurations =  parseConfiguration(option.projectRootPath)
         var hasError = false
         val folder = File(configurations.testsDirectoryPath)
-        val listOfFiles = folder.listFiles()
+        val listOfFiles = folder.listFiles()?.sortedBy { it }
         var executionResult: ExecutionResult? = null
         val startTime = System.currentTimeMillis()
         var passedTestsCount = 0
@@ -106,11 +106,18 @@ private fun executeTest(filePath: String, dataFile: DataFile, option: TestProjec
 
         val testResult: TestResult = when (test) {
             is Test.Feature -> {
-                testFeature(test.value, dataFile = dataFile, option)
+                testFeature(
+                    testFeature = test.value,
+                    dataFile = dataFile,
+                    option = option
+                )
             }
 
             is Test.Segment -> {
-                testSegment(test.value, configuration)
+                testSegment(
+                    test.value,
+                    configuration
+                )
             }
         }
 

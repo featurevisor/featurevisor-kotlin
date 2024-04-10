@@ -3,9 +3,9 @@ package com.featurevisor.testRunner
 import com.featurevisor.sdk.segmentIsMatched
 import com.featurevisor.types.*
 
-fun testSegment(test: TestSegment,configuration: Configuration): TestResult {
+fun testSegment(testSegment: TestSegment,configuration: Configuration): TestResult {
     val testStartTime = System.currentTimeMillis()
-    val segmentKey = test.key
+    val segmentKey = testSegment.key
 
     val testResult = TestResult(
         type = "segment",
@@ -16,22 +16,26 @@ fun testSegment(test: TestSegment,configuration: Configuration): TestResult {
         assertions = mutableListOf()
     )
 
-    for (aIndex in 0 until test.assertions.size) {
-        val assertions = getSegmentAssertionsFromMatrix(aIndex, test.assertions[aIndex])
+    testSegment.assertions.forEachIndexed { index, segmentAssertion ->
+        val assertions = getSegmentAssertionsFromMatrix(index,segmentAssertion)
 
-        for (assertion in assertions) {
+        assertions.forEach {
             val assertionStartTime = System.currentTimeMillis()
 
             val testResultAssertion = TestResultAssertion(
-                description = assertion.description.orEmpty(),
+                description = it.description.orEmpty(),
                 duration = 0,
                 passed = true,
                 errors = mutableListOf()
             )
 
+            if (option.assertionPattern.isNotEmpty() && !it.description.orEmpty().contains(option.assertionPattern)) {
+                return@forEach
+            }
+
             val yamlSegment = parseYamlSegment("${configuration.segmentsDirectoryPath}/$segmentKey.yml")
-            val expected = assertion.expectedToMatch
-            val actual = segmentIsMatched(yamlSegment!!, assertion.context)
+            val expected = it.expectedToMatch
+            val actual = segmentIsMatched(yamlSegment!!, it.context)
             val passed = actual == expected
 
             if (!passed) {
