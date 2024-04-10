@@ -55,6 +55,13 @@ internal fun getSdkInstance(datafileContent: DatafileContent?, assertion: Featur
         )
     )
 
+internal fun initializeSdkWithDataFileContent(datafileContent: DatafileContent?) =
+    FeaturevisorInstance.createInstance(
+        InstanceOptions(
+            datafile = datafileContent,
+        )
+    )
+
 internal fun getFileForSpecificPath(path: String) = File(path)
 
 internal inline fun <reified R : Any> String.convertToDataClass() = json.decodeFromString<R>(this)
@@ -230,30 +237,29 @@ fun checkJsonIsEquals(a: String, b: String): Boolean {
     return map1 == map2
 }
 
-fun buildDataFileForBothEnvironments(projectRootPath: String): DataFile {
-    val dataFileForStaging = try {
-        getJsonForDataFile(environment = "staging", projectRootPath = projectRootPath)?.run {
-            convertToDataClass<DatafileContent>()
-        }
-    } catch (e: Exception) {
-        printMessageInRedColor("Unable to parse staging data file")
-        null
-    }
-
-    val dataFileForProduction = try {
-        getJsonForDataFile(environment = "production", projectRootPath = projectRootPath)?.run {
-            convertToDataClass<DatafileContent>()
-        }
-
-    } catch (e: Exception) {
-        printMessageInRedColor("Unable to parse production data file")
-        null
-    }
-
-    return DataFile(
-        stagingDataFiles = dataFileForStaging,
-        productionDataFiles = dataFileForProduction
+fun buildDataFileForBothEnvironments(projectRootPath: String): DataFile =
+    DataFile(
+        stagingDataFiles = buildDataFileForStaging(projectRootPath),
+        productionDataFiles = buildDataFileForProduction(projectRootPath)
     )
+
+fun buildDataFileForStaging(projectRootPath: String) = try {
+    getJsonForDataFile(environment = "staging", projectRootPath = projectRootPath)?.run {
+        convertToDataClass<DatafileContent>()
+    }
+} catch (e: Exception) {
+    printMessageInRedColor("Unable to parse staging data file")
+    null
+}
+
+fun buildDataFileForProduction(projectRootPath: String) = try {
+    getJsonForDataFile(environment = "production", projectRootPath = projectRootPath)?.run {
+        convertToDataClass<DatafileContent>()
+    }
+
+} catch (e: Exception) {
+    printMessageInRedColor("Unable to parse production data file")
+    null
 }
 
 fun getDataFileContent(featureName: String, environment: String, projectRootPath: String) =
@@ -270,4 +276,12 @@ fun getDataFileContent(featureName: String, environment: String, projectRootPath
         null
     }
 
+fun convertNanoSecondToMilliSecond(timeInNanoSecond:Double):String {
+    val timeInMilliSecond = timeInNanoSecond/1000000
+    return if (timeInMilliSecond > 1000){
+        "${timeInMilliSecond / 1000} s"
+    }else{
+        "$timeInMilliSecond ms"
+    }
+}
 
