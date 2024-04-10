@@ -9,7 +9,11 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 
-fun testFeature(testFeature: TestFeature, dataFile: DataFile, option: TestProjectOption): TestResult {
+fun testFeature(
+    testFeature: TestFeature,
+    datafileContentByEnvironment:MutableMap<String, DatafileContent>,
+    option: TestProjectOption
+): TestResult {
     val testStartTime = System.currentTimeMillis()
     val featureKey = testFeature.key
 
@@ -40,15 +44,23 @@ fun testFeature(testFeature: TestFeature, dataFile: DataFile, option: TestProjec
                 return@forEach
             }
 
-            val datafileContent = if (option.fast) {
-                if (it.environment.equals("staging", true)) dataFile.stagingDataFiles else dataFile.productionDataFiles
-            } else {
-                getDataFileContent(
+            val datafileContent = datafileContentByEnvironment[it.environment]
+                ?: getDataFileContent(
                     featureName = testFeature.key,
                     environment = it.environment,
                     projectRootPath = option.projectRootPath.orEmpty()
                 )
-            }
+
+
+//                if (option.fast) {
+//                if (it.environment.equals("staging", true)) dataFile.stagingDataFiles else dataFile.productionDataFiles
+//            } else {
+//                getDataFileContent(
+//                    featureName = testFeature.key,
+//                    environment = it.environment,
+//                    projectRootPath = option.projectRootPath.orEmpty()
+//                )
+//            }
 
             if (option.showDatafile) {
                 printNormalMessage("")

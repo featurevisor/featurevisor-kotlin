@@ -28,7 +28,7 @@ fun benchmarkFeature(option: BenchMarkOptions) {
 
     val datafileBuildStart = System.nanoTime().toDouble()
 
-    val datafileContent = buildDataFileForStaging(option.projectRootPath)
+    val datafileContent = buildDataFileAsPerEnvironment(option.projectRootPath,"staging")
 
     val datafileBuildEnd = System.nanoTime().toDouble()
 
