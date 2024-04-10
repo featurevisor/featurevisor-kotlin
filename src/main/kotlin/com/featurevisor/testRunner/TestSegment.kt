@@ -3,7 +3,7 @@ package com.featurevisor.testRunner
 import com.featurevisor.sdk.segmentIsMatched
 import com.featurevisor.types.*
 
-fun testSegment(testSegment: TestSegment,configuration: Configuration): TestResult {
+fun testSegment(testSegment: TestSegment,configuration: Configuration,option: TestProjectOption): TestResult {
     val testStartTime = System.currentTimeMillis()
     val segmentKey = testSegment.key
 
