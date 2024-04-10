@@ -8,7 +8,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import java.io.File
 import java.util.*
-import java.util.concurrent.TimeUnit
+import kotlin.math.abs
 
 
 internal const val tick = "\u2713"
@@ -70,14 +70,39 @@ internal fun getRootProjectDir(): String {
     throw IllegalStateException("Root project directory not found.")
 }
 
-fun prettyDuration(timestamp: Long): String {
-    val millis = timestamp % 1000
-    val seconds = TimeUnit.MILLISECONDS.toSeconds(timestamp)
-    return if (seconds == 0L) {
-        "$millis ms"
-    } else {
-        "$seconds s $millis ms"
+fun prettyDuration(diffInMs: Long): String {
+    var diff = abs(diffInMs)
+
+    if (diff == 0L) {
+        return "0ms"
     }
+
+    val ms = diff % 1000
+    diff = (diff - ms) / 1000
+    val secs = diff % 60
+    diff = (diff - secs) / 60
+    val mins = diff % 60
+    val hrs = (diff - mins) / 60
+
+    var result = ""
+
+    if (hrs != 0L) {
+        result += " $hrs h"
+    }
+
+    if (mins != 0L) {
+        result += " $mins m"
+    }
+
+    if (secs != 0L) {
+        result += " $secs s"
+    }
+
+    if (ms != 0L) {
+        result += " $ms ms"
+    }
+
+    return result.trim()
 }
 
 internal fun printTestResult(testResult: TestResult) {
