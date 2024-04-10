@@ -6,9 +6,9 @@ import com.featurevisor.types.TestResultAssertion
 import com.featurevisor.types.TestResultAssertionError
 import com.featurevisor.types.TestSegment
 
-fun testSegment(test: TestSegment, segmentFilePath: String): TestResult {
+fun testSegment(testSegment: TestSegment, option: TestProjectOption): TestResult {
     val testStartTime = System.currentTimeMillis()
-    val segmentKey = test.key
+    val segmentKey = testSegment.key
 
     val testResult = TestResult(
         type = "segment",
@@ -19,22 +19,26 @@ fun testSegment(test: TestSegment, segmentFilePath: String): TestResult {
         assertions = mutableListOf()
     )
 
-    for (aIndex in 0 until test.assertions.size) {
-        val assertions = getSegmentAssertionsFromMatrix(aIndex, test.assertions[aIndex])
+    testSegment.assertions.forEachIndexed { index, segmentAssertion ->
+        val assertions = getSegmentAssertionsFromMatrix(index,segmentAssertion)
 
-        for (assertion in assertions) {
+        assertions.forEach {
             val assertionStartTime = System.currentTimeMillis()
 
             val testResultAssertion = TestResultAssertion(
-                description = assertion.description.orEmpty(),
+                description = it.description.orEmpty(),
                 duration = 0,
                 passed = true,
                 errors = mutableListOf()
             )
 
-            val yamlSegment = parseYamlSegment("$segmentFilePath/segments/$segmentKey.yml")
-            val expected = assertion.expectedToMatch
-            val actual = segmentIsMatched(yamlSegment!!, assertion.context)
+            if (option.assertionPattern.isNotEmpty() && !it.description.orEmpty().contains(option.assertionPattern)) {
+                return@forEach
+            }
+
+            val yamlSegment = parseYamlSegment("${option.projectRootPath}/segments/$segmentKey.yml")
+            val expected = it.expectedToMatch
+            val actual = segmentIsMatched(yamlSegment!!, it.context)
             val passed = actual == expected
 
             if (!passed) {
