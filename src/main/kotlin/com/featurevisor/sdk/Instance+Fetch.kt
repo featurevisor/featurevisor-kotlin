@@ -40,7 +40,7 @@ private fun fetchDatafileContentFromUrl(
     }
 }
 
-const val BODY_BYTE_COUNT = 1000000L
+internal const val BODY_BYTE_COUNT = 1000000L
 private inline fun fetch(
     request: Request,
     crossinline completion: (Result<DatafileContent>) -> Unit,

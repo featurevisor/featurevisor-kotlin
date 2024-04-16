@@ -6,12 +6,12 @@ import com.featurevisor.sdk.getVariation
 import com.featurevisor.sdk.isEnabled
 import com.featurevisor.types.*
 
-data class BenchmarkOutput(
+internal data class BenchmarkOutput(
     val value: Any? = null,
     val duration: Double
 )
 
-data class BenchMarkOptions(
+internal data class BenchMarkOptions(
     val environment: String = "",
     val feature: String = "",
     val n: Int = 0,
@@ -21,7 +21,7 @@ data class BenchMarkOptions(
     val variable: String? = null,
 )
 
-fun benchmarkFeature(option: BenchMarkOptions) {
+internal fun benchmarkFeature(option: BenchMarkOptions) {
     println("Running benchmark for feature ${option.feature}...")
 
     println("Building datafile containing all features for ${option.environment}...")
@@ -83,7 +83,7 @@ fun benchmarkFeature(option: BenchMarkOptions) {
 }
 
 
-fun benchmarkFeatureFlag(
+internal fun benchmarkFeatureFlag(
     f: FeaturevisorInstance,
     feature: FeatureKey,
     context: Context,
@@ -105,7 +105,7 @@ fun benchmarkFeatureFlag(
 }
 
 
-fun benchmarkFeatureVariation(
+internal fun benchmarkFeatureVariation(
     f: FeaturevisorInstance,
     feature: FeatureKey,
     context: Context,
@@ -126,7 +126,7 @@ fun benchmarkFeatureVariation(
     )
 }
 
-fun benchmarkFeatureVariable(
+internal fun benchmarkFeatureVariable(
     f: FeaturevisorInstance,
     feature: FeatureKey,
     variableKey: VariableKey,

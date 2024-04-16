@@ -77,7 +77,7 @@ internal fun getRootProjectDir(): String {
     throw IllegalStateException("Root project directory not found.")
 }
 
-fun prettyDuration(diffInMs: Long): String {
+internal fun prettyDuration(diffInMs: Long): String {
     var diff = abs(diffInMs)
 
     if (diff == 0L) {
@@ -155,7 +155,7 @@ internal fun printTestResult(testResult: TestResult) {
     }
 }
 
-fun getContextValue(contextValue: Any?) =
+internal fun getContextValue(contextValue: Any?) =
     when (contextValue) {
         is Boolean -> AttributeValue.BooleanValue(contextValue)
         is Int -> AttributeValue.IntValue(contextValue)
@@ -166,7 +166,7 @@ fun getContextValue(contextValue: Any?) =
         else -> throw Exception("Unsupported context value")
     }
 
-fun getContextValues(contextValue: AttributeValue?) =
+internal fun getContextValues(contextValue: AttributeValue?) =
     when (contextValue) {
         is AttributeValue.IntValue -> contextValue.value
         is AttributeValue.DoubleValue -> contextValue.value
@@ -176,7 +176,7 @@ fun getContextValues(contextValue: AttributeValue?) =
         null -> null
     }
 
-fun checkIfArraysAreEqual(a: Array<Any>, b: Array<Any>): Boolean {
+internal fun checkIfArraysAreEqual(a: Array<Any>, b: Array<Any>): Boolean {
     if (a.size != b.size) return false
 
     for (i in a.indices) {
@@ -187,7 +187,7 @@ fun checkIfArraysAreEqual(a: Array<Any>, b: Array<Any>): Boolean {
     return true
 }
 
-fun checkIfObjectsAreEqual(a: Any?, b: Any?): Boolean {
+internal fun checkIfObjectsAreEqual(a: Any?, b: Any?): Boolean {
     if (a === b) {
         return true
     }
@@ -215,7 +215,7 @@ fun checkIfObjectsAreEqual(a: Any?, b: Any?): Boolean {
     return true
 }
 
-fun stringToArray(input: String): List<Any>? {
+internal fun stringToArray(input: String): List<Any>? {
     if (input.trim().startsWith("[") && input.trim().endsWith("]")) {
         val trimmed = input.trim().substring(1, input.length - 1)
         val elements = trimmed.split(",").map { it.trim() }
@@ -231,19 +231,19 @@ fun stringToArray(input: String): List<Any>? {
     return null
 }
 
-fun checkJsonIsEquals(a: String, b: String): Boolean {
+internal fun checkJsonIsEquals(a: String, b: String): Boolean {
     val map1 = Json.decodeFromString<Map<String, JsonElement>>(a)
     val map2 = Json.decodeFromString<Map<String, JsonElement>>(b)
     return map1 == map2
 }
 
-fun buildDataFileForBothEnvironments(projectRootPath: String): DataFile =
+internal fun buildDataFileForBothEnvironments(projectRootPath: String): DataFile =
     DataFile(
         stagingDataFiles = buildDataFileForStaging(projectRootPath),
         productionDataFiles = buildDataFileForProduction(projectRootPath)
     )
 
-fun buildDataFileForStaging(projectRootPath: String) = try {
+internal fun buildDataFileForStaging(projectRootPath: String) = try {
     getJsonForDataFile(environment = "staging", projectRootPath = projectRootPath)?.run {
         convertToDataClass<DatafileContent>()
     }
@@ -252,7 +252,7 @@ fun buildDataFileForStaging(projectRootPath: String) = try {
     null
 }
 
-fun buildDataFileForProduction(projectRootPath: String) = try {
+internal fun buildDataFileForProduction(projectRootPath: String) = try {
     getJsonForDataFile(environment = "production", projectRootPath = projectRootPath)?.run {
         convertToDataClass<DatafileContent>()
     }
@@ -262,7 +262,7 @@ fun buildDataFileForProduction(projectRootPath: String) = try {
     null
 }
 
-fun getDataFileContent(featureName: String, environment: String, projectRootPath: String) =
+internal fun getDataFileContent(featureName: String, environment: String, projectRootPath: String) =
     try {
         getJsonForFeatureUsingCommand(
             featureName = featureName,
@@ -276,7 +276,7 @@ fun getDataFileContent(featureName: String, environment: String, projectRootPath
         null
     }
 
-fun convertNanoSecondToMilliSecond(timeInNanoSecond:Double):String {
+internal fun convertNanoSecondToMilliSecond(timeInNanoSecond:Double):String {
     val timeInMilliSecond = timeInNanoSecond/1000000
     return if (timeInMilliSecond > 1000){
         "${timeInMilliSecond / 1000} s"

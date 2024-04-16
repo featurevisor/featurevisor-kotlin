@@ -6,7 +6,7 @@ import com.featurevisor.types.TestResultAssertion
 import com.featurevisor.types.TestResultAssertionError
 import com.featurevisor.types.TestSegment
 
-fun testSegment(testSegment: TestSegment, option: TestProjectOption): TestResult {
+internal fun testSegment(testSegment: TestSegment, option: TestProjectOption): TestResult {
     val testStartTime = System.currentTimeMillis()
     val segmentKey = testSegment.key
 

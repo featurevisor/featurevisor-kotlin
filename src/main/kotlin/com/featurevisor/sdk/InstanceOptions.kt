@@ -4,9 +4,9 @@ import com.featurevisor.types.DatafileContent
 import com.featurevisor.types.InitialFeatures
 import com.featurevisor.types.StickyFeatures
 
-typealias Listener = (Array<out Any>) -> Unit
+public typealias Listener = (Array<out Any>) -> Unit
 
-data class InstanceOptions(
+public data class InstanceOptions(
     val bucketKeySeparator: String = defaultBucketKeySeparator,
     val configureBucketKey: ConfigureBucketKey? = null,
     val configureBucketValue: ConfigureBucketValue? = null,
@@ -24,7 +24,7 @@ data class InstanceOptions(
     val refreshInterval: Long? = null, // seconds
     val stickyFeatures: StickyFeatures? = null,
 ) {
-    companion object {
+    internal companion object {
         private const val defaultBucketKeySeparator = "."
     }
 }

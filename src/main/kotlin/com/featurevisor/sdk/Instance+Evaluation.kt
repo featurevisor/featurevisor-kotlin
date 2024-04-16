@@ -24,7 +24,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.encodeToJsonElement
 
-enum class EvaluationReason(val value: String) {
+public enum class EvaluationReason(public val value: String) {
     NOT_FOUND("not_found"),
     NO_VARIATIONS("no_variations"),
     DISABLED("disabled"),
@@ -41,7 +41,7 @@ enum class EvaluationReason(val value: String) {
 }
 
 @Serializable
-data class Evaluation(
+public data class Evaluation(
     val featureKey: FeatureKey,
     val reason: EvaluationReason,
     val bucketValue: BucketValue? = null,
@@ -56,7 +56,7 @@ data class Evaluation(
     val variableValue: VariableValue? = null,
     val variableSchema: VariableSchema? = null,
 ) {
-    fun toDictionary(): Map<String, Any> {
+    public fun toDictionary(): Map<String, Any> {
         val data = try {
             val json = Json.encodeToJsonElement(this)
             Json.decodeFromJsonElement<Map<String, Any>>(json)
@@ -68,13 +68,13 @@ data class Evaluation(
     }
 }
 
-fun FeaturevisorInstance.isEnabled(featureKey: FeatureKey, context: Context = emptyMap()): Boolean {
+public fun FeaturevisorInstance.isEnabled(featureKey: FeatureKey, context: Context = emptyMap()): Boolean {
     val evaluation = evaluateFlag(featureKey, context)
     return evaluation.enabled == true
 }
 
 @Suppress("UNREACHABLE_CODE")
-fun FeaturevisorInstance.evaluateVariation(featureKey: FeatureKey, context: Context = emptyMap()): Evaluation {
+public fun FeaturevisorInstance.evaluateVariation(featureKey: FeatureKey, context: Context = emptyMap()): Evaluation {
     var evaluation: Evaluation
     try {
         val flag = evaluateFlag(featureKey, context)
@@ -231,7 +231,7 @@ fun FeaturevisorInstance.evaluateVariation(featureKey: FeatureKey, context: Cont
 
 
 @Suppress("UNREACHABLE_CODE")
-fun FeaturevisorInstance.evaluateFlag(featureKey: FeatureKey, context: Context = emptyMap()): Evaluation {
+public fun FeaturevisorInstance.evaluateFlag(featureKey: FeatureKey, context: Context = emptyMap()): Evaluation {
 
     var evaluation: Evaluation
 
@@ -443,7 +443,7 @@ fun FeaturevisorInstance.evaluateFlag(featureKey: FeatureKey, context: Context =
 }
 
 @Suppress("UNREACHABLE_CODE")
-fun FeaturevisorInstance.evaluateVariable(
+public fun FeaturevisorInstance.evaluateVariable(
     featureKey: FeatureKey,
     variableKey: VariableKey,
     context: Context = emptyMap(),

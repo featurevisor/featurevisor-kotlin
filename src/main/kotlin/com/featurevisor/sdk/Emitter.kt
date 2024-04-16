@@ -2,7 +2,7 @@ package com.featurevisor.sdk
 
 import com.featurevisor.types.EventName
 
-class Emitter {
+internal class Emitter {
 
     private val listeners = mutableMapOf<EventName, (Array<out Any>) -> Unit>()
 

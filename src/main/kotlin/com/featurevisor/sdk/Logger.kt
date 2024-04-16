@@ -5,20 +5,20 @@ import com.featurevisor.sdk.Logger.LogLevel.ERROR
 import com.featurevisor.sdk.Logger.LogLevel.INFO
 import com.featurevisor.sdk.Logger.LogLevel.WARN
 
-typealias LogDetails = Map<String, Any>
-typealias LogHandler = (level: Logger.LogLevel, message: String, details: LogDetails?) -> Unit
+public typealias LogDetails = Map<String, Any>
+public typealias LogHandler = (level: Logger.LogLevel, message: String, details: LogDetails?) -> Unit
 
-class Logger(
+public class Logger(
     private var levels: List<LogLevel>,
     private val handle: LogHandler,
 ) {
-    companion object {
+    public companion object {
         private val defaultLogLevels: List<LogLevel> = listOf(ERROR, WARN)
         private val defaultLogHandler: LogHandler = { level, message, _ ->
             println("[${level.value}] $message")
         }
 
-        fun createLogger(
+        public fun createLogger(
             levels: List<LogLevel> = defaultLogLevels,
             handle: LogHandler = defaultLogHandler,
         ): Logger {
@@ -26,23 +26,23 @@ class Logger(
         }
     }
 
-    fun setLevels(levels: List<LogLevel>) {
+    public fun setLevels(levels: List<LogLevel>) {
         this.levels = levels
     }
 
-    fun debug(message: String, details: LogDetails? = null) {
+    public fun debug(message: String, details: LogDetails? = null) {
         log(DEBUG, message, details)
     }
 
-    fun info(message: String, details: LogDetails? = null) {
+    public fun info(message: String, details: LogDetails? = null) {
         log(INFO, message, details)
     }
 
-    fun warn(message: String, details: LogDetails? = null) {
+    public fun warn(message: String, details: LogDetails? = null) {
         log(WARN, message, details)
     }
 
-    fun error(message: String, details: LogDetails? = null) {
+    public fun error(message: String, details: LogDetails? = null) {
         log(ERROR, message, details)
     }
 
@@ -52,7 +52,7 @@ class Logger(
         }
     }
 
-    enum class LogLevel(val value: String) {
+    public enum class LogLevel(public val value: String) {
         ERROR("error"),
         WARN("warn"),
         INFO("info"),

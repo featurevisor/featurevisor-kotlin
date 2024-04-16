@@ -25,7 +25,7 @@ import java.text.SimpleDateFormat
 
 @OptIn(InternalSerializationApi::class, ExperimentalSerializationApi::class)
 @Serializer(forClass = Required::class)
-object RequiredSerializer: KSerializer<Required>{
+internal object RequiredSerializer: KSerializer<Required>{
     override val descriptor: SerialDescriptor =
         buildSerialDescriptor("package.Required", PolymorphicKind.SEALED)
 
@@ -50,7 +50,7 @@ object RequiredSerializer: KSerializer<Required>{
 
 @OptIn(InternalSerializationApi::class)
 @Serializer(forClass = Condition::class)
-object ConditionSerializer : KSerializer<Condition> {
+public object ConditionSerializer : KSerializer<Condition> {
     override val descriptor: SerialDescriptor =
         buildSerialDescriptor("package.Condition", PolymorphicKind.SEALED)
 
@@ -125,7 +125,7 @@ object ConditionSerializer : KSerializer<Condition> {
 
 @OptIn(InternalSerializationApi::class)
 @Serializer(forClass = GroupSegment::class)
-object GroupSegmentSerializer : KSerializer<GroupSegment> {
+public object GroupSegmentSerializer : KSerializer<GroupSegment> {
     override val descriptor: SerialDescriptor =
         buildSerialDescriptor("package.GroupSegment", PolymorphicKind.SEALED)
 
@@ -201,7 +201,7 @@ object GroupSegmentSerializer : KSerializer<GroupSegment> {
 
 @OptIn(InternalSerializationApi::class)
 @Serializer(forClass = BucketBy::class)
-object BucketBySerializer : KSerializer<BucketBy> {
+public object BucketBySerializer : KSerializer<BucketBy> {
     override val descriptor: SerialDescriptor =
         buildSerialDescriptor("package.BucketBy", PolymorphicKind.SEALED)
 
@@ -245,7 +245,7 @@ object BucketBySerializer : KSerializer<BucketBy> {
 
 @OptIn(InternalSerializationApi::class)
 @Serializer(forClass = ConditionValue::class)
-object ConditionValueSerializer : KSerializer<ConditionValue> {
+public object ConditionValueSerializer : KSerializer<ConditionValue> {
     override val descriptor: SerialDescriptor =
         buildSerialDescriptor("package.ConditionValue", PolymorphicKind.SEALED)
 
@@ -288,7 +288,7 @@ object ConditionValueSerializer : KSerializer<ConditionValue> {
 
 @OptIn(InternalSerializationApi::class)
 @Serializer(forClass = VariableValue::class)
-object VariableValueSerializer : KSerializer<VariableValue> {
+public object VariableValueSerializer : KSerializer<VariableValue> {
     override val descriptor: SerialDescriptor =
         buildSerialDescriptor("package.VariableValue", PolymorphicKind.SEALED)
 
@@ -332,7 +332,7 @@ object VariableValueSerializer : KSerializer<VariableValue> {
     }
 }
 
-fun isValidJson(jsonString: String): Boolean {
+public fun isValidJson(jsonString: String): Boolean {
     return try {
         // Attempt to parse the string
         Json.decodeFromString<Map<String, JsonElement>>(jsonString)
