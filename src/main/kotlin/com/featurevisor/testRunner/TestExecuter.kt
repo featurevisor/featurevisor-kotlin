@@ -3,7 +3,7 @@ package com.featurevisor.testRunner
 import com.featurevisor.types.*
 import java.io.File
 
-data class TestProjectOption(
+internal data class TestProjectOption(
     val keyPattern: String = "",
     val assertionPattern: String = "",
     val verbose: Boolean = false,
@@ -14,7 +14,7 @@ data class TestProjectOption(
     val projectRootPath: String = getRootProjectDir()
 )
 
-fun startTest(option: TestProjectOption) {
+internal fun startTest(option: TestProjectOption) {
     var hasError = false
     val folder = File("${option.projectRootPath}/${option.testDirPath}")
     val listOfFiles = folder.listFiles()?.sortedBy { it }

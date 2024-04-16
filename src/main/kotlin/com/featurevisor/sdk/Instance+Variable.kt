@@ -16,7 +16,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.encodeToJsonElement
 
-fun FeaturevisorInstance.getVariable(
+public fun FeaturevisorInstance.getVariable(
     featureKey: FeatureKey,
     variableKey: VariableKey,
     context: Context = emptyMap(),
@@ -30,7 +30,7 @@ fun FeaturevisorInstance.getVariable(
     return evaluation.variableValue
 }
 
-fun FeaturevisorInstance.getVariableBoolean(
+public fun FeaturevisorInstance.getVariableBoolean(
     featureKey: FeatureKey,
     variableKey: VariableKey,
     context: Context,
@@ -38,7 +38,7 @@ fun FeaturevisorInstance.getVariableBoolean(
     return (getVariable(featureKey, variableKey, context) as? BooleanValue)?.value
 }
 
-fun FeaturevisorInstance.getVariableString(
+public fun FeaturevisorInstance.getVariableString(
     featureKey: FeatureKey,
     variableKey: VariableKey,
     context: Context,
@@ -46,7 +46,7 @@ fun FeaturevisorInstance.getVariableString(
     return (getVariable(featureKey, variableKey, context) as? StringValue)?.value
 }
 
-fun FeaturevisorInstance.getVariableInteger(
+public fun FeaturevisorInstance.getVariableInteger(
     featureKey: FeatureKey,
     variableKey: VariableKey,
     context: Context,
@@ -54,7 +54,7 @@ fun FeaturevisorInstance.getVariableInteger(
     return (getVariable(featureKey, variableKey, context) as? IntValue)?.value
 }
 
-fun FeaturevisorInstance.getVariableDouble(
+public fun FeaturevisorInstance.getVariableDouble(
     featureKey: FeatureKey,
     variableKey: VariableKey,
     context: Context,
@@ -62,7 +62,7 @@ fun FeaturevisorInstance.getVariableDouble(
     return (getVariable(featureKey, variableKey, context) as? DoubleValue)?.value
 }
 
-fun FeaturevisorInstance.getVariableArray(
+public fun FeaturevisorInstance.getVariableArray(
     featureKey: FeatureKey,
     variableKey: VariableKey,
     context: Context,
@@ -70,7 +70,7 @@ fun FeaturevisorInstance.getVariableArray(
     return (getVariable(featureKey, variableKey, context) as? ArrayValue)?.values
 }
 
-inline fun <reified T : Any> FeaturevisorInstance.getVariableObject(
+public inline fun <reified T : Any> FeaturevisorInstance.getVariableObject(
     featureKey: FeatureKey,
     variableKey: VariableKey,
     context: Context,
@@ -84,7 +84,7 @@ inline fun <reified T : Any> FeaturevisorInstance.getVariableObject(
     }
 }
 
-inline fun <reified T : Any> FeaturevisorInstance.getVariableJSON(
+public inline fun <reified T : Any> FeaturevisorInstance.getVariableJSON(
     featureKey: FeatureKey,
     variableKey: VariableKey,
     context: Context,

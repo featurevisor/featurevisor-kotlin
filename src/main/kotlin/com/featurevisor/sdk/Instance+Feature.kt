@@ -7,11 +7,11 @@ import com.featurevisor.types.Feature
 import com.featurevisor.types.Force
 import com.featurevisor.types.Traffic
 
-fun FeaturevisorInstance.getFeatureByKey(featureKey: String): Feature? {
+public fun FeaturevisorInstance.getFeatureByKey(featureKey: String): Feature? {
     return datafileReader.getFeature(featureKey)
 }
 
-fun FeaturevisorInstance.getFeature(featureKey: String): Feature?{
+public fun FeaturevisorInstance.getFeature(featureKey: String): Feature?{
     return datafileReader.getFeature(featureKey)
 }
 
@@ -58,7 +58,7 @@ internal fun FeaturevisorInstance.getMatchedAllocation(
     }
 }
 
-data class MatchedTrafficAndAllocation(
+internal data class MatchedTrafficAndAllocation(
     val matchedTraffic: Traffic?,
     val matchedAllocation: Allocation?,
 )

@@ -5,12 +5,12 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import java.util.*
 
-typealias Context = Map<AttributeKey, AttributeValue>
-typealias VariationValue = String
-typealias VariableKey = String
+public typealias Context = Map<AttributeKey, AttributeValue>
+public typealias VariationValue = String
+public typealias VariableKey = String
 
 @Serializable
-enum class VariableType {
+public enum class VariableType {
     @SerialName("boolean")
     BOOLEAN,
     @SerialName("string")
@@ -27,21 +27,21 @@ enum class VariableType {
     JSON
 }
 
-typealias VariableObjectValue = Map<String, VariableValue>
+public typealias VariableObjectValue = Map<String, VariableValue>
 
 @Serializable(with = VariableValueSerializer::class)
-sealed class VariableValue {
-    data class BooleanValue(val value: Boolean) : VariableValue()
-    data class StringValue(val value: String) : VariableValue()
-    data class IntValue(val value: Int) : VariableValue()
-    data class DoubleValue(val value: Double) : VariableValue()
-    data class ArrayValue(val values: List<String>) : VariableValue()
-    data class ObjectValue(val value: VariableObjectValue) : VariableValue()
-    data class JsonValue(val value: String) : VariableValue()
+public sealed class VariableValue {
+    public data class BooleanValue(val value: Boolean) : VariableValue()
+    public data class StringValue(val value: String) : VariableValue()
+    public data class IntValue(val value: Int) : VariableValue()
+    public data class DoubleValue(val value: Double) : VariableValue()
+    public data class ArrayValue(val values: List<String>) : VariableValue()
+    public data class ObjectValue(val value: VariableObjectValue) : VariableValue()
+    public data class JsonValue(val value: String) : VariableValue()
 }
 
 @Serializable
-data class VariableOverride(
+public data class VariableOverride(
     val value: VariableValue,
 
     // one of the below must be present in YAML
@@ -50,14 +50,14 @@ data class VariableOverride(
 )
 
 @Serializable
-data class Variable(
+public data class Variable(
     val key: VariableKey,
     val value: VariableValue,
     val overrides: List<VariableOverride>? = null,
 )
 
 @Serializable
-data class Variation(
+public data class Variation(
     // only available in YAML
     val description: String? = null,
 
@@ -70,18 +70,18 @@ data class Variation(
 )
 
 @Serializable
-data class VariableSchema(
+public data class VariableSchema(
     val key: VariableKey,
     val type: VariableType,
     val defaultValue: VariableValue,
 )
 
-typealias FeatureKey = String
+public typealias FeatureKey = String
 
-typealias VariableValues = Map<VariableKey, VariableValue>
+public typealias VariableValues = Map<VariableKey, VariableValue>
 
 @Serializable
-data class Force(
+public data class Force(
     // one of the below must be present in YAML
     val conditions: Condition? = null,
     val segments: GroupSegment? = null,
@@ -91,7 +91,7 @@ data class Force(
     val variables: VariableValues? = null,
 )
 
-data class Slot(
+public data class Slot(
     // @TODO: allow false?
     val feature: FeatureKey? = null,
 
@@ -99,27 +99,27 @@ data class Slot(
     val percentage: Weight,
 )
 
-data class Group(
+public data class Group(
     val key: String,
     val description: String,
     val slots: List<Slot>,
 )
 
-typealias BucketKey = String
+public typealias BucketKey = String
 // 0 to 100,000
-typealias BucketValue = Int
-typealias StickyFeatures = Map<FeatureKey, OverrideFeature>
-typealias InitialFeatures = Map<FeatureKey, OverrideFeature>
+public typealias BucketValue = Int
+public typealias StickyFeatures = Map<FeatureKey, OverrideFeature>
+public typealias InitialFeatures = Map<FeatureKey, OverrideFeature>
 
 /**
  * YAML-only type
  */
 // 0 to 100
-typealias Weight = Double
-typealias EnvironmentKey = String
-typealias RuleKey = String
+internal typealias Weight = Double
+internal typealias EnvironmentKey = String
+internal typealias RuleKey = String
 
-data class Rule(
+public data class Rule(
     val key: RuleKey,
     val segments: GroupSegment,
     val percentage: Weight,
@@ -129,15 +129,15 @@ data class Rule(
     val variables: VariableValues? = null,
 )
 
-data class Environment(
+public data class Environment(
     val expose: Boolean? = null,
     val rules: List<Rule>,
     val force: List<Force>? = null,
 )
 
-typealias Environments = Map<EnvironmentKey, Environment>
+public typealias Environments = Map<EnvironmentKey, Environment>
 
-data class ParsedFeature(
+public data class ParsedFeature(
     val key: FeatureKey,
 
     val archived: Boolean?,
@@ -156,80 +156,80 @@ data class ParsedFeature(
     val environments: Environments,
 )
 
-typealias AttributeKey = String
+public typealias AttributeKey = String
 
 @Serializable
-data class Attribute(
+public data class Attribute(
     val key: AttributeKey,
     val type: String,
     val archived: Boolean? = null,
     val capture: Boolean? = null,
 )
 
-sealed class AttributeValue {
-    data class StringValue(val value: String?) : AttributeValue()
-    data class IntValue(val value: Int) : AttributeValue()
-    data class DoubleValue(val value: Double) : AttributeValue()
-    data class BooleanValue(val value: Boolean) : AttributeValue()
-    data class DateValue(val value: Date) : AttributeValue()
+public sealed class AttributeValue {
+    public data class StringValue(val value: String?) : AttributeValue()
+    public data class IntValue(val value: Int) : AttributeValue()
+    public data class DoubleValue(val value: Double) : AttributeValue()
+    public data class BooleanValue(val value: Boolean) : AttributeValue()
+    public data class DateValue(val value: Date) : AttributeValue()
 }
 
 @Serializable(with = ConditionSerializer::class)
-sealed class Condition {
-    data class Plain(
+public sealed class Condition {
+    public data class Plain(
         val attributeKey: AttributeKey,
         val operator: Operator,
         val value: ConditionValue,
     ) : Condition()
 
-    data class And(val and: List<Condition>) : Condition()
-    data class Or(val or: List<Condition>) : Condition()
-    data class Not(val not: List<Condition>) : Condition()
+    public data class And(val and: List<Condition>) : Condition()
+    public data class Or(val or: List<Condition>) : Condition()
+    public data class Not(val not: List<Condition>) : Condition()
 }
 
-const val TAG = "FeaturevisorService"
+public const val TAG: String = "FeaturevisorService"
 
 @Serializable(with = ConditionValueSerializer::class)
-sealed class ConditionValue {
-    data class StringValue(val value: String?) : ConditionValue()
-    data class IntValue(val value: Int) : ConditionValue()
-    data class DoubleValue(val value: Double) : ConditionValue()
-    data class BooleanValue(val value: Boolean) : ConditionValue()
-    data class ArrayValue(val values: List<String>) : ConditionValue()
-    data class DateTimeValue(val value: Date) : ConditionValue()
+public sealed class ConditionValue {
+    public data class StringValue(val value: String?) : ConditionValue()
+    public data class IntValue(val value: Int) : ConditionValue()
+    public data class DoubleValue(val value: Double) : ConditionValue()
+    public data class BooleanValue(val value: Boolean) : ConditionValue()
+    public data class ArrayValue(val values: List<String>) : ConditionValue()
+    public data class DateTimeValue(val value: Date) : ConditionValue()
 }
 
-typealias SegmentKey = String
+public typealias SegmentKey = String
 
 @Serializable
-data class Segment(
+public data class Segment(
     val archived: Boolean? = null,
     val key: SegmentKey,
     val conditions: Condition,
 )
 
-data class AndGroupSegment(
+public data class AndGroupSegment(
     val and: List<GroupSegment>,
 )
 
-data class OrGroupSegment(
+public data class OrGroupSegment(
     val or: List<GroupSegment>,
 )
 
-data class NotGroupSegment(
+public data class NotGroupSegment(
     val not: List<GroupSegment>,
 )
 
 @Serializable(with = GroupSegmentSerializer::class)
-sealed class GroupSegment {
-    data class Plain(val segment: SegmentKey) : GroupSegment()
-    data class Multiple(val segments: List<GroupSegment>) : GroupSegment()
-    data class And(val segment: AndGroupSegment) : GroupSegment()
-    data class Or(val segment: OrGroupSegment) : GroupSegment()
-    data class Not(val segment: NotGroupSegment) : GroupSegment()
+public sealed class GroupSegment {
+    public data class Plain(val segment: SegmentKey) : GroupSegment()
+    public data class Multiple(val segments: List<GroupSegment>) : GroupSegment()
+    public data class And(val segment: AndGroupSegment) : GroupSegment()
+    public data class Or(val segment: OrGroupSegment) : GroupSegment()
+    public data class Not(val segment: NotGroupSegment) : GroupSegment()
 }
 
-enum class Operator(val value: String) {
+public enum class Operator(public val value: String) {
     EQUALS("equals"),
     NOT_EQUALS("notEquals"),
 
@@ -262,7 +262,7 @@ enum class Operator(val value: String) {
     NOT_IN_ARRAY("notIn");
 }
 
-enum class EventName {
+public enum class EventName {
     READY,
     REFRESH,
     UPDATE,
@@ -274,18 +274,18 @@ enum class EventName {
  * Datafile-only types
  */
 // 0 to 100,000
-typealias Percentage = Int
+internal typealias Percentage = Int
 
-typealias Range = List<Int>
+internal typealias Range = List<Int>
 
 @Serializable
-data class Allocation(
+public data class Allocation(
     val variation: VariationValue,
     val range: Range,
 )
 
 @Serializable
-data class Traffic(
+public data class Traffic(
     val key: RuleKey,
     val segments: GroupSegment,
     val percentage: Percentage,
@@ -298,25 +298,25 @@ data class Traffic(
 )
 
 @Serializable(with = BucketBySerializer::class)
-sealed class BucketBy {
-    data class Single(val bucketBy: String) : BucketBy()
-    data class And(val bucketBy: List<String>) : BucketBy()
-    data class Or(val bucketBy: List<String>) : BucketBy()
+public sealed class BucketBy {
+    public data class Single(val bucketBy: String) : BucketBy()
+    public data class And(val bucketBy: List<String>) : BucketBy()
+    public data class Or(val bucketBy: List<String>) : BucketBy()
 }
 
-data class RequiredWithVariation(
+public data class RequiredWithVariation(
     val key: FeatureKey,
     val variation: VariationValue,
 )
 
 @Serializable(with = RequiredSerializer::class)
-sealed class Required {
-    data class FeatureKey(val required: com.featurevisor.types.FeatureKey) : Required()
-    data class WithVariation(val required: RequiredWithVariation) : Required()
+public sealed class Required {
+    public data class FeatureKey(val required: com.featurevisor.types.FeatureKey) : Required()
+    public data class WithVariation(val required: RequiredWithVariation) : Required()
 }
 
 @Serializable
-data class Feature(
+public data class Feature(
     val key: FeatureKey,
     val deprecated: Boolean? = null,
     val variablesSchema: List<VariableSchema>? = null,
@@ -331,7 +331,7 @@ data class Feature(
 )
 
 @Serializable
-data class DatafileContent(
+public data class DatafileContent(
     val schemaVersion: String,
     val revision: String,
     val attributes: List<Attribute>,
@@ -340,7 +340,7 @@ data class DatafileContent(
 )
 
 @Serializable
-data class OverrideFeature(
+public data class OverrideFeature(
     val enabled: Boolean,
     val variation: VariationValue? = null,
     val variables: VariableValues? = null,
@@ -350,10 +350,10 @@ data class OverrideFeature(
  * Tests
  */
 
-typealias AssertionMatrix = Map<String, List<AttributeValue>>
+internal typealias AssertionMatrix = Map<String, List<AttributeValue>>
 
 
-data class FeatureAssertion(
+internal data class FeatureAssertion(
     var description: String?=null,
     var environment: EnvironmentKey="staging",
     // bucket weight: 0 to 100
@@ -365,29 +365,29 @@ data class FeatureAssertion(
     val matrix: AssertionMatrix? = null
 )
 
-data class TestFeature(
+internal data class TestFeature(
     val key: FeatureKey,
     val assertions: List<FeatureAssertion>,
 )
 
-data class SegmentAssertion(
+internal data class SegmentAssertion(
     var description: String?=null,
     var context: Context,
     val expectedToMatch: Boolean,
     val matrix: AssertionMatrix? = null
 )
 
-data class TestSegment(
+internal data class TestSegment(
     val key: SegmentKey,
     val assertions: List<SegmentAssertion>,
 )
 
-sealed class Test {
+internal sealed class Test {
     data class Feature(val value: TestFeature) : Test()
     data class Segment(val value: TestSegment) : Test()
 }
 
-sealed class WeightType{
+internal sealed class WeightType{
     data class IntType(val value: Int):WeightType()
 
     data class DoubleType(val value: Double):WeightType()
@@ -395,7 +395,7 @@ sealed class WeightType{
     data class StringType(val value: String):WeightType()
 }
 
-data class TestResultAssertionError(
+internal data class TestResultAssertionError(
     val type: String,
     val expected: Any?=null,
     val actual: Any?=null,
@@ -403,7 +403,7 @@ data class TestResultAssertionError(
     val details: Map<String, Any>?=null
 )
 
-data class TestResultAssertion(
+internal data class TestResultAssertion(
     val description: String,
     val environment: EnvironmentKey? = null,
     var duration: Long,
@@ -411,7 +411,7 @@ data class TestResultAssertion(
     val errors: List<TestResultAssertionError>?
 )
 
-data class TestResult(
+internal data class TestResult(
     val type: String,
     val key: FeatureKey,
     var notFound: Boolean?=null,
@@ -420,17 +420,17 @@ data class TestResult(
     val assertions: List<TestResultAssertion>
 )
 
-data class ExecutionResult(
+internal data class ExecutionResult(
     var passed: Boolean,
     val assertionsCount: AssertionsCount
 )
 
-data class AssertionsCount(
+internal data class AssertionsCount(
     var passed: Int=0,
     var failed: Int=0
 )
 
-data class DataFile(
+internal data class DataFile(
     val stagingDataFiles: DatafileContent? = null,
     val productionDataFiles: DatafileContent? = null
 )

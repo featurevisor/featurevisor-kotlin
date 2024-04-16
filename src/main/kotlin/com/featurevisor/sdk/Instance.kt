@@ -10,12 +10,12 @@ import kotlinx.coroutines.Job
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 
-typealias ConfigureBucketKey = (Feature, Context, BucketKey) -> BucketKey
-typealias ConfigureBucketValue = (Feature, Context, BucketValue) -> BucketValue
-typealias InterceptContext = (Context) -> Context
-typealias DatafileFetchHandler = (datafileUrl: String) -> Result<DatafileContent>
+internal typealias ConfigureBucketKey = (Feature, Context, BucketKey) -> BucketKey
+internal typealias ConfigureBucketValue = (Feature, Context, BucketValue) -> BucketValue
+internal typealias InterceptContext = (Context) -> Context
+internal typealias DatafileFetchHandler = (datafileUrl: String) -> Result<DatafileContent>
 
-var emptyDatafile = DatafileContent(
+internal var emptyDatafile = DatafileContent(
     schemaVersion =  "1",
     revision = "unknown",
     attributes = emptyList(),
@@ -23,14 +23,14 @@ var emptyDatafile = DatafileContent(
     features = emptyList(),
 )
 
-class FeaturevisorInstance private constructor(options: InstanceOptions) {
+public class FeaturevisorInstance private constructor(options: InstanceOptions) {
 
-    companion object {
-        fun createInstance(options: InstanceOptions): FeaturevisorInstance {
+    public companion object {
+        public fun createInstance(options: InstanceOptions): FeaturevisorInstance {
             return FeaturevisorInstance(options)
         }
 
-        var companionLogger: Logger? = null
+        public var companionLogger: Logger? = null
     }
 
     private val on: (EventName, Listener) -> Unit
@@ -118,11 +118,11 @@ class FeaturevisorInstance private constructor(options: InstanceOptions) {
         }
     }
 
-    fun setLogLevels(levels: List<Logger.LogLevel>) {
+    public fun setLogLevels(levels: List<Logger.LogLevel>) {
         this.logger?.setLevels(levels)
     }
 
-    fun setDatafile(datafileJSON: String) {
+    public fun setDatafile(datafileJSON: String) {
         val data = datafileJSON.toByteArray(Charsets.UTF_8)
         try {
             val datafileContent = Json.decodeFromString<DatafileContent>(String(data))
@@ -132,15 +132,15 @@ class FeaturevisorInstance private constructor(options: InstanceOptions) {
         }
     }
 
-    fun setDatafile(datafileContent: DatafileContent) {
+    public fun setDatafile(datafileContent: DatafileContent) {
         datafileReader = DatafileReader(datafileJson = datafileContent)
     }
 
-    fun setStickyFeatures(stickyFeatures: StickyFeatures?) {
+    public fun setStickyFeatures(stickyFeatures: StickyFeatures?) {
         this.stickyFeatures = stickyFeatures
     }
 
-    fun getRevision(): String {
+    public fun getRevision(): String {
         return datafileReader.getRevision()
     }
 }

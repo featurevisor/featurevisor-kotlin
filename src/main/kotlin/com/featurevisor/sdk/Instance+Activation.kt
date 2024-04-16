@@ -6,7 +6,7 @@ import com.featurevisor.types.EventName.ACTIVATION
 import com.featurevisor.types.FeatureKey
 import com.featurevisor.types.VariationValue
 
-fun FeaturevisorInstance.activate(featureKey: FeatureKey, context: Context = emptyMap()): VariationValue? {
+public fun FeaturevisorInstance.activate(featureKey: FeatureKey, context: Context = emptyMap()): VariationValue? {
     val evaluation = evaluateVariation(featureKey, context)
     val variationValue = evaluation.variation?.value ?: evaluation.variationValue ?: return null
     val finalContext = interceptContext?.invoke(context) ?: context

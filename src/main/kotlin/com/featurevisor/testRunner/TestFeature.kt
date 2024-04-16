@@ -9,7 +9,7 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 
-fun testFeature(testFeature: TestFeature, dataFile: DataFile, option: TestProjectOption): TestResult {
+internal fun testFeature(testFeature: TestFeature, dataFile: DataFile, option: TestProjectOption): TestResult {
     val testStartTime = System.currentTimeMillis()
     val featureKey = testFeature.key
 

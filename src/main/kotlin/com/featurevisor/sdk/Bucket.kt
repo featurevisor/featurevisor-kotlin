@@ -3,7 +3,7 @@ package com.featurevisor.sdk
 import com.goncalossilva.murmurhash.MurmurHash3
 import kotlin.math.floor
 
-object Bucket {
+internal object Bucket {
 
     private const val HASH_SEED = 1u
     private const val MAX_HASH_VALUE = 4294967296 // 2^32

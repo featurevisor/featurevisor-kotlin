@@ -8,7 +8,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
-fun FeaturevisorInstance.startRefreshing() = when {
+public fun FeaturevisorInstance.startRefreshing(): Unit? = when {
     datafileUrl == null -> {
         logger?.error("cannot start refreshing since `datafileUrl` is not provided")
         throw MissingDatafileUrlWhileRefreshing
@@ -26,7 +26,7 @@ fun FeaturevisorInstance.startRefreshing() = when {
     }
 }
 
-fun FeaturevisorInstance.stopRefreshing() {
+public fun FeaturevisorInstance.stopRefreshing() {
     refreshJob?.cancel()
     refreshJob = null
     logger?.warn("refreshing has stopped")

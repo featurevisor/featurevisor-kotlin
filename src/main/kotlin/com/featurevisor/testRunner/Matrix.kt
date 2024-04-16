@@ -2,7 +2,7 @@ package com.featurevisor.testRunner
 
 import com.featurevisor.types.*
 
-fun generateCombinations(
+internal fun generateCombinations(
     keys: List<String>,
     matrix: AssertionMatrix,
     idx: Int,
@@ -23,7 +23,7 @@ fun generateCombinations(
     }
 }
 
-fun getMatrixCombinations(matrix: AssertionMatrix): List<MutableMap<String, AttributeValue>> {
+internal fun getMatrixCombinations(matrix: AssertionMatrix): List<MutableMap<String, AttributeValue>> {
     val keys = matrix.keys.toList()
 
     if (keys.isEmpty()) {
@@ -35,7 +35,7 @@ fun getMatrixCombinations(matrix: AssertionMatrix): List<MutableMap<String, Attr
     return combinations
 }
 
-fun applyCombinationToValue(value: Any?, combination: Map<String, AttributeValue>): Any? {
+internal fun applyCombinationToValue(value: Any?, combination: Map<String, AttributeValue>): Any? {
     if (value is String) {
         val variableKeysInValue = Regex("""\$\{\{\s*([^\s}]+)\s*}}""").findAll(value)
 
@@ -52,7 +52,7 @@ fun applyCombinationToValue(value: Any?, combination: Map<String, AttributeValue
     return value
 }
 
-fun applyCombinationToFeatureAssertion(
+internal fun applyCombinationToFeatureAssertion(
     combination: Map<String, AttributeValue>,
     assertion: FeatureAssertion
 ): FeatureAssertion {
@@ -86,7 +86,7 @@ fun applyCombinationToFeatureAssertion(
     return flattenedAssertion
 }
 
-fun getFeatureAssertionsFromMatrix(
+internal fun getFeatureAssertionsFromMatrix(
     aIndex: Int,
     assertionWithMatrix: FeatureAssertion
 ): List<FeatureAssertion> {
@@ -111,7 +111,7 @@ fun getFeatureAssertionsFromMatrix(
 }
 
 @Suppress("IMPLICIT_CAST_TO_ANY")
-fun getAtValue(at: WeightType) = when (at) {
+internal fun getAtValue(at: WeightType) = when (at) {
     is WeightType.IntType -> {
         at.value
     }
@@ -125,7 +125,7 @@ fun getAtValue(at: WeightType) = when (at) {
     }
 }
 
-fun applyCombinationToSegmentAssertion(
+internal fun applyCombinationToSegmentAssertion(
     combination: Map<String, AttributeValue>,
     assertion: SegmentAssertion
 ): SegmentAssertion {
@@ -143,7 +143,7 @@ fun applyCombinationToSegmentAssertion(
     return flattenedAssertion
 }
 
-fun getSegmentAssertionsFromMatrix(
+internal fun getSegmentAssertionsFromMatrix(
     aIndex: Int,
     assertionWithMatrix: SegmentAssertion
 ): List<SegmentAssertion> {

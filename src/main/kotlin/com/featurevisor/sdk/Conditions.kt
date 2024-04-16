@@ -30,7 +30,7 @@ import com.featurevisor.types.Operator.SEMVER_NOT_EQUALS
 import com.featurevisor.types.Operator.STARTS_WITH
 import net.swiftzer.semver.SemVer
 
-object Conditions {
+internal object Conditions {
 
     fun conditionIsMatched(condition: Plain, context: Context): Boolean {
         val (attributeKey, operator, conditionValue) = condition

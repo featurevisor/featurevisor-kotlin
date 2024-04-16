@@ -7,6 +7,7 @@
 
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
+import org.jetbrains.kotlin.gradle.dsl.ExplicitApiMode.Strict
 
 plugins {
     // Apply the org.jetbrains.kotlin.jvm Plugin to add support for Kotlin.
@@ -42,6 +43,10 @@ publishing {
             }
         }
     }
+}
+
+kotlin {
+    explicitApi = Strict
 }
 
 dependencies {

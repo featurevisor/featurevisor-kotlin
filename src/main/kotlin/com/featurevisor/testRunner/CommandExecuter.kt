@@ -12,7 +12,7 @@ internal fun getJsonForFeatureUsingCommand(featureName: String, environment: Str
         null
     }
 
-fun getJsonForDataFile(environment: String, projectRootPath: String) =
+internal fun getJsonForDataFile(environment: String, projectRootPath: String) =
     try {
         createCommandAccordingToEnvironment(environment).runCommand(getFileForSpecificPath(projectRootPath))
     } catch (e: Exception) {
