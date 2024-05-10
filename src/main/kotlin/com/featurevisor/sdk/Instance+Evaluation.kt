@@ -475,7 +475,7 @@ fun FeaturevisorInstance.evaluateVariable(
 
         // initial
         if (!statuses.ready && initialFeatures?.get(featureKey)?.variables?.get(variableKey) != null) {
-            val variableValue = initialFeatures?.get(featureKey)?.variables?.get(variableKey)
+            val variableValue = initialFeatures[featureKey]?.variables?.get(variableKey)
             evaluation = Evaluation(
                 featureKey = featureKey,
                 reason = INITIAL,
