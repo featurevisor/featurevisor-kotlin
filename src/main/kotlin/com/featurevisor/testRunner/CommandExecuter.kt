@@ -39,3 +39,15 @@ private fun String.runCommand(workingDir: File): String? =
         printMessageInRedColor("Exception while executing command -> ${e.message}")
         null
     }
+
+fun createCommandForConfiguration()=
+    "npx featurevisor config --print --pretty"
+
+fun getConfigurationJson(projectRootPath: String) =
+    try {
+        createCommandForConfiguration().runCommand(getFileForSpecificPath(projectRootPath))
+    }catch (e:Exception){
+        printMessageInRedColor("Exception in createCommandForConfiguration Commandline execution --> ${e.message}")
+        null
+    }
+

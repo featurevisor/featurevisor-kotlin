@@ -257,3 +257,7 @@ private fun parseConditionValue(value: Any?): ConditionValue {
     }
 }
 
+fun parseConfiguration(projectRootPath: String) =
+    json.decodeFromString(Configuration.serializer(),getConfigurationJson(projectRootPath)!!)
+
+

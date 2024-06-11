@@ -10,80 +10,80 @@ data class TestProjectOption(
     val showDatafile: Boolean = false,
     val onlyFailures: Boolean = false,
     val fast: Boolean = false,
-    val testDirPath: String = "tests",
-    val projectRootPath: String = getRootProjectDir()
+    val projectRootPath: String? = null
 )
 
 fun startTest(option: TestProjectOption) {
-    var hasError = false
-    val folder = File("${option.projectRootPath}/${option.testDirPath}")
-    val listOfFiles = folder.listFiles()?.sortedBy { it }
-    var executionResult: ExecutionResult? = null
-    val startTime = System.currentTimeMillis()
-    var passedTestsCount = 0
-    var failedTestsCount = 0
-    var passedAssertionsCount = 0
-    var failedAssertionsCount = 0
+    option.projectRootPath?.let { it ->
+        val projectConfig =  parseConfiguration(it)
+        var hasError = false
+        val folder = File(projectConfig.testsDirectoryPath)
+        val listOfFiles = folder.listFiles()?.sortedBy { it }
+        var executionResult: ExecutionResult? = null
+        val startTime = System.currentTimeMillis()
+        var passedTestsCount = 0
+        var failedTestsCount = 0
+        var passedAssertionsCount = 0
+        var failedAssertionsCount = 0
+        val datafileContentByEnvironment: MutableMap<String, DatafileContent> = mutableMapOf()
 
-    if (!listOfFiles.isNullOrEmpty()) {
-        val datafile =
-            if (option.fast) buildDataFileForBothEnvironments(projectRootPath = option.projectRootPath) else DataFile(
-                null,
-                null
-            )
-        if (option.fast && (datafile.stagingDataFiles == null || datafile.productionDataFiles == null)) {
-            return
-        }
-        for (file in listOfFiles) {
-            if (file.isFile) {
-                if (file.extension.equals("yml", true)) {
-                    val filePath = file.absoluteFile.path
-                    try {
-                        executionResult = executeTest(filePath, dataFile = datafile, option)
-                    } catch (e: Exception) {
-                        printMessageInRedColor("Exception in $filePath --> ${e.message}")
-                    }
-
-                    if (executionResult == null) {
-                        continue
-                    }
-
-                    if (executionResult.passed) {
-                        passedTestsCount++
-                    } else {
-                        hasError = true
-                        failedTestsCount++
-                    }
-
-                    passedAssertionsCount += executionResult.assertionsCount.passed
-                    failedAssertionsCount += executionResult.assertionsCount.failed
-                } else {
-                    printMessageInRedColor("The file is not valid yml file")
-                }
+        if (option.fast) {
+            for (environment in projectConfig.environments) {
+                val datafileContent = buildDataFileAsPerEnvironment(option.projectRootPath,environment)
+                datafileContentByEnvironment[environment] = datafileContent
             }
         }
 
-        val endTime = System.currentTimeMillis() - startTime
+        if (!listOfFiles.isNullOrEmpty()) {
+            for (file in listOfFiles) {
+                if (file.isFile) {
+                    if (file.extension.equals("yml", true)) {
+                        val filePath = file.absoluteFile.path
+                        if (listOfFiles.isNotEmpty()){
+                            executionResult = executeTest(filePath, datafileContentByEnvironment, option, projectConfig)
+                            if (executionResult == null) {
+                                continue
+                            }
 
-        if (!option.onlyFailures || hasError) {
-            printNormalMessage("\n----")
-        }
-        printNormalMessage("")
+                            if (executionResult.passed) {
+                                passedTestsCount++
+                            } else {
+                                hasError = true
+                                failedTestsCount++
+                            }
 
-        if (hasError) {
-            printMessageInRedColor("\n\nTest specs: $passedTestsCount passed, $failedTestsCount failed")
-            printMessageInRedColor("Test Assertion: $passedAssertionsCount passed, $failedAssertionsCount failed")
+                            passedAssertionsCount += executionResult.assertionsCount.passed
+                            failedAssertionsCount += executionResult.assertionsCount.failed
+                        }
+                    } else {
+                        printMessageInRedColor("The file is not valid yml file")
+                    }
+                }
+            }
+
+            val endTime = System.currentTimeMillis() - startTime
+
+            if (!option.onlyFailures || hasError) {
+                printNormalMessage("\n----")
+            }
+            printNormalMessage("")
+
+            if (hasError) {
+                printMessageInRedColor("\n\nTest specs: $passedTestsCount passed, $failedTestsCount failed")
+                printMessageInRedColor("Test Assertion: $passedAssertionsCount passed, $failedAssertionsCount failed")
+            } else {
+                printMessageInGreenColor("\n\nTest specs: $passedTestsCount passed, $failedTestsCount failed")
+                printMessageInGreenColor("Test Assertion: $passedAssertionsCount passed, $failedAssertionsCount failed")
+            }
+            printBoldMessage("Time:       ${prettyDuration(endTime)}")
         } else {
-            printMessageInGreenColor("\n\nTest specs: $passedTestsCount passed, $failedTestsCount failed")
-            printMessageInGreenColor("Test Assertion: $passedAssertionsCount passed, $failedAssertionsCount failed")
+            printMessageInRedColor("Directory is Empty or not exists")
         }
-        printBoldMessage("Time:       ${prettyDuration(endTime)}")
-    } else {
-        printMessageInRedColor("Directory is Empty or not exists")
-    }
+    } ?: printNormalMessage("Root Project Path Not Found")
+
 }
 
-private fun executeTest(filePath: String, dataFile: DataFile, option: TestProjectOption): ExecutionResult? {
+private fun executeTest(filePath: String, datafileContentByEnvironment:MutableMap<String, DatafileContent>, option: TestProjectOption,configuration: Configuration): ExecutionResult? {
     val test = parseTestFeatureAssertions(filePath)
 
     val executionResult = ExecutionResult(
@@ -105,7 +105,7 @@ private fun executeTest(filePath: String, dataFile: DataFile, option: TestProjec
             is Test.Feature -> {
                 testFeature(
                     testFeature = test.value,
-                    dataFile = dataFile,
+                    datafileContentByEnvironment = datafileContentByEnvironment,
                     option = option
                 )
             }
@@ -113,6 +113,7 @@ private fun executeTest(filePath: String, dataFile: DataFile, option: TestProjec
             is Test.Segment -> {
                 testSegment(
                     testSegment = test.value,
+                    configuration = configuration,
                     option = option
                 )
             }

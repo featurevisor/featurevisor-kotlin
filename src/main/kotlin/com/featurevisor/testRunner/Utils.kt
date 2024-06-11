@@ -2,6 +2,7 @@ package com.featurevisor.testRunner
 
 import com.featurevisor.sdk.FeaturevisorInstance
 import com.featurevisor.sdk.InstanceOptions
+import com.featurevisor.sdk.emptyDatafile
 import com.featurevisor.types.*
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
@@ -237,29 +238,14 @@ fun checkJsonIsEquals(a: String, b: String): Boolean {
     return map1 == map2
 }
 
-fun buildDataFileForBothEnvironments(projectRootPath: String): DataFile =
-    DataFile(
-        stagingDataFiles = buildDataFileForStaging(projectRootPath),
-        productionDataFiles = buildDataFileForProduction(projectRootPath)
-    )
 
-fun buildDataFileForStaging(projectRootPath: String) = try {
-    getJsonForDataFile(environment = "staging", projectRootPath = projectRootPath)?.run {
+fun buildDataFileAsPerEnvironment(projectRootPath: String,environment: String) = try {
+    getJsonForDataFile(environment = environment, projectRootPath = projectRootPath)?.run {
         convertToDataClass<DatafileContent>()
-    }
+    } ?: emptyDatafile
 } catch (e: Exception) {
-    printMessageInRedColor("Unable to parse staging data file")
-    null
-}
-
-fun buildDataFileForProduction(projectRootPath: String) = try {
-    getJsonForDataFile(environment = "production", projectRootPath = projectRootPath)?.run {
-        convertToDataClass<DatafileContent>()
-    }
-
-} catch (e: Exception) {
-    printMessageInRedColor("Unable to parse production data file")
-    null
+    printMessageInRedColor("Unable to parse  data file")
+    emptyDatafile
 }
 
 fun getDataFileContent(featureName: String, environment: String, projectRootPath: String) =
