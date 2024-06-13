@@ -1,14 +1,8 @@
 package com.featurevisor.sdk
 
-import com.featurevisor.types.Attribute
-import com.featurevisor.types.AttributeKey
-import com.featurevisor.types.DatafileContent
-import com.featurevisor.types.Feature
-import com.featurevisor.types.FeatureKey
-import com.featurevisor.types.Segment
-import com.featurevisor.types.SegmentKey
+import com.featurevisor.types.*
 
-class DatafileReader constructor(
+class DatafileReader(
     datafileJson: DatafileContent,
 ) {
 

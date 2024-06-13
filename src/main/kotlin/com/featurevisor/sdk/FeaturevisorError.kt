@@ -19,4 +19,7 @@ sealed class FeaturevisorError(message: String) : Throwable(message = message) {
     class InvalidUrl(val url: String?) : FeaturevisorError("Invalid URL")
 
     object MissingDatafileUrlWhileRefreshing : FeaturevisorError("Missing datafile url need to refresh")
+
+    /// Fetching was cancelled
+    object FetchingDataFileCancelled : FeaturevisorError("Fetching data file cancelled")
 }
