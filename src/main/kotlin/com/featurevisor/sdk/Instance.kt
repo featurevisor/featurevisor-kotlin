@@ -59,7 +59,7 @@ class FeaturevisorInstance private constructor(options: InstanceOptions) {
     internal var configureBucketValue = options.configureBucketValue
     internal var refreshJob: Job? = null
     private var fetchJob: Job? = null
-    internal val coroutineScope = CoroutineScope(Dispatchers.Unconfined)
+    internal val coroutineScope = CoroutineScope(Dispatchers.IO)
 
     init {
         with(options) {
