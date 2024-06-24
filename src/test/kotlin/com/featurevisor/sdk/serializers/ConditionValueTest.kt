@@ -69,4 +69,16 @@ class ConditionValueTest {
         result.values[0] shouldBe "test1"
         result.values[1] shouldBe "test2"
     }
+
+    @Test
+    fun `decode numeric string value with correct type`() {
+        val element = """
+            "1"
+        """.trimIndent()
+
+        val result = Json.decodeFromString<ConditionValue>(element)
+
+        result.shouldBeTypeOf<ConditionValue.StringValue>()
+        result.value shouldBe "1"
+    }
 }
