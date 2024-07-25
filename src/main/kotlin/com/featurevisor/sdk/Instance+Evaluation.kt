@@ -640,14 +640,13 @@ fun FeaturevisorInstance.evaluateVariable(
             logger?.debug("using default value", evaluation.toDictionary())
             return evaluation
         }
-    }catch (e: Exception){
+    } catch (e: Exception){
         evaluation = Evaluation(
             featureKey = featureKey,
             reason = ERROR,
-            error(e)
         )
 
-        this.logger?.error("error", evaluation.toDictionary())
+        this.logger?.error(message = e.message.orEmpty(), details = evaluation.toDictionary())
 
         return evaluation
     }
