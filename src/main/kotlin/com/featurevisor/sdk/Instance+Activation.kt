@@ -12,9 +12,9 @@ fun FeaturevisorInstance.activate(featureKey: FeatureKey, context: Context = emp
     val finalContext = interceptContext?.invoke(context) ?: context
     val captureContext = mutableMapOf<String, AttributeValue>()
     val attributesForCapturing = datafileReader.getAllAttributes()
-        .filter { it.value.capture == true }
+        .filter { it.capture == true }
 
-    attributesForCapturing.forEach { (_, attribute) ->
+    attributesForCapturing.forEach { attribute ->
         finalContext[attribute.key]?.let {
             captureContext[attribute.key] = it
         }
