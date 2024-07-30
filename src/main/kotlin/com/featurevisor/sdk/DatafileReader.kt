@@ -1,8 +1,14 @@
 package com.featurevisor.sdk
 
-import com.featurevisor.types.*
+import com.featurevisor.types.Attribute
+import com.featurevisor.types.AttributeKey
+import com.featurevisor.types.DatafileContent
+import com.featurevisor.types.Feature
+import com.featurevisor.types.FeatureKey
+import com.featurevisor.types.Segment
+import com.featurevisor.types.SegmentKey
 
-class DatafileReader(
+class DatafileReader constructor(
     datafileContent: DatafileContent,
 ) {
 
@@ -20,8 +26,8 @@ class DatafileReader(
         return schemaVersion
     }
 
-    fun getAllAttributes(): Map<AttributeKey, Attribute> {
-        return attributes
+    fun getAllAttributes(): List<Attribute> {
+        return attributes.values.toList()
     }
 
     fun getAttribute(attributeKey: AttributeKey): Attribute? {
