@@ -14,7 +14,7 @@ fun FeaturevisorInstance.activate(featureKey: FeatureKey, context: Context = emp
     val attributesForCapturing = datafileReader.getAllAttributes()
         .filter { it.value.capture == true }
 
-    attributesForCapturing.forEach { attribute ->
+    attributesForCapturing.forEach { (_, attribute) ->
         finalContext[attribute.key]?.let {
             captureContext[attribute.key] = it
         }
