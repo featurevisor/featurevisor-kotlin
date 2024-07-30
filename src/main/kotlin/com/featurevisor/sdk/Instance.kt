@@ -6,8 +6,6 @@ package com.featurevisor.sdk
 import com.featurevisor.sdk.FeaturevisorError.MissingDatafileOptions
 import com.featurevisor.types.*
 import com.featurevisor.types.EventName.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
@@ -18,7 +16,7 @@ typealias InterceptContext = (Context) -> Context
 typealias DatafileFetchHandler = (datafileUrl: String) -> Result<DatafileContent>
 
 var emptyDatafile = DatafileContent(
-    schemaVersion = "1",
+    schemaVersion =  "1",
     revision = "unknown",
     attributes = emptyList(),
     segments = emptyList(),
@@ -58,8 +56,6 @@ class FeaturevisorInstance private constructor(options: InstanceOptions) {
     internal var configureBucketKey = options.configureBucketKey
     internal var configureBucketValue = options.configureBucketValue
     internal var refreshJob: Job? = null
-    private var fetchJob: Job? = null
-    internal val coroutineScope = CoroutineScope(Dispatchers.IO)
 
     init {
         with(options) {
@@ -103,38 +99,23 @@ class FeaturevisorInstance private constructor(options: InstanceOptions) {
                 }
 
                 datafileUrl != null -> {
-                    datafileReader = DatafileReader(options.datafile ?: emptyDatafile)
-                    fetchJob = fetchDatafileContentJob(
-                        url = datafileUrl,
-                        logger = logger,
-                        handleDatafileFetch = handleDatafileFetch,
-                        retryCount = retryCount.coerceAtLeast(1),
-                        retryInterval = retryInterval.coerceAtLeast(0),
-                        coroutineScope = coroutineScope,
-                    ) { result ->
-                        result.onSuccess { fetchResult ->
-                            val datafileContent = fetchResult.datafileContent
-                            datafileReader = DatafileReader(datafileContent)
+                    datafileReader = DatafileReader(options.datafile?: emptyDatafile)
+                    fetchDatafileContent(datafileUrl, handleDatafileFetch) { result ->
+                        if (result.isSuccess) {
+                            datafileReader = DatafileReader(result.getOrThrow())
                             statuses.ready = true
-                            emitter.emit(READY, datafileContent, fetchResult.responseBodyString)
+                            emitter.emit(READY, result.getOrThrow())
                             if (refreshInterval != null) startRefreshing()
-                        }.onFailure { error ->
-                            logger?.error("Failed to fetch datafile: $error")
+                        } else {
+                            logger?.error("Failed to fetch datafile: $result")
                             emitter.emit(ERROR)
                         }
-                        cancelFetchRetry()
                     }
                 }
 
                 else -> throw MissingDatafileOptions
             }
         }
-    }
-
-    // Provide a mechanism to cancel the fetch job if retry count is more than one
-    fun cancelFetchRetry() {
-        fetchJob?.cancel()
-        fetchJob = null
     }
 
     fun setLogLevels(levels: List<Logger.LogLevel>) {
