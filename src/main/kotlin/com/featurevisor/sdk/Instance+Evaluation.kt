@@ -220,10 +220,9 @@ fun FeaturevisorInstance.evaluateVariation(featureKey: FeatureKey, context: Cont
         evaluation = Evaluation(
             featureKey = featureKey,
             reason = ERROR,
-            error(e)
         )
 
-        this.logger?.error("error", evaluation.toDictionary())
+        this.logger?.error(message = e.message.orEmpty(), details = evaluation.toDictionary())
 
         return evaluation
     }
@@ -433,10 +432,9 @@ fun FeaturevisorInstance.evaluateFlag(featureKey: FeatureKey, context: Context =
         evaluation = Evaluation(
             featureKey = featureKey,
             reason = ERROR,
-            error(e)
         )
 
-        this.logger?.error("error", evaluation.toDictionary())
+        this.logger?.error(message = e.message.orEmpty(), details = evaluation.toDictionary())
 
         return evaluation
     }

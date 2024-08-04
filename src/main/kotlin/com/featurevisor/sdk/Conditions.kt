@@ -142,6 +142,10 @@ object Conditions {
     }
 
     private fun compareVersions(actual: String, condition: String): Int {
-        return SemVer.parse(actual).compareTo(SemVer.parse(condition))
+        return try {
+            SemVer.parse(actual).compareTo(SemVer.parse(condition))
+        } catch (e: Exception) {
+            0
+        }
     }
 }

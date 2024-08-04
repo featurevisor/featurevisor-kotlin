@@ -41,7 +41,7 @@ fun startTest(option: TestProjectOption) {
                     try {
                         executionResult = executeTest(filePath, dataFile = datafile, option)
                     } catch (e: Exception) {
-                        printMessageInRedColor("Exception in $filePath --> ${e.message}")
+                        printMessageInRedColor("Exception while execution test --> ${e.message}")
                     }
 
                     if (executionResult == null) {
