@@ -1,16 +1,22 @@
 package com.featurevisor.sdk
 
-import com.featurevisor.types.*
+import com.featurevisor.types.Attribute
+import com.featurevisor.types.AttributeKey
+import com.featurevisor.types.DatafileContent
+import com.featurevisor.types.Feature
+import com.featurevisor.types.FeatureKey
+import com.featurevisor.types.Segment
+import com.featurevisor.types.SegmentKey
 
-class DatafileReader(
-    datafileJson: DatafileContent,
+class DatafileReader constructor(
+    datafileContent: DatafileContent,
 ) {
 
-    private val schemaVersion: String = datafileJson.schemaVersion
-    private val revision: String = datafileJson.revision
-    private val attributes: List<Attribute> = datafileJson.attributes
-    private val segments: List<Segment> = datafileJson.segments
-    private val features: List<Feature> = datafileJson.features
+    private val schemaVersion: String = datafileContent.schemaVersion
+    private val revision: String = datafileContent.revision
+    private val attributes: Map<AttributeKey, Attribute> = datafileContent.attributes.associateBy { it.key }
+    private val segments: Map<SegmentKey, Segment> = datafileContent.segments.associateBy { it.key }
+    private val features: Map<FeatureKey, Feature> = datafileContent.features.associateBy { it.key }
 
     fun getRevision(): String {
         return revision
@@ -21,18 +27,18 @@ class DatafileReader(
     }
 
     fun getAllAttributes(): List<Attribute> {
-        return attributes
+        return attributes.values.toList()
     }
 
     fun getAttribute(attributeKey: AttributeKey): Attribute? {
-        return attributes.find { attribute -> attribute.key == attributeKey }
+        return attributes[attributeKey]
     }
 
     fun getSegment(segmentKey: SegmentKey): Segment? {
-        return segments.find { segment -> segment.key == segmentKey }
+        return segments[segmentKey]
     }
 
     fun getFeature(featureKey: FeatureKey): Feature? {
-        return features.find { feature -> feature.key == featureKey }
+        return features[featureKey]
     }
 }

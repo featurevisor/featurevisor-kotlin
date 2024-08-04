@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test
 class DatafileReaderTest {
 
     private val systemUnderTest = DatafileReader(
-        datafileJson = DatafileContentFactory.get()
+        datafileContent = DatafileContentFactory.get()
     )
 
     @Test
