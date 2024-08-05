@@ -51,17 +51,6 @@ fun testFeature(
                     projectRootPath = option.projectRootPath.orEmpty()
                 )
 
-
-//                if (option.fast) {
-//                if (it.environment.equals("staging", true)) dataFile.stagingDataFiles else dataFile.productionDataFiles
-//            } else {
-//                getDataFileContent(
-//                    featureName = testFeature.key,
-//                    environment = it.environment,
-//                    projectRootPath = option.projectRootPath.orEmpty()
-//                )
-//            }
-
             if (option.showDatafile) {
                 printNormalMessage("")
                 printNormalMessage(datafileContent.toString())
