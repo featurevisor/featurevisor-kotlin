@@ -34,8 +34,8 @@ fun testSegment(testSegment: TestSegment,configuration: Configuration,option: Te
             }
 
             val yamlSegment = parseYamlSegment("${configuration.segmentsDirectoryPath}/$segmentKey.yml")
-            val expected = assertion.expectedToMatch
-            val actual = segmentIsMatched(yamlSegment!!, assertion.context)
+            val expected = it.expectedToMatch
+            val actual = segmentIsMatched(yamlSegment!!, it.context)
             val passed = actual == expected
 
             if (!passed) {

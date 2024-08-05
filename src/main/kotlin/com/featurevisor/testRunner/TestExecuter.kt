@@ -45,12 +45,12 @@ fun startTest(option: TestProjectOption) {
                                 continue
                             }
 
-                        if (executionResult.passed) {
-                            passedTestsCount++
-                        } else {
-                            hasError = true
-                            failedTestsCount++
-                        }
+                    if (executionResult.passed) {
+                        passedTestsCount++
+                    } else {
+                        hasError = true
+                        failedTestsCount++
+                    }
 
                         passedAssertionsCount += executionResult.assertionsCount.passed
                         failedAssertionsCount += executionResult.assertionsCount.failed
