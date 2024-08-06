@@ -103,7 +103,9 @@ class FeaturevisorInstance private constructor(options: InstanceOptions) {
                 }
 
                 datafileUrl != null -> {
-                    datafileReader = DatafileReader(options.datafile ?: emptyDatafile)
+                    if(::datafileReader.isInitialized.not()) {
+                        datafileReader = DatafileReader(options.datafile ?: emptyDatafile)
+                    }
                     fetchJob = fetchDatafileContentJob(
                         url = datafileUrl,
                         logger = logger,
