@@ -17,7 +17,7 @@ fun FeaturevisorInstance.startRefreshing() = when {
     refreshJob != null -> logger?.warn("refreshing has already started")
     refreshInterval == null -> logger?.warn("no `refreshInterval` option provided")
     else -> {
-        refreshJob = CoroutineScope(Dispatchers.Unconfined).launch {
+        refreshJob = coroutineScope.launch {
             while (isActive) {
                 refresh()
                 delay(refreshInterval)
@@ -32,7 +32,7 @@ fun FeaturevisorInstance.stopRefreshing() {
     logger?.warn("refreshing has stopped")
 }
 
-private fun FeaturevisorInstance.refresh() {
+private suspend fun FeaturevisorInstance.refresh() {
     logger?.debug("refreshing datafile")
     when {
         statuses.refreshInProgress -> logger?.warn("refresh in progress, skipping")
@@ -40,12 +40,12 @@ private fun FeaturevisorInstance.refresh() {
         else -> {
             statuses.refreshInProgress = true
             fetchDatafileContent(
-                datafileUrl,
-                handleDatafileFetch,
+                url = datafileUrl,
+                handleDatafileFetch = handleDatafileFetch,
             ) { result ->
 
-                if (result.isSuccess) {
-                    val datafileContent = result.getOrThrow()
+                result.onSuccess { fetchResult ->
+                    val datafileContent = fetchResult.datafileContent
                     val currentRevision = getRevision()
                     val newRevision = datafileContent.revision
                     val isNotSameRevision = currentRevision != newRevision
@@ -59,7 +59,7 @@ private fun FeaturevisorInstance.refresh() {
                     }
 
                     statuses.refreshInProgress = false
-                } else {
+                }.onFailure {
                     logger?.error(
                         "failed to refresh datafile",
                         mapOf("error" to result)
