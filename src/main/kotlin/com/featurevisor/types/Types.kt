@@ -440,3 +440,21 @@ data class DataFile(
     val stagingDataFiles: DatafileContent? = null,
     val productionDataFiles: DatafileContent? = null
 )
+
+@Serializable
+data class Configuration(
+    val environments:List<String>,
+    val tags: List<String>,
+    val defaultBucketBy:String,
+    val prettyState:Boolean,
+    val prettyDatafile:Boolean,
+    val stringify:Boolean,
+    val featuresDirectoryPath:String,
+    val segmentsDirectoryPath:String,
+    val attributesDirectoryPath:String,
+    val groupsDirectoryPath:String,
+    val testsDirectoryPath:String,
+    val stateDirectoryPath:String,
+    val outputDirectoryPath:String,
+    val siteExportDirectoryPath:String
+)

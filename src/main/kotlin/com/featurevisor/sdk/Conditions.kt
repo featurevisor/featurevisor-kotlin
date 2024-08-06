@@ -114,7 +114,7 @@ object Conditions {
             attributeValue is AttributeValue.StringValue && conditionValue is ConditionValue.ArrayValue -> {
                 when (operator) {
                     IN_ARRAY -> attributeValue.value in conditionValue.values
-                    NOT_IN_ARRAY -> (attributeValue.value in conditionValue.values).not()
+                    NOT_IN_ARRAY -> (attributeValue.value !in conditionValue.values)
                     else -> false
                 }
             }
@@ -142,6 +142,10 @@ object Conditions {
     }
 
     private fun compareVersions(actual: String, condition: String): Int {
-        return SemVer.parse(actual).compareTo(SemVer.parse(condition))
+        return try {
+            SemVer.parse(actual).compareTo(SemVer.parse(condition))
+        } catch (e: Exception) {
+            0
+        }
     }
 }
