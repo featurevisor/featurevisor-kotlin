@@ -6,16 +6,13 @@ package com.featurevisor.sdk
 import com.featurevisor.types.DatafileContent
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
-import io.mockk.spyk
+import io.mockk.mockk
 import io.mockk.verify
 import org.junit.jupiter.api.Test
 
 class InstanceTest {
     private val datafileUrl = "https://www.testmock.com"
-    private val fetchHandler = object : (String) -> Result<DatafileContent> {
-        override fun invoke(param: String): Result<DatafileContent> = Result.failure(Throwable())
-    }
-    private val mockDatafileFetchHandler: DatafileFetchHandler = spyk(fetchHandler)
+    private val mockDatafileFetchHandler: DatafileFetchHandler = mockk<DatafileFetchHandler>(relaxed = true)
     private val datafileContent = DatafileContent(
         schemaVersion = "0",
         revision = "0",
