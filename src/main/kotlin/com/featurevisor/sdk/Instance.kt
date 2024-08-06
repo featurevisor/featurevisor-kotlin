@@ -126,14 +126,14 @@ class FeaturevisorInstance private constructor(options: InstanceOptions) {
         val data = datafileJSON.toByteArray(Charsets.UTF_8)
         try {
             val datafileContent = Json.decodeFromString<DatafileContent>(String(data))
-            datafileReader = DatafileReader(datafileJson = datafileContent)
+            datafileReader = DatafileReader(datafileContent = datafileContent)
         } catch (e: Exception) {
             logger?.error("could not parse datafile", mapOf("error" to e))
         }
     }
 
     fun setDatafile(datafileContent: DatafileContent) {
-        datafileReader = DatafileReader(datafileJson = datafileContent)
+        datafileReader = DatafileReader(datafileContent = datafileContent)
     }
 
     fun setStickyFeatures(stickyFeatures: StickyFeatures?) {
