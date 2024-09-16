@@ -42,7 +42,7 @@ object Conditions {
                     EQUALS -> attributeValue.value == conditionValue.value
                     NOT_EQUALS -> attributeValue.value != conditionValue.value
                     CONTAINS -> attributeValue.value?.contains(conditionValue.value.orEmpty()) ?: false
-                    NOT_CONTAINS -> attributeValue.value?.contains(conditionValue.value.orEmpty())?.not()  ?: false
+                    NOT_CONTAINS -> attributeValue.value?.contains(conditionValue.value.orEmpty())?.not() ?: false
                     STARTS_WITH -> attributeValue.value?.startsWith(conditionValue.value.orEmpty()) ?: false
                     ENDS_WITH -> attributeValue.value?.endsWith(conditionValue.value.orEmpty()) ?: false
                     SEMVER_EQUALS -> compareVersions(
@@ -119,6 +119,65 @@ object Conditions {
                 }
             }
 
+            attributeValue is AttributeValue.IntValue && conditionValue is ConditionValue.ArrayValue -> {
+                when (operator) {
+                    IN_ARRAY -> attributeValue.value.toString() in conditionValue.values
+                    NOT_IN_ARRAY -> (attributeValue.value.toString() !in conditionValue.values)
+                    else -> false
+                }
+            }
+
+            attributeValue is AttributeValue.DoubleValue && conditionValue is ConditionValue.StringValue -> {
+                when (operator) {
+                    EQUALS -> attributeValue.value.toString() == conditionValue.value
+                    NOT_EQUALS -> attributeValue.value.toString() != conditionValue.value
+
+                    SEMVER_EQUALS -> compareVersions(
+                        attributeValue.value.toString(),
+                        conditionValue.value.orEmpty(),
+                    ) == 0
+
+                    SEMVER_NOT_EQUALS -> compareVersions(
+                        attributeValue.value.toString(),
+                        conditionValue.value.orEmpty(),
+                    ) != 0
+
+                    SEMVER_GREATER_THAN -> compareVersions(
+                        attributeValue.value.toString(),
+                        conditionValue.value.orEmpty()
+                    ) == 1
+
+                    SEMVER_GREATER_THAN_OR_EQUALS -> compareVersions(
+                        attributeValue.value.toString(),
+                        conditionValue.value.orEmpty()
+                    ) >= 0
+
+                    SEMVER_LESS_THAN -> compareVersions(
+                        attributeValue.value.toString(),
+                        conditionValue.value.orEmpty()
+                    ) == -1
+
+                    SEMVER_LESS_THAN_OR_EQUALS -> compareVersions(
+                        attributeValue.value.toString(),
+                        conditionValue.value.orEmpty()
+                    ) <= 0
+
+                    else -> false
+                }
+            }
+
+            attributeValue is AttributeValue.StringValue && conditionValue is ConditionValue.IntValue -> {
+                when (operator) {
+                    EQUALS -> attributeValue.value == conditionValue.value.toString()
+                    NOT_EQUALS -> attributeValue.value != conditionValue.value.toString()
+                    CONTAINS -> attributeValue.value?.contains(conditionValue.value.toString()) ?: false
+                    NOT_CONTAINS -> attributeValue.value?.contains(conditionValue.value.toString())?.not() ?: false
+                    STARTS_WITH -> attributeValue.value?.startsWith(conditionValue.value.toString()) ?: false
+                    ENDS_WITH -> attributeValue.value?.endsWith(conditionValue.value.toString()) ?: false
+                    else -> false
+                }
+            }
+
             attributeValue is AttributeValue.DateValue && conditionValue is ConditionValue.DateTimeValue -> {
                 when (operator) {
                     EQUALS -> attributeValue.value == conditionValue.value
@@ -143,9 +202,31 @@ object Conditions {
 
     private fun compareVersions(actual: String, condition: String): Int {
         return try {
-            SemVer.parse(actual).compareTo(SemVer.parse(condition))
+            SemVer.parse(normalizeSemver(actual)).compareTo(SemVer.parse(normalizeSemver(condition)))
         } catch (e: Exception) {
             0
         }
     }
+
+    private fun normalizeSemver(version: String): String {
+        val parts = version.split("-", "+")
+        val mainParts = parts[0].split(".").map { it.toInt().toString() }
+        var normalizedVersion = mainParts.joinToString(".")
+
+        if (version.contains("-")) {
+            val preRelease = parts[1].split(".").joinToString(".") {
+                if (it.all { char -> char.isDigit() }) it.toInt().toString()
+                else it
+            }
+            normalizedVersion += "-$preRelease"
+        }
+
+        if (version.contains("+")) {
+            val buildMetadata = version.split("+")[1]
+            normalizedVersion += "+$buildMetadata"
+        }
+
+        return normalizedVersion
+    }
+
 }
