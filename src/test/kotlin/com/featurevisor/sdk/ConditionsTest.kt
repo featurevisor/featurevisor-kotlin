@@ -3,25 +3,8 @@ package com.featurevisor.sdk
 import com.featurevisor.types.AttributeValue
 import com.featurevisor.types.Condition
 import com.featurevisor.types.ConditionValue
-import com.featurevisor.types.Operator.AFTER
-import com.featurevisor.types.Operator.BEFORE
-import com.featurevisor.types.Operator.CONTAINS
-import com.featurevisor.types.Operator.ENDS_WITH
-import com.featurevisor.types.Operator.EQUALS
-import com.featurevisor.types.Operator.GREATER_THAN
-import com.featurevisor.types.Operator.GREATER_THAN_OR_EQUALS
-import com.featurevisor.types.Operator.IN_ARRAY
-import com.featurevisor.types.Operator.LESS_THAN
-import com.featurevisor.types.Operator.LESS_THAN_OR_EQUALS
-import com.featurevisor.types.Operator.NOT_EQUALS
-import com.featurevisor.types.Operator.NOT_IN_ARRAY
-import com.featurevisor.types.Operator.SEMVER_EQUALS
-import com.featurevisor.types.Operator.SEMVER_GREATER_THAN
-import com.featurevisor.types.Operator.SEMVER_GREATER_THAN_OR_EQUALS
-import com.featurevisor.types.Operator.SEMVER_LESS_THAN
-import com.featurevisor.types.Operator.SEMVER_LESS_THAN_OR_EQUALS
-import com.featurevisor.types.Operator.SEMVER_NOT_EQUALS
-import com.featurevisor.types.Operator.STARTS_WITH
+import com.featurevisor.types.Operator
+import com.featurevisor.types.Operator.*
 import io.kotest.matchers.shouldBe
 import java.sql.Date
 import java.time.LocalDate
@@ -456,6 +439,282 @@ class ConditionsTest {
         Conditions.conditionIsMatched(
             condition = condition,
             context = mapOf("letter" to AttributeValue.StringValue("d")),
+        ) shouldBe true
+    }
+
+    @Test
+    fun `SEMVER_EQUALS operator works when condition value is String and attribute value is Double`() {
+        val condition = Condition.Plain(
+            attributeKey = "version",
+            operator = SEMVER_EQUALS,
+            value = ConditionValue.StringValue("1.2")
+        )
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("version" to AttributeValue.DoubleValue(1.2))
+        ) shouldBe true
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("version" to AttributeValue.DoubleValue(1.3))
+        ) shouldBe false
+    }
+
+    @Test
+    fun `SEMVER_NOT_EQUALS operator works when condition value is String and attribute value is Double`() {
+        val condition = Condition.Plain(
+            attributeKey = "version",
+            operator = SEMVER_NOT_EQUALS,
+            value = ConditionValue.StringValue("1.2")
+        )
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("version" to AttributeValue.DoubleValue(1.2))
+        ) shouldBe false
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("version" to AttributeValue.DoubleValue(1.3))
+        ) shouldBe true
+    }
+
+    @Test
+    fun `SEMVER_GREATER_THAN operator works when condition value is String and attribute value is Double`() {
+        val condition = Condition.Plain(
+            attributeKey = "version",
+            operator = SEMVER_GREATER_THAN,
+            value = ConditionValue.StringValue("1.2")
+        )
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("version" to AttributeValue.DoubleValue(1.2))
+        ) shouldBe false
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("version" to AttributeValue.DoubleValue(1.3))
+        ) shouldBe true
+    }
+
+    @Test
+    fun `SEMVER_GREATER_THAN_OR_EQUALS operator works when condition value is String and attribute value is Double`() {
+        val condition = Condition.Plain(
+            attributeKey = "version",
+            operator = SEMVER_GREATER_THAN_OR_EQUALS,
+            value = ConditionValue.StringValue("1.2")
+        )
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("version" to AttributeValue.DoubleValue(1.1))
+        ) shouldBe false
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("version" to AttributeValue.DoubleValue(1.2))
+        ) shouldBe true
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("version" to AttributeValue.DoubleValue(1.3))
+        ) shouldBe true
+    }
+
+    @Test
+    fun `SEMVER_LESS_THAN operator works when condition value is String and attribute value is Double`() {
+        val condition = Condition.Plain(
+            attributeKey = "version",
+            operator = SEMVER_LESS_THAN,
+            value = ConditionValue.StringValue("1.2")
+        )
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("version" to AttributeValue.DoubleValue(1.1))
+        ) shouldBe true
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("version" to AttributeValue.DoubleValue(1.2))
+        ) shouldBe false
+    }
+
+    @Test
+    fun `SEMVER_LESS_THAN_OR_EQUALS operator works when condition value is String and attribute value is Double`() {
+        val condition = Condition.Plain(
+            attributeKey = "version",
+            operator = SEMVER_LESS_THAN_OR_EQUALS,
+            value = ConditionValue.StringValue("1.2")
+        )
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("version" to AttributeValue.DoubleValue(1.1))
+        ) shouldBe true
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("version" to AttributeValue.DoubleValue(1.2))
+        ) shouldBe true
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("version" to AttributeValue.DoubleValue(1.3))
+        ) shouldBe false
+    }
+
+    @Test
+    fun `EQUALS operator works when condition value is Int and attribute value is String`() {
+        val condition = Condition.Plain(
+            attributeKey = "browser_type",
+            operator = EQUALS,
+            value = ConditionValue.IntValue(1)
+        )
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("browser_type" to AttributeValue.StringValue("1"))
+        ) shouldBe true
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("browser_type" to AttributeValue.StringValue("2"))
+        ) shouldBe false
+    }
+
+    @Test
+    fun `NOT_EQUALS operator works when condition value is Int and attribute value is String`() {
+        val condition = Condition.Plain(
+            attributeKey = "browser_type",
+            operator = NOT_EQUALS,
+            value = ConditionValue.IntValue(1)
+        )
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("browser_type" to AttributeValue.StringValue("1"))
+        ) shouldBe false
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("browser_type" to AttributeValue.StringValue("2"))
+        ) shouldBe true
+    }
+
+    @Test
+    fun `CONTAINS operator works when condition value is Int and attribute value is String`() {
+        val condition = Condition.Plain(
+            attributeKey = "browser_type",
+            operator = CONTAINS,
+            value = ConditionValue.IntValue(1)
+        )
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("browser_type" to AttributeValue.StringValue("123"))
+        ) shouldBe true
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("browser_type" to AttributeValue.StringValue("23"))
+        ) shouldBe false
+    }
+
+    @Test
+    fun `NOT_CONTAINS operator works when condition value is Int and attribute value is String`() {
+        val condition = Condition.Plain(
+            attributeKey = "browser_type",
+            operator = NOT_CONTAINS,
+            value = ConditionValue.IntValue(1)
+        )
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("browser_type" to AttributeValue.StringValue("123"))
+        ) shouldBe false
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("browser_type" to AttributeValue.StringValue("23"))
+        ) shouldBe true
+    }
+
+    @Test
+    fun `STARTS_WITH operator works when condition value is Int and attribute value is String`() {
+        val condition = Condition.Plain(
+            attributeKey = "browser_type",
+            operator = STARTS_WITH,
+            value = ConditionValue.IntValue(1)
+        )
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("browser_type" to AttributeValue.StringValue("123"))
+        ) shouldBe true
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("browser_type" to AttributeValue.StringValue("23"))
+        ) shouldBe false
+    }
+
+    @Test
+    fun `ENDS_WITH operator works when condition value is Int and attribute value is String`() {
+        val condition = Condition.Plain(
+            attributeKey = "browser_type",
+            operator = ENDS_WITH,
+            value = ConditionValue.IntValue(3)
+        )
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("browser_type" to AttributeValue.StringValue("123"))
+        ) shouldBe true
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("browser_type" to AttributeValue.StringValue("25"))
+        ) shouldBe false
+    }
+
+    @Test
+    fun `IN_ARRAY operator works when condition value is Array and attribute value is Int`() {
+        val condition = Condition.Plain(
+            attributeKey = "browser_type",
+            operator = IN_ARRAY,
+            value = ConditionValue.ArrayValue(listOf("1","2","3","4"))
+        )
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("browser_type" to AttributeValue.IntValue(1))
+        ) shouldBe true
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("browser_type" to AttributeValue.IntValue(5))
+        ) shouldBe false
+    }
+
+    @Test
+    fun `NOT_IN_ARRAY operator works when condition value is Array and attribute value is Int`() {
+        val condition = Condition.Plain(
+            attributeKey = "browser_type",
+            operator = NOT_IN_ARRAY,
+            value = ConditionValue.ArrayValue(listOf("1","2","3","4"))
+        )
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("browser_type" to AttributeValue.IntValue(1))
+        ) shouldBe false
+
+        Conditions.conditionIsMatched(
+            condition = condition,
+            context = mapOf("browser_type" to AttributeValue.IntValue(5))
         ) shouldBe true
     }
 
