@@ -340,12 +340,6 @@ data class DatafileContent(
 )
 
 @Serializable
-data class DatafileFetchResult(
-    val datafileContent: DatafileContent,
-    val responseBodyString: String
-)
-
-@Serializable
 data class OverrideFeature(
     val enabled: Boolean,
     val variation: VariationValue? = null,

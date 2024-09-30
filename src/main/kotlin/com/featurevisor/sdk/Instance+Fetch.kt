@@ -8,6 +8,9 @@ import kotlinx.serialization.json.Json
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import java.lang.IllegalArgumentException
 
+const val BODY_BYTE_COUNT = 1000000L
+val client = OkHttpClient()
+
 // MARK: - Fetch datafile content
 @Throws(IOException::class)
 internal fun FeaturevisorInstance.fetchDatafileContent(
@@ -39,10 +42,6 @@ private fun fetchDatafileContentFromUrl(
         completion(Result.failure(FeaturevisorError.InvalidUrl(url)))
     }
 }
-
-const val BODY_BYTE_COUNT = 1000000L
-val client = OkHttpClient()
-
 
 private inline fun fetch(
     request: Request,

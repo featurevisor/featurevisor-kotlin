@@ -8,6 +8,7 @@ import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.mockk
 import io.mockk.unmockkAll
+import io.mockk.verify
 import kotlinx.coroutines.*
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.TestCoroutineScope
@@ -73,21 +74,23 @@ class InstanceTest {
 
     @Test
     fun `instance fetches data using handleDatafileFetch`() {
-        coEvery { mockDatafileFetchHandler(datafileUrl) } returns Result.success(datafileContent)
-        instanceOptions = instanceOptions.copy(
-            datafileUrl = datafileUrl,
-            datafile = null,
-            handleDatafileFetch = mockDatafileFetchHandler,
-        )
+        testScope.launch {
+            coEvery { mockDatafileFetchHandler(datafileUrl) } returns Result.success(datafileContent)
 
-        FeaturevisorInstance.createInstance(
-            options = instanceOptions
-        )
-// TODO: FixMe
-//        verify(exactly = 1) {
-//            mockDatafileFetchHandler(datafileUrl)
-//        }
-        systemUnderTest.statuses.ready shouldBe true
+            val sdk = FeaturevisorInstance.createInstance(
+                options = instanceOptions.copy(
+                    datafileUrl = datafileUrl,
+                    datafile = null,
+                    handleDatafileFetch = mockDatafileFetchHandler,
+                )
+            )
+
+            sdk.statuses.ready shouldBe true
+
+            verify(exactly = 1) {
+                mockDatafileFetchHandler(datafileUrl)
+            }
+        }
     }
 
     @Test
