@@ -9,6 +9,7 @@ import com.featurevisor.types.EventName.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 
@@ -103,28 +104,25 @@ class FeaturevisorInstance private constructor(options: InstanceOptions) {
                 }
 
                 datafileUrl != null -> {
-                    if(::datafileReader.isInitialized.not()) {
+                    if (::datafileReader.isInitialized.not()) {
                         datafileReader = DatafileReader(options.datafile ?: emptyDatafile)
                     }
-                    fetchJob = fetchDatafileContentJob(
-                        url = datafileUrl,
-                        logger = logger,
-                        handleDatafileFetch = handleDatafileFetch,
-                        retryCount = retryCount.coerceAtLeast(1),
-                        retryInterval = retryInterval.coerceAtLeast(0),
-                        coroutineScope = coroutineScope,
-                    ) { result ->
-                        result.onSuccess { fetchResult ->
-                            val datafileContent = fetchResult.datafileContent
-                            datafileReader = DatafileReader(datafileContent)
-                            statuses.ready = true
-                            emitter.emit(READY, datafileContent, fetchResult.responseBodyString)
-                            if (refreshInterval != null) startRefreshing()
-                        }.onFailure { error ->
-                            logger?.error("Failed to fetch datafile: $error")
-                            emitter.emit(ERROR)
+                    fetchJob = coroutineScope.launch {
+                        fetchDatafileContent(
+                            url = datafileUrl,
+                            handleDatafileFetch = handleDatafileFetch,
+                        ) { result ->
+                            result.onSuccess { datafileContent ->
+                                datafileReader = DatafileReader(datafileContent)
+                                statuses.ready = true
+                                emitter.emit(READY, datafileContent)
+                                if (refreshInterval != null) startRefreshing()
+                            }.onFailure { error ->
+                                logger?.error("Failed to fetch datafile: $error")
+                                emitter.emit(ERROR)
+                            }
+                            cancelFetchJob()
                         }
-                        cancelFetchRetry()
                     }
                 }
 
@@ -134,7 +132,7 @@ class FeaturevisorInstance private constructor(options: InstanceOptions) {
     }
 
     // Provide a mechanism to cancel the fetch job if retry count is more than one
-    fun cancelFetchRetry() {
+    private fun cancelFetchJob() {
         fetchJob?.cancel()
         fetchJob = null
     }

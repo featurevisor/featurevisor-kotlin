@@ -22,6 +22,7 @@ fun FeaturevisorInstance.startRefreshing() = when {
                 refresh()
                 delay(refreshInterval)
             }
+            stopRefreshing()
         }
     }
 }
@@ -32,7 +33,7 @@ fun FeaturevisorInstance.stopRefreshing() {
     logger?.warn("refreshing has stopped")
 }
 
-private suspend fun FeaturevisorInstance.refresh() {
+private fun FeaturevisorInstance.refresh() {
     logger?.debug("refreshing datafile")
     when {
         statuses.refreshInProgress -> logger?.warn("refresh in progress, skipping")
@@ -43,9 +44,7 @@ private suspend fun FeaturevisorInstance.refresh() {
                 url = datafileUrl,
                 handleDatafileFetch = handleDatafileFetch,
             ) { result ->
-
-                result.onSuccess { fetchResult ->
-                    val datafileContent = fetchResult.datafileContent
+                result.onSuccess { datafileContent ->
                     val currentRevision = getRevision()
                     val newRevision = datafileContent.revision
                     val isNotSameRevision = currentRevision != newRevision
