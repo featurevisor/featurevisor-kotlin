@@ -33,7 +33,7 @@ fun FeaturevisorInstance.stopRefreshing() {
     logger?.warn("refreshing has stopped")
 }
 
-private fun FeaturevisorInstance.refresh() {
+private suspend fun FeaturevisorInstance.refresh() {
     logger?.debug("refreshing datafile")
     when {
         statuses.refreshInProgress -> logger?.warn("refresh in progress, skipping")

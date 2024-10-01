@@ -6,12 +6,10 @@ package com.featurevisor.sdk
 import com.featurevisor.sdk.FeaturevisorError.MissingDatafileOptions
 import com.featurevisor.types.*
 import com.featurevisor.types.EventName.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
+import kotlin.coroutines.resume
 
 typealias ConfigureBucketKey = (Feature, Context, BucketKey) -> BucketKey
 typealias ConfigureBucketValue = (Feature, Context, BucketValue) -> BucketValue
@@ -139,6 +137,21 @@ class FeaturevisorInstance private constructor(options: InstanceOptions) {
 
     fun setLogLevels(levels: List<Logger.LogLevel>) {
         this.logger?.setLevels(levels)
+    }
+
+    suspend fun onReady(): FeaturevisorInstance {
+        return suspendCancellableCoroutine { continuation ->
+            if (this.statuses.ready) {
+                continuation.resume(this)
+            }
+
+            val cb :(result:Array<out Any>) -> Unit = {
+                this.emitter.removeListener(READY)
+                continuation.resume(this)
+            }
+
+            this.emitter.addListener(READY,cb)
+        }
     }
 
     fun setDatafile(datafileJSON: String) {

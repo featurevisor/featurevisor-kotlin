@@ -3,8 +3,12 @@
  */
 package com.featurevisor.sdk
 
+import com.featurevisor.sdk.FeaturevisorInstance.Companion.createInstance
+import com.featurevisor.sdk.Logger.Companion.createLogger
+import com.featurevisor.sdk.Logger.LogLevel
 import com.featurevisor.types.*
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.instanceOf
 import io.mockk.coEvery
 import io.mockk.mockk
 import io.mockk.unmockkAll
@@ -24,11 +28,11 @@ class InstanceTest {
     private val datafileUrl = "https://www.testmock.com"
     private val mockDatafileFetchHandler: DatafileFetchHandler = mockk<DatafileFetchHandler>(relaxed = true)
     private val datafileContent = DatafileContent(
-        schemaVersion = "0",
-        revision = "0",
-        attributes = listOf(),
-        segments = listOf(),
-        features = listOf()
+        schemaVersion = "1",
+        revision = "1.0",
+        attributes = emptyList(),
+        segments = emptyList(),
+        features = emptyList()
     )
     private var instanceOptions = InstanceOptions(
         bucketKeySeparator = "",
@@ -48,12 +52,8 @@ class InstanceTest {
         stickyFeatures = mapOf(),
         onError = {},
     )
-    private val systemUnderTest = FeaturevisorInstance.createInstance(
-        options = instanceOptions
-    )
 
     private val dispatcher = TestCoroutineDispatcher()
-
     private val testScope = TestCoroutineScope(dispatcher)
 
     @BeforeEach
@@ -68,8 +68,32 @@ class InstanceTest {
     }
 
     @Test
+    fun `sdk should be a function`() {
+        val sdk = createInstance(
+            instanceOptions
+        )
+
+        sdk shouldBe instanceOf<FeaturevisorInstance>()
+    }
+
+    @Test
+    fun `sdk should create instance with datafile content`() {
+        val sdk = FeaturevisorInstance.createInstance(
+            instanceOptions
+        )
+
+        sdk shouldBe instanceOf<FeaturevisorInstance>()
+        sdk.statuses.ready shouldBe true
+    }
+
+
+    @Test
     fun `instance initialised properly`() {
-        systemUnderTest.statuses.ready shouldBe true
+        val sdk = createInstance(
+            options = instanceOptions
+        )
+
+        sdk.statuses.ready shouldBe true
     }
 
     @Test
@@ -77,7 +101,7 @@ class InstanceTest {
         testScope.launch {
             coEvery { mockDatafileFetchHandler(datafileUrl) } returns Result.success(datafileContent)
 
-            val sdk = FeaturevisorInstance.createInstance(
+            val sdk = createInstance(
                 options = instanceOptions.copy(
                     datafileUrl = datafileUrl,
                     datafile = null,
@@ -94,12 +118,317 @@ class InstanceTest {
     }
 
     @Test
+    fun `should trigger onReady event once`() {
+        testScope.launch {
+            var readyCount = 0
+
+            val sdk = createInstance(
+                instanceOptions.copy(
+                    onReady = {
+                        readyCount += 1
+                    }
+                )
+            )
+
+            delay(0)
+
+            readyCount shouldBe 1
+            sdk.isReady() shouldBe true
+        }
+    }
+
+    @Test
+    fun `should resolve onReady method as Promise when initialized synchronously`() {
+        testScope.launch {
+            var readyCount = 0
+
+            var sdk = createInstance(
+                instanceOptions.copy(
+                    onReady = {
+                        readyCount += 1
+                    }
+                )
+
+            )
+
+            delay(0)
+
+            sdk = sdk.onReady()
+
+            sdk.isReady() shouldBe true
+            readyCount shouldBe 1
+        }
+    }
+
+    @Test
+    fun `should resolve onReady method as Promise when fetching datafile remotely`() {
+        testScope.launch {
+            var readyCount = 0
+
+            var sdk = createInstance(
+                instanceOptions.copy(
+                    datafileUrl = datafileUrl,
+                    onReady = {
+                        readyCount += 1
+                    }
+                )
+            )
+
+            sdk = sdk.onReady()
+
+            sdk.isReady() shouldBe true
+            readyCount shouldBe 1
+        }
+
+    }
+
+    @Test
+    fun `should configure plain bucketBy`() {
+        var capturedBucketKey = ""
+
+        val sdk = createInstance(
+            instanceOptions.copy(
+                datafile = datafileContent.copy(
+                    features = listOf(
+                        Feature(
+                            key = "test",
+                            bucketBy = BucketBy.Single("userId"),
+                            variations = listOf(
+                                Variation(value = "control"),
+                                Variation(value = "treatment")
+                            ),
+                            traffic = listOf(
+                                Traffic(
+                                    key = "1",
+                                    segments = GroupSegment.Plain("*"),
+                                    percentage = 100000,
+                                    allocation = listOf(
+                                        Allocation(variation = "control", range = listOf(0, 100000)),
+                                        Allocation(variation = "treatment", range = listOf(0, 0))
+                                    )
+                                )
+                            )
+                        )
+                    )
+                ),
+                configureBucketKey = { _, _, bucketKey ->
+                    capturedBucketKey = bucketKey
+                    bucketKey
+                }
+            )
+        )
+
+        val featureKey = "test"
+        val context = mapOf("userId" to AttributeValue.StringValue("123"))
+
+        sdk.isEnabled(featureKey, context) shouldBe true
+        sdk.getVariation(featureKey, context) shouldBe "control"
+        "${AttributeValue.StringValue("123")}${AttributeValue.StringValue("test")}" shouldBe capturedBucketKey
+    }
+
+    @Test
+    fun `should configure and bucketBy`() {
+        var capturedBucketKey = ""
+
+        val sdk = createInstance(
+            instanceOptions.copy(
+                datafile = datafileContent.copy(
+                    features = listOf(
+                        Feature(
+                            key = "test",
+                            bucketBy = BucketBy.And(listOf("userId", "organizationId")),
+                            variations = listOf(
+                                Variation(value = "control"),
+                                Variation(value = "treatment")
+                            ),
+                            traffic = listOf(
+                                Traffic(
+                                    key = "1",
+                                    segments = GroupSegment.Plain("*"),
+                                    percentage = 100000,
+                                    allocation = listOf(
+                                        Allocation(variation = "control", range = listOf(0, 100000)),
+                                        Allocation(variation = "treatment", range = listOf(0, 0))
+                                    )
+                                )
+                            )
+                        )
+                    )
+                ),
+                configureBucketKey = { feature, context, bucketKey ->
+                    capturedBucketKey = bucketKey
+                    bucketKey
+                }
+            )
+
+        )
+
+        val featureKey = "test"
+        val context = mapOf(
+            "userId" to AttributeValue.StringValue("123"),
+            "organizationId" to AttributeValue.StringValue("456")
+        )
+
+        sdk.getVariation(featureKey, context) shouldBe "control"
+        capturedBucketKey shouldBe "${AttributeValue.StringValue("123")}${AttributeValue.StringValue("456")}${
+            AttributeValue.StringValue(
+                "test"
+            )
+        }"
+    }
+
+    @Test
+    fun `should configure or bucketBy`() {
+        var capturedBucketKey = ""
+
+        val sdk = createInstance(
+            instanceOptions.copy(
+                datafile = datafileContent.copy(
+                    features = listOf(
+                        Feature(
+                            key = "test",
+                            bucketBy = BucketBy.Or(listOf("userId", "deviceId")),
+                            variations = listOf(
+                                Variation(value = "control"),
+                                Variation(value = "treatment")
+                            ),
+                            traffic = listOf(
+                                Traffic(
+                                    key = "1",
+                                    segments = GroupSegment.Plain("*"),
+                                    percentage = 100000,
+                                    allocation = listOf(
+                                        Allocation(variation = "control", range = listOf(0, 100000)),
+                                        Allocation(variation = "treatment", range = listOf(0, 0))
+                                    )
+                                )
+                            )
+                        )
+                    )
+                ),
+                configureBucketKey = { _, _, bucketKey ->
+                    capturedBucketKey = bucketKey
+                    bucketKey
+                }
+            )
+        )
+
+        val context1 = mapOf(
+            "userId" to AttributeValue.StringValue("123"),
+            "deviceId" to AttributeValue.StringValue("456")
+        )
+
+        sdk.isEnabled("test", context1) shouldBe true
+        sdk.getVariation("test", context1) shouldBe "control"
+        capturedBucketKey shouldBe "${AttributeValue.StringValue("123")}${AttributeValue.StringValue("test")}"
+
+        val context2 = mapOf(
+            "deviceId" to AttributeValue.StringValue("456")
+        )
+
+        sdk.getVariation("test", context2) shouldBe "control"
+        capturedBucketKey shouldBe "${AttributeValue.StringValue("456")}${AttributeValue.StringValue("test")}"
+    }
+
+    @Test
+    fun `should intercept context`() {
+        var intercepted = false
+
+        val sdk = createInstance(
+            instanceOptions.copy(
+                datafile = datafileContent.copy(
+                    features = listOf(
+                        Feature(
+                            key = "test",
+                            bucketBy = BucketBy.Single("userId"),
+                            variations = listOf(
+                                Variation(value = "control"),
+                                Variation(value = "treatment")
+                            ),
+                            traffic = listOf(
+                                Traffic(
+                                    key = "1",
+                                    segments = GroupSegment.Plain("*"),
+                                    percentage = 100000,
+                                    allocation = listOf(
+                                        Allocation("control", listOf(0, 100000)),
+                                        Allocation("treatment", listOf(0, 0))
+                                    )
+                                )
+                            )
+                        )
+                    )
+                ),
+                interceptContext = { context ->
+                    intercepted = true
+                    context // Return the context as is (modify if needed)
+                }
+            )
+        )
+
+        val variation = sdk.getVariation(
+            "test",
+            mapOf("userId" to AttributeValue.StringValue("123"))
+        )
+
+        variation shouldBe "control"
+        intercepted shouldBe true
+    }
+
+    @Test
+    fun `should activate feature`() {
+        var activated = false
+
+        val sdk = createInstance(
+            instanceOptions.copy(
+                datafile = datafileContent.copy(
+                    features = listOf(
+                        Feature(
+                            key = "test",
+                            bucketBy = BucketBy.Single("userId"),
+                            variations = listOf(
+                                Variation(value = "control"),
+                                Variation(value = "treatment")
+                            ),
+                            traffic = listOf(
+                                Traffic(
+                                    key = "1",
+                                    segments = GroupSegment.Plain("*"),
+                                    percentage = 100000,
+                                    allocation = listOf(
+                                        Allocation("control", listOf(0, 100000)),
+                                        Allocation("treatment", listOf(0, 0))
+                                    )
+                                )
+                            )
+                        )
+                    )
+                ),
+                onActivation = {
+                    activated = true
+                }
+            )
+
+        )
+
+        val variation = sdk.getVariation("test", mapOf("userId" to AttributeValue.StringValue("123")))
+
+        activated shouldBe false
+        variation shouldBe "control"
+
+        val activatedVariation = sdk.activate("test", mapOf("userId" to AttributeValue.StringValue("123")))
+
+        activated shouldBe true
+        activatedVariation shouldBe "control"
+    }
+
+    @Test
     fun `should refresh datafile`() {
         testScope.launch {
             var refreshed = false
             var updatedViaOption = false
 
-            val sdk = FeaturevisorInstance.createInstance(
+            val sdk = createInstance(
                 instanceOptions.copy(
                     datafileUrl = datafileUrl,
                     datafile = null,
@@ -117,17 +446,1069 @@ class InstanceTest {
 
             )
 
-            assertEquals(false, sdk.isReady())
+            sdk.isReady() shouldBe false
 
             delay(3)
 
-            assertEquals(true, refreshed)
-            assertEquals(true, updatedViaOption)
-
-            assertEquals(true, sdk.isReady())
+            refreshed shouldBe true
+            updatedViaOption shouldBe true
+            sdk.isReady() shouldBe true
 
             sdk.stopRefreshing()
         }
     }
 
+    @Test
+    fun `should initialize with sticky features`() {
+
+        testScope.launch {
+            val sdk = createInstance(
+                instanceOptions.copy(
+                    stickyFeatures = mapOf(
+                        "test" to OverrideFeature(
+                            enabled = true,
+                            variation = "control",
+                            variables = mapOf("color" to VariableValue.StringValue("red"))
+                        )
+                    ),
+                    datafile = datafileContent,
+                    handleDatafileFetch = {
+                        val content = DatafileContent(
+                            schemaVersion = "1",
+                            revision = "1.0",
+                            features = listOf(
+                                Feature(
+                                    key = "test",
+                                    bucketBy = BucketBy.Single("userId"),
+                                    variations = listOf(
+                                        Variation(value = "control"),
+                                        Variation(value = "treatment")
+                                    ),
+                                    traffic = listOf(
+                                        Traffic(
+                                            key = "1",
+                                            segments = GroupSegment.Plain("*"),
+                                            percentage = 100000,
+                                            allocation = listOf(
+                                                Allocation("control", listOf(0, 0)),
+                                                Allocation("treatment", listOf(0, 100000))
+                                            )
+                                        )
+                                    )
+                                )
+                            ),
+                            attributes = emptyList(),
+                            segments = emptyList()
+                        )
+
+                        runBlocking { delay(50) }
+                        Result.success(content)
+                    }
+                )
+
+            )
+
+            sdk.getVariation("test", mapOf("userId" to AttributeValue.StringValue("123"))) shouldBe "control"
+            sdk.getVariable("test", "color", mapOf("userId" to AttributeValue.StringValue("123"))) shouldBe "red"
+
+            delay(75)
+
+            sdk.getVariation("test", mapOf("userId" to AttributeValue.StringValue("123"))) shouldBe "control"
+
+            sdk.setStickyFeatures(emptyMap())
+
+            sdk.getVariation("test", mapOf("userId" to AttributeValue.StringValue("123"))) shouldBe "treatment"
+
+        }
+    }
+
+    @Test
+    fun `should initialize with initial features`() {
+        testScope.launch {
+            val sdk = createInstance(
+                instanceOptions.copy(
+                    initialFeatures = mapOf(
+                        "test" to OverrideFeature(
+                            enabled = true,
+                            variation = "control",
+                            variables = mapOf("color" to VariableValue.StringValue("red"))
+                        )
+                    ),
+                    datafileUrl = datafileUrl,
+                    handleDatafileFetch = {
+                        Result.success(
+                            datafileContent.copy(
+                                features = listOf(
+                                    Feature(
+                                        key = "test",
+                                        bucketBy = BucketBy.Single("userId"),
+                                        variations = listOf(
+                                            Variation(value = "control"),
+                                            Variation(value = "treatment")
+                                        ),
+                                        traffic = listOf(
+                                            Traffic(
+                                                key = "1",
+                                                segments = GroupSegment.Plain("*"),
+                                                percentage = 100000,
+                                                allocation = listOf(
+                                                    Allocation("control", listOf(0, 0)),
+                                                    Allocation("treatment", listOf(0, 100000))
+                                                )
+                                            )
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    }
+                )
+            )
+
+            sdk.getVariation("test", mapOf("userId" to AttributeValue.StringValue("123"))) shouldBe "control"
+            sdk.getVariable("test", "color", mapOf("userId" to AttributeValue.StringValue("123"))) shouldBe "red"
+
+            sdk.fetchDatafileContent(url = datafileUrl) {
+                sdk.getVariation("test", mapOf("userId" to AttributeValue.StringValue("123"))) shouldBe "treatment"
+            }
+        }
+    }
+
+
+    @Test
+    fun `should honour simple required features`() {
+        val sdk = createInstance(
+            instanceOptions.copy(
+                datafile = datafileContent.copy(
+                    features = listOf(
+                        Feature(
+                            key = "requiredKey",
+                            bucketBy = BucketBy.Single("userId"),
+                            traffic = listOf(
+                                Traffic(
+                                    key = "1",
+                                    segments = GroupSegment.Plain("*"),
+                                    percentage = 0, // disabled
+                                    allocation = emptyList()
+                                )
+                            )
+                        ),
+                        Feature(
+                            key = "myKey",
+                            bucketBy = BucketBy.Single("userId"),
+                            required = listOf(
+                                Required.FeatureKey("requiredKey")
+                            ),
+                            traffic = listOf(
+                                Traffic(
+                                    key = "1",
+                                    segments = GroupSegment.Plain("*"),
+                                    percentage = 100000,
+                                    allocation = emptyList()
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        )
+
+        sdk.isEnabled("myKey") shouldBe false
+
+        // enabling required should enable the feature too
+        val sdk2 = createInstance(
+            instanceOptions.copy(
+                datafile = datafileContent.copy(
+                    features = listOf(
+                        Feature(
+                            key = "requiredKey",
+                            bucketBy = BucketBy.Single("userId"),
+                            traffic = listOf(
+                                Traffic(
+                                    key = "1",
+                                    segments = GroupSegment.Plain("*"),
+                                    percentage = 100000, // enabled
+                                    allocation = emptyList()
+                                )
+                            )
+                        ),
+                        Feature(
+                            key = "myKey",
+                            bucketBy = BucketBy.Single("userId"),
+                            required = listOf(Required.FeatureKey("requiredKey")),
+                            traffic = listOf(
+                                Traffic(
+                                    key = "1",
+                                    segments = GroupSegment.Plain("*"),
+                                    percentage = 100000,
+                                    allocation = emptyList()
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        )
+
+        sdk2.isEnabled("myKey") shouldBe true
+    }
+
+    @Test
+    fun `should honour required features with variation`() {
+        val sdk = createInstance(
+            instanceOptions.copy(
+                datafile = datafileContent.copy(
+                    features = listOf(
+                        Feature(
+                            key = "requiredKey",
+                            bucketBy = BucketBy.Single("userId"),
+                            variations = listOf(
+                                Variation(value = "control"),
+                                Variation(value = "treatment")
+                            ),
+                            traffic = listOf(
+                                Traffic(
+                                    key = "1",
+                                    segments = GroupSegment.Plain("*"),
+                                    percentage = 100000,
+                                    allocation = listOf(
+                                        Allocation("control", listOf(0, 0)),
+                                        Allocation("treatment", listOf(0, 100000))
+                                    )
+                                )
+                            )
+                        ),
+                        Feature(
+                            key = "myKey",
+                            bucketBy = BucketBy.Single("userId"),
+                            required = listOf(
+                                Required.WithVariation(
+                                    RequiredWithVariation(
+                                        "requiredKey",
+                                        "control"
+                                    )
+                                ) // different variation
+                            ),
+                            traffic = listOf(
+                                Traffic(
+                                    key = "1",
+                                    segments = GroupSegment.Plain("*"),
+                                    percentage = 100000,
+                                    allocation = emptyList()
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        )
+
+        sdk.isEnabled("myKey") shouldBe false
+
+        // child should be enabled because required has desired variation
+        val sdk2 = createInstance(
+            instanceOptions.copy(
+                datafile = datafileContent.copy(
+                    features = listOf(
+                        Feature(
+                            key = "requiredKey",
+                            bucketBy = BucketBy.Single("userId"),
+                            variations = listOf(
+                                Variation(value = "control"),
+                                Variation(value = "treatment")
+                            ),
+                            traffic = listOf(
+                                Traffic(
+                                    key = "1",
+                                    segments = GroupSegment.Plain("*"),
+                                    percentage = 100000,
+                                    allocation = listOf(
+                                        Allocation("control", listOf(0, 0)),
+                                        Allocation("treatment", listOf(0, 100000))
+                                    )
+                                )
+                            )
+                        ),
+                        Feature(
+                            key = "myKey",
+                            bucketBy = BucketBy.Single("userId"),
+                            required = listOf(
+                                Required.WithVariation(
+                                    RequiredWithVariation(
+                                        "requiredKey",
+                                        "treatment"
+                                    )
+                                ) // desired variation
+                            ),
+                            traffic = listOf(
+                                Traffic(
+                                    key = "1",
+                                    segments = GroupSegment.Plain("*"),
+                                    percentage = 100000,
+                                    allocation = emptyList()
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        )
+
+        sdk2.isEnabled("myKey") shouldBe true
+    }
+
+
+    @Test
+    fun `should emit warnings for deprecated feature`() {
+        var deprecatedCount = 0
+
+        val sdk = createInstance(
+            instanceOptions.copy(
+                datafile =
+                datafileContent.copy(
+                    features = listOf(
+                        Feature(
+                            key = "test",
+                            bucketBy = BucketBy.Single("userId"),
+                            variations = listOf(
+                                Variation(value = "control"),
+                                Variation(value = "treatment")
+                            ),
+                            traffic = listOf(
+                                Traffic(
+                                    key = "1",
+                                    segments = GroupSegment.Plain("*"),
+                                    percentage = 100000,
+                                    allocation = listOf(
+                                        Allocation("control", listOf(0, 100000)),
+                                        Allocation("treatment", listOf(0, 0))
+                                    )
+                                )
+                            )
+                        ),
+                        Feature(
+                            key = "deprecatedTest",
+                            deprecated = true,
+                            bucketBy = BucketBy.Single("userId"),
+                            variations = listOf(
+                                Variation(value = "control"),
+                                Variation(value = "treatment")
+                            ),
+                            traffic = listOf(
+                                Traffic(
+                                    key = "1",
+                                    segments = GroupSegment.Plain("*"),
+                                    percentage = 100000,
+                                    allocation = listOf(
+                                        Allocation("control", listOf(0, 100000)),
+                                        Allocation("treatment", listOf(0, 0))
+                                    )
+                                )
+                            )
+                        )
+                    )
+                ),
+                logger = createLogger { level, message, _ ->
+                    if (level == LogLevel.WARN && message.contains("is deprecated")) {
+                        deprecatedCount += 1
+                    }
+                }
+            )
+        )
+
+        val testVariation = sdk.getVariation("test", mapOf("userId" to AttributeValue.StringValue("123")))
+        val deprecatedTestVariation =
+            sdk.getVariation("deprecatedTest", mapOf("userId" to AttributeValue.StringValue("123")))
+
+        testVariation shouldBe "control"
+        deprecatedTestVariation shouldBe "control"
+        deprecatedCount shouldBe 1
+    }
+
+
+    @Test
+    fun `should check if enabled for overridden flags from rules`() {
+        val sdk = createInstance(
+            instanceOptions.copy(
+                datafile = datafileContent.copy(
+                    features = listOf(
+                        Feature(
+                            key = "test",
+                            bucketBy = BucketBy.Single("userId"),
+                            traffic = listOf(
+                                Traffic(
+                                    key = "2",
+                                    segments = GroupSegment.Multiple(
+                                        listOf(
+                                            GroupSegment.Plain("netherlands")
+                                        )
+                                    ),
+                                    percentage = 100000,
+                                    enabled = false,
+                                    allocation = emptyList()
+                                ),
+                                Traffic(
+                                    key = "1",
+                                    segments = GroupSegment.Multiple(
+                                        listOf(
+                                            GroupSegment.Plain("*")
+                                        )
+                                    ),
+                                    percentage = 100000,
+                                    allocation = emptyList()
+                                )
+                            )
+                        )
+                    ),
+                    segments = listOf(
+                        Segment(
+                            key = "netherlands",
+                            conditions = Condition.Plain(
+                                "country", Operator.EQUALS, ConditionValue.StringValue("nl")
+                            )
+                        )
+                    )
+                )
+            )
+
+        )
+
+        sdk.isEnabled(
+            "test", mapOf(
+                "userId" to AttributeValue.StringValue("user-123"),
+                "country" to AttributeValue.StringValue("de")
+            )
+        ) shouldBe true
+        sdk.isEnabled(
+            "test", mapOf(
+                "userId" to AttributeValue.StringValue("user-123"),
+                "country" to AttributeValue.StringValue("nl")
+            )
+        ) shouldBe false
+    }
+
+    @Test
+    fun `should check if enabled for mutually exclusive features`() {
+        var bucketValue = 10000
+
+        val sdk = createInstance(
+            instanceOptions.copy(
+                configureBucketValue = { _, _, _ ->
+                    bucketValue
+                },
+                datafile = datafileContent.copy(
+                    features = listOf(
+                        Feature(
+                            key = "mutex",
+                            bucketBy = BucketBy.Single("userId"),
+                            ranges = listOf(listOf(0, 50000)),
+                            traffic = listOf(
+                                Traffic(
+                                    key = "1",
+                                    segments = GroupSegment.Multiple(
+                                        listOf(
+                                            GroupSegment.Plain("*")
+                                        )
+                                    ),
+                                    percentage = 50000,
+                                    allocation = emptyList()
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+
+        )
+
+        sdk.isEnabled("test") shouldBe false
+        sdk.isEnabled("test", mapOf("userId" to AttributeValue.StringValue("123"))) shouldBe false
+
+        bucketValue = 40000
+        sdk.isEnabled("mutex", mapOf("userId" to AttributeValue.StringValue("123"))) shouldBe true
+
+        bucketValue = 60000
+        sdk.isEnabled("mutex", mapOf("userId" to AttributeValue.StringValue("123"))) shouldBe false
+    }
+
+    @Test
+    fun `should get variation`() {
+        val sdk = createInstance(
+            instanceOptions.copy(
+                datafile = datafileContent.copy(
+                    features = listOf(
+                        Feature(
+                            key = "test",
+                            bucketBy = BucketBy.Single("userId"),
+                            variations = listOf(
+                                Variation(value = "control"),
+                                Variation(value = "treatment")
+                            ),
+                            force = listOf(
+                                Force(
+                                    conditions = Condition.And(
+                                        listOf(
+                                            Condition.Plain(
+                                                "userId",
+                                                Operator.EQUALS,
+                                                ConditionValue.StringValue("user-gb")
+                                            )
+                                        )
+                                    ),
+                                    enabled = false
+                                ),
+                                Force(
+                                    segments = GroupSegment.Multiple(listOf(GroupSegment.Plain("netherlands"))),
+                                    enabled = false
+                                )
+                            ),
+                            traffic = listOf(
+                                Traffic(
+                                    key = "1",
+                                    segments = GroupSegment.Multiple(listOf(GroupSegment.Plain("*"))),
+                                    percentage = 100000,
+                                    allocation = listOf(
+                                        Allocation("control", listOf(0, 0)),
+                                        Allocation("treatment", listOf(0, 100000))
+                                    )
+                                )
+                            )
+                        ),
+                        Feature(
+                            key = "testWithNoVariation",
+                            bucketBy = BucketBy.Single("userId"),
+                            traffic = listOf(
+                                Traffic(
+                                    key = "1",
+                                    segments = GroupSegment.Multiple(listOf(GroupSegment.Plain("*"))),
+                                    percentage = 100000,
+                                    allocation = emptyList()
+                                )
+                            )
+                        )
+                    ),
+                    segments = listOf(
+                        Segment(
+                            key = "netherlands",
+                            conditions = Condition.And(
+                                listOf(
+                                    Condition.Plain(
+                                        "country",
+                                        Operator.EQUALS,
+                                        ConditionValue.StringValue("nl")
+                                    )
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+
+        )
+
+        val context = mapOf("userId" to AttributeValue.StringValue("123"))
+
+        sdk.getVariation("test", context) shouldBe "treatment"
+        sdk.getVariation("test", mapOf("userId" to AttributeValue.StringValue("user-ch"))) shouldBe "treatment"
+
+        // non-existing feature
+        sdk.getVariation("nonExistingFeature", context) shouldBe null
+
+        // disabled features
+        sdk.getVariation("nonExistingFeature", mapOf("userId" to AttributeValue.StringValue("user-gb"))) shouldBe null
+        sdk.getVariation(
+            "nonExistingFeature", mapOf(
+                "userId" to AttributeValue.StringValue("user-gb"),
+                "country" to AttributeValue.StringValue("nl")
+            )
+        ) shouldBe null
+
+        // no variation
+        sdk.getVariation("testWithNoVariation", context) shouldBe null
+    }
+
+    @Test
+    fun `should get variable`() {
+        val sdk = createInstance(
+            instanceOptions.copy(
+                datafile = datafileContent.copy(
+
+                    features = listOf(
+                        Feature(
+                            key = "test",
+                            bucketBy = BucketBy.Single("userId"),
+                            variablesSchema = listOf(
+                                VariableSchema(
+                                    key = "color",
+                                    type = VariableType.STRING,
+                                    defaultValue = VariableValue.StringValue("red")
+                                ),
+                                VariableSchema(
+                                    key = "showSidebar",
+                                    type = VariableType.BOOLEAN,
+                                    defaultValue = VariableValue.BooleanValue(false)
+                                ),
+                                VariableSchema(
+                                    key = "sidebarTitle",
+                                    type = VariableType.STRING,
+                                    defaultValue = VariableValue.StringValue("sidebar title")
+                                ),
+                                VariableSchema(
+                                    key = "count",
+                                    type = VariableType.INTEGER,
+                                    defaultValue = VariableValue.IntValue(0)
+                                ), VariableSchema(
+                                    key = "price",
+                                    type = VariableType.DOUBLE,
+                                    defaultValue = VariableValue.DoubleValue(9.99)
+                                ),
+
+                                VariableSchema(
+                                    key = "paymentMethods",
+                                    type = VariableType.ARRAY,
+                                    defaultValue = VariableValue.ArrayValue(listOf("paypal", "creditcard"))
+                                ),
+                                VariableSchema(
+                                    key = "flatConfig",
+                                    type = VariableType.OBJECT,
+                                    defaultValue = VariableValue.ObjectValue(mapOf("key" to VariableValue.StringValue("value")))
+                                ),
+                                VariableSchema(
+                                    key = "nestedConfig",
+                                    type = VariableType.JSON,
+                                    defaultValue = VariableValue.JsonValue("""{"key":{"nested":"value"}}""")
+                                )
+                            ),
+                            variations = listOf(
+                                Variation(
+                                    value = "control"
+                                ),
+                                Variation(
+                                    value = "treatment",
+                                    variables = listOf(
+                                        Variable(
+                                            key = "showSidebar",
+                                            value = VariableValue.BooleanValue(true),
+                                            overrides = listOf(
+                                                VariableOverride(
+                                                    segments =
+                                                    GroupSegment.Multiple(
+                                                        listOf(
+                                                            GroupSegment.Plain(
+                                                                "netherlands"
+                                                            )
+                                                        )
+                                                    ),
+                                                    value = VariableValue.BooleanValue(false)
+                                                ),
+                                                VariableOverride(
+                                                    conditions = Condition.Plain(
+                                                        "country",
+                                                        Operator.EQUALS,
+                                                        ConditionValue.StringValue("de")
+                                                    ),
+                                                    value = VariableValue.BooleanValue(false)
+                                                )
+                                            )
+                                        ),
+                                        Variable(
+                                            key = "sidebarTitle",
+                                            value = VariableValue.StringValue("sidebar title from variation"),
+                                            overrides = listOf(
+                                                VariableOverride(
+                                                    segments =
+                                                    GroupSegment.Multiple(
+                                                        listOf(
+                                                            GroupSegment.Plain(
+                                                                "netherlands"
+                                                            )
+                                                        )
+                                                    ),
+                                                    value = VariableValue.StringValue("Dutch title"),
+
+
+                                                    ),
+                                                VariableOverride(
+                                                    conditions = Condition.Plain(
+                                                        "country",
+                                                        Operator.EQUALS,
+                                                        ConditionValue.StringValue("de")
+                                                    ),
+                                                    value = VariableValue.StringValue("German title")
+                                                ),
+                                            )
+                                        )
+                                    )
+                                ),
+                            ),
+                            force = listOf(
+                                Force(
+                                    conditions = Condition.And(
+                                        listOf(
+                                            Condition.Plain(
+                                                attributeKey = "userId",
+                                                operator = Operator.EQUALS,
+                                                value = ConditionValue.StringValue("user-ch")
+                                            )
+                                        )
+                                    ),
+                                    enabled = true,
+                                    variation = "control",
+                                    variables = mapOf("color" to VariableValue.StringValue("red and white"))
+                                ),
+                                Force(
+                                    conditions = Condition.And(
+                                        listOf(
+                                            Condition.Plain(
+                                                attributeKey = "userId",
+                                                operator = Operator.EQUALS,
+                                                value = ConditionValue.StringValue("user-gb")
+                                            )
+                                        )
+                                    ),
+                                    enabled = false
+                                ),
+                                Force(
+                                    conditions = Condition.And(
+                                        listOf(
+                                            Condition.Plain(
+                                                attributeKey = "userId",
+                                                operator = Operator.EQUALS,
+                                                value = ConditionValue.StringValue("user-forced-variation")
+                                            )
+                                        )
+                                    ),
+                                    enabled = true,
+                                    variation = "treatment"
+                                )
+                            ),
+                            traffic = listOf(
+                                Traffic(
+                                    key = "2",
+                                    segments = GroupSegment.Multiple(
+                                        listOf(
+                                            GroupSegment.Plain(
+                                                "belgium"
+                                            )
+                                        )
+                                    ),
+                                    percentage = 100000,
+                                    allocation = listOf(
+                                        Allocation(
+                                            variation = "control",
+                                            range = listOf(0, 0)
+                                        ),
+                                        Allocation(
+                                            variation = "treatment",
+                                            range = listOf(0, 100000)
+                                        )
+                                    ),
+                                    variation = "control",
+                                    variables = mapOf("color" to VariableValue.StringValue("black"))
+                                ),
+                                Traffic(
+                                    key = "1",
+                                    segments = GroupSegment.Plain(
+                                        "*"
+                                    ),
+                                    percentage = 100000,
+                                    allocation = listOf(
+                                        Allocation(
+                                            variation = "control",
+                                            range = listOf(0, 0)
+                                        ),
+                                        Allocation(
+                                            variation = "treatment",
+                                            range = listOf(0, 100000)
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    ),
+                    attributes = listOf(
+                        Attribute(key = "userId", type = "string", capture = true),
+                        Attribute(key = "country", type = "string")
+                    ),
+                    segments = listOf(
+                        Segment(
+                            key = "netherlands",
+                            conditions = Condition.Plain(
+                                attributeKey = "country",
+                                operator = Operator.EQUALS,
+                                value = ConditionValue.StringValue("nl")
+                            )
+                        ),
+                        Segment(
+                            key = "belgium",
+                            conditions = Condition.Plain(
+                                attributeKey = "country",
+                                operator = Operator.EQUALS,
+                                value = ConditionValue.StringValue("be")
+                            )
+                        )
+                    )
+                )
+            )
+        )
+
+        val context = mapOf("userId" to AttributeValue.StringValue("123"))
+
+        sdk.getVariation("test", context) shouldBe "treatment"
+        sdk.getVariation("test", context + mapOf("country" to AttributeValue.StringValue("be"))) shouldBe "control"
+        sdk.getVariation("test", mapOf("userId" to AttributeValue.StringValue("user-ch"))) shouldBe "control"
+
+        (sdk.getVariable("test", "color", context) as VariableValue.StringValue).value shouldBe "red"
+        sdk.getVariableString("test", "color", context) shouldBe "red"
+        (sdk.getVariable(
+            "test",
+            "color",
+            context.toMutableMap().apply { putAll(mapOf("country" to AttributeValue.StringValue("be"))) }
+        ) as VariableValue.StringValue).value shouldBe "black"
+        (sdk.getVariable(
+            "test",
+            "color",
+            mapOf("userId" to AttributeValue.StringValue("user-ch"))
+        ) as VariableValue.StringValue).value shouldBe "red and white"
+
+        (sdk.getVariable("test", "showSidebar", context) as VariableValue.BooleanValue).value shouldBe true
+        sdk.getVariableBoolean("test", "showSidebar", context) shouldBe true
+        sdk.getVariableBoolean(
+            "test",
+            "showSidebar",
+            context + mapOf("country" to AttributeValue.StringValue("nl"))
+        ) shouldBe false
+        sdk.getVariableBoolean(
+            "test",
+            "showSidebar",
+            context + mapOf("country" to AttributeValue.StringValue("de"))
+        ) shouldBe false
+
+        sdk.getVariableString(
+            "test", "sidebarTitle",
+            mapOf(
+                "userId" to AttributeValue.StringValue("user-forced-variation"),
+                "country" to AttributeValue.StringValue("de")
+            )
+        ) shouldBe "German title"
+        sdk.getVariableString(
+            "test",
+            "sidebarTitle",
+            mapOf(
+                "userId" to AttributeValue.StringValue("user-forced-variation"),
+                "country" to AttributeValue.StringValue("nl")
+            )
+        ) shouldBe "Dutch title"
+        sdk.getVariableString(
+            "test",
+            "sidebarTitle",
+            mapOf(
+                "userId" to AttributeValue.StringValue("user-forced-variation"),
+                "country" to AttributeValue.StringValue("be")
+            )
+        ) shouldBe "sidebar title from variation"
+
+        (sdk.getVariable("test", "count", context) as VariableValue.IntValue).value shouldBe 0
+        sdk.getVariableInteger("test", "count", context) shouldBe 0
+
+        (sdk.getVariable("test", "price", context) as VariableValue.DoubleValue).value shouldBe 9.99
+        sdk.getVariableDouble("test", "price", context) shouldBe 9.99
+
+        (sdk.getVariable(
+            "test",
+            "paymentMethods",
+            context
+        ) as VariableValue.ArrayValue).values shouldBe listOf("paypal", "creditcard")
+        sdk.getVariableArray("test", "paymentMethods", context) shouldBe listOf("paypal", "creditcard")
+
+        (sdk.getVariable(
+            "test",
+            "flatConfig",
+            context
+        ) as VariableValue.ObjectValue).value shouldBe mapOf("key" to VariableValue.StringValue(value = "value"))
+        sdk.getVariableObject<Map<String, String>>("test", "flatConfig", context) shouldBe mapOf("key" to "value")
+
+        (sdk.getVariable(
+            "test",
+            "nestedConfig",
+            context
+        ) as VariableValue.JsonValue).value shouldBe "{\"key\":{\"nested\":\"value\"}}"
+        mapOf("key" to mapOf("nested" to "value")) shouldBe sdk.getVariableJSON("test", "nestedConfig", context)
+
+        // Non-existing
+        sdk.getVariable("test", "nonExisting", context) shouldBe null
+        sdk.getVariable("nonExistingFeature", "nonExisting", context) shouldBe null
+
+        // Disabled
+        sdk.getVariable("test", "color", mapOf("userId" to AttributeValue.StringValue("user-gb"))) shouldBe null
+    }
+
+    @Test
+    fun `should get variables without any variations`() {
+        val sdk = createInstance(
+            instanceOptions.copy(
+                datafile = datafileContent.copy(
+                    schemaVersion = "1",
+                    revision = "1.0",
+                    attributes = listOf(
+                        Attribute(key = "userId", type = "string", capture = true),
+                        Attribute(key = "country", type = "string")
+                    ),
+                    segments = listOf(
+                        Segment(
+                            key = "netherlands",
+                            conditions = Condition.Plain(
+                                attributeKey = "country",
+                                operator = Operator.EQUALS,
+                                value = ConditionValue.StringValue("nl")
+                            ),
+
+                            )
+                    ),
+                    features = listOf(
+                        Feature(
+                            key = "test",
+                            bucketBy = BucketBy.Single("userId"),
+                            variablesSchema = listOf(
+                                VariableSchema(
+                                    key = "color",
+                                    type = VariableType.STRING,
+                                    defaultValue = VariableValue.StringValue("red")
+                                )
+                            ),
+                            traffic = listOf(
+                                Traffic(
+                                    key = "1",
+                                    segments = GroupSegment.Plain("netherlands"),
+                                    percentage = 100000,
+                                    variables = mapOf("color" to VariableValue.StringValue("orange")),
+                                    allocation = emptyList()
+                                ),
+                                Traffic(
+                                    key = "2",
+                                    segments = GroupSegment.Plain("*"),
+                                    percentage = 100000,
+                                    allocation = emptyList()
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        )
+
+        val defaultContext = mapOf("userId" to AttributeValue.StringValue("123"))
+
+        // Test default value
+        (sdk.getVariable("test", "color", defaultContext) as VariableValue.StringValue).value shouldBe "red"
+
+        // Test override
+        (sdk.getVariable(
+            "test",
+            "color",
+            defaultContext + mapOf("country" to AttributeValue.StringValue("nl"))
+        ) as VariableValue.StringValue).value shouldBe "orange"
+    }
+
+    @Test
+    fun `should check if enabled for individually named segments`() {
+        val sdk = createInstance(
+            instanceOptions.copy(
+                datafile = datafileContent.copy(
+                    schemaVersion = "1",
+                    revision = "1.0",
+                    features = listOf(
+                        Feature(
+                            key = "test",
+                            bucketBy = BucketBy.Single("userId"),
+                            traffic = listOf(
+                                Traffic(
+                                    key = "1",
+                                    segments = GroupSegment.Plain("netherlands"),
+                                    percentage = 100000,
+                                    allocation = emptyList()
+                                ),
+                                Traffic(
+                                    key = "2",
+                                    segments = GroupSegment.Multiple(
+                                        listOf(
+                                            GroupSegment.Plain("iphone"),
+                                            GroupSegment.Plain("unitedStates")
+                                        )
+                                    ),
+                                    percentage = 100000,
+                                    allocation = emptyList()
+                                )
+                            )
+                        )
+                    ),
+                    attributes = emptyList(),
+                    segments = listOf(
+                        Segment(
+                            key = "netherlands",
+                            conditions = Condition.Plain(
+                                attributeKey = "country",
+                                operator = Operator.EQUALS,
+                                value = ConditionValue.StringValue("nl")
+                            )
+                        ),
+                        Segment(
+                            key = "iphone",
+                            conditions = Condition.Plain(
+                                attributeKey = "device",
+                                operator = Operator.EQUALS,
+                                value = ConditionValue.StringValue("iphone")
+                            )
+
+                        ),
+                        Segment(
+                            key = "unitedStates",
+                            conditions = Condition.Plain(
+                                attributeKey = "country",
+                                operator = Operator.EQUALS,
+                                value = ConditionValue.StringValue("us")
+                            )
+                        )
+                    )
+                )
+            )
+        )
+
+        // Check if enabled
+        assertEquals(false, sdk.isEnabled("test"))
+        assertEquals(false, sdk.isEnabled("test", mapOf("userId" to AttributeValue.StringValue("123"))))
+        assertEquals(
+            false,
+            sdk.isEnabled(
+                "test",
+                mapOf("userId" to AttributeValue.StringValue("123"), "country" to AttributeValue.StringValue("de"))
+            )
+        )
+        assertEquals(
+            false,
+            sdk.isEnabled(
+                "test",
+                mapOf("userId" to AttributeValue.StringValue("123"), "country" to AttributeValue.StringValue("us"))
+            )
+        )
+
+        assertEquals(
+            true,
+            sdk.isEnabled(
+                "test",
+                mapOf("userId" to AttributeValue.StringValue("123"), "country" to AttributeValue.StringValue("nl"))
+            )
+        )
+        assertEquals(
+            true,
+            sdk.isEnabled(
+                "test",
+                mapOf(
+                    "userId" to AttributeValue.StringValue("123"),
+                    "country" to AttributeValue.StringValue("us"),
+                    "device" to AttributeValue.StringValue("iphone")
+                )
+            )
+        )
+    }
 }

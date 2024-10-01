@@ -4,6 +4,7 @@ import com.featurevisor.sdk.FeaturevisorInstance
 import com.featurevisor.sdk.InstanceOptions
 import com.featurevisor.sdk.emptyDatafile
 import com.featurevisor.types.*
+import com.featurevisor.types.VariableValue.*
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
@@ -174,6 +175,18 @@ fun getContextValues(contextValue: AttributeValue?) =
         is AttributeValue.StringValue -> contextValue.value
         is AttributeValue.BooleanValue -> contextValue.value
         is AttributeValue.DateValue -> contextValue.value
+        null -> null
+    }
+
+fun getVariableValues(variableValue: VariableValue?) =
+    when (variableValue) {
+        is IntValue -> variableValue.value
+        is DoubleValue -> variableValue.value
+        is StringValue -> variableValue.value
+        is BooleanValue -> variableValue.value
+        is ArrayValue -> variableValue.values
+        is JsonValue -> variableValue.value
+        is ObjectValue -> variableValue.value
         null -> null
     }
 

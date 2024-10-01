@@ -13,7 +13,7 @@ val client = OkHttpClient()
 
 // MARK: - Fetch datafile content
 @Throws(IOException::class)
-internal fun FeaturevisorInstance.fetchDatafileContent(
+suspend fun FeaturevisorInstance.fetchDatafileContent(
     url: String,
     handleDatafileFetch: DatafileFetchHandler? = null,
     completion: (Result<DatafileContent>) -> Unit,
