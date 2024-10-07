@@ -22,7 +22,6 @@ fun FeaturevisorInstance.startRefreshing() = when {
                 refresh()
                 delay(refreshInterval)
             }
-            stopRefreshing()
         }
     }
 }
