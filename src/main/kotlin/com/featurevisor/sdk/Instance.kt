@@ -6,9 +6,10 @@ package com.featurevisor.sdk
 import com.featurevisor.sdk.FeaturevisorError.MissingDatafileOptions
 import com.featurevisor.types.*
 import com.featurevisor.types.EventName.*
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.*
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
+import kotlin.coroutines.resume
 
 typealias ConfigureBucketKey = (Feature, Context, BucketKey) -> BucketKey
 typealias ConfigureBucketValue = (Feature, Context, BucketValue) -> BucketValue
@@ -16,7 +17,7 @@ typealias InterceptContext = (Context) -> Context
 typealias DatafileFetchHandler = (datafileUrl: String) -> Result<DatafileContent>
 
 var emptyDatafile = DatafileContent(
-    schemaVersion =  "1",
+    schemaVersion = "1",
     revision = "unknown",
     attributes = emptyList(),
     segments = emptyList(),
@@ -56,6 +57,8 @@ class FeaturevisorInstance private constructor(options: InstanceOptions) {
     internal var configureBucketKey = options.configureBucketKey
     internal var configureBucketValue = options.configureBucketValue
     internal var refreshJob: Job? = null
+    private var fetchJob: Job? = null
+    internal val coroutineScope = CoroutineScope(Dispatchers.IO)
 
     init {
         with(options) {
@@ -99,16 +102,24 @@ class FeaturevisorInstance private constructor(options: InstanceOptions) {
                 }
 
                 datafileUrl != null -> {
-                    datafileReader = DatafileReader(options.datafile?: emptyDatafile)
-                    fetchDatafileContent(datafileUrl, handleDatafileFetch) { result ->
-                        if (result.isSuccess) {
-                            datafileReader = DatafileReader(result.getOrThrow())
-                            statuses.ready = true
-                            emitter.emit(READY, result.getOrThrow())
-                            if (refreshInterval != null) startRefreshing()
-                        } else {
-                            logger?.error("Failed to fetch datafile: $result")
-                            emitter.emit(ERROR)
+                    if (::datafileReader.isInitialized.not()) {
+                        datafileReader = DatafileReader(options.datafile ?: emptyDatafile)
+                    }
+                    fetchJob = coroutineScope.launch {
+                        fetchDatafileContent(
+                            url = datafileUrl,
+                            handleDatafileFetch = handleDatafileFetch,
+                        ) { result ->
+                            result.onSuccess { datafileContent ->
+                                datafileReader = DatafileReader(datafileContent)
+                                statuses.ready = true
+                                emitter.emit(READY, datafileContent)
+                                if (refreshInterval != null) startRefreshing()
+                            }.onFailure { error ->
+                                logger?.error("Failed to fetch datafile: $error")
+                                emitter.emit(ERROR)
+                            }
+                            cancelFetchJob()
                         }
                     }
                 }
@@ -118,8 +129,29 @@ class FeaturevisorInstance private constructor(options: InstanceOptions) {
         }
     }
 
+    // Provide a mechanism to cancel the fetch job if retry count is more than one
+    private fun cancelFetchJob() {
+        fetchJob?.cancel()
+        fetchJob = null
+    }
+
     fun setLogLevels(levels: List<Logger.LogLevel>) {
         this.logger?.setLevels(levels)
+    }
+
+    suspend fun onReady(): FeaturevisorInstance {
+        return suspendCancellableCoroutine { continuation ->
+            if (this.statuses.ready) {
+                continuation.resume(this)
+            }
+
+            val cb :(result:Array<out Any>) -> Unit = {
+                this.emitter.removeListener(READY)
+                continuation.resume(this)
+            }
+
+            this.emitter.addListener(READY,cb)
+        }
     }
 
     fun setDatafile(datafileJSON: String) {

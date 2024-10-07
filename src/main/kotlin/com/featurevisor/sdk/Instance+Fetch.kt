@@ -8,9 +8,12 @@ import kotlinx.serialization.json.Json
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import java.lang.IllegalArgumentException
 
+const val BODY_BYTE_COUNT = 1000000L
+val client = OkHttpClient()
+
 // MARK: - Fetch datafile content
 @Throws(IOException::class)
-internal fun FeaturevisorInstance.fetchDatafileContent(
+suspend fun FeaturevisorInstance.fetchDatafileContent(
     url: String,
     handleDatafileFetch: DatafileFetchHandler? = null,
     completion: (Result<DatafileContent>) -> Unit,
@@ -40,12 +43,10 @@ private fun fetchDatafileContentFromUrl(
     }
 }
 
-const val BODY_BYTE_COUNT = 1000000L
 private inline fun fetch(
     request: Request,
     crossinline completion: (Result<DatafileContent>) -> Unit,
 ) {
-    val client = OkHttpClient()
     val call = client.newCall(request)
     call.enqueue(object : Callback {
         override fun onResponse(call: Call, response: Response) {
@@ -59,7 +60,7 @@ private inline fun fetch(
                 try {
                     val content = json.decodeFromString<DatafileContent>(responseBodyString)
                     completion(Result.success(content))
-                } catch(throwable: Throwable) {
+                } catch (throwable: Throwable) {
                     completion(
                         Result.failure(
                             FeaturevisorError.UnparsableJson(
