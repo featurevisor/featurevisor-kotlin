@@ -111,10 +111,11 @@ object Conditions {
                 }
             }
 
-            attributeValue is AttributeValue.StringValue && conditionValue is ConditionValue.ArrayValue -> {
+            conditionValue is ConditionValue.ArrayValue -> {
+                val valueInContext = (context[attributeKey] as? AttributeValue.StringValue)?.value
                 when (operator) {
-                    IN_ARRAY -> attributeValue.value in conditionValue.values
-                    NOT_IN_ARRAY -> (attributeValue.value !in conditionValue.values)
+                    IN_ARRAY -> valueInContext in conditionValue.values
+                    NOT_IN_ARRAY -> valueInContext !in conditionValue.values
                     else -> false
                 }
             }
