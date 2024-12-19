@@ -210,23 +210,27 @@ object Conditions {
 
     private fun normalizeSemver(version: String): String {
         val parts = version.split("-", "+")
-        val mainParts = parts[0].split(".").map { it.toInt().toString() }
-        var normalizedVersion = mainParts.joinToString(".")
+        val mainParts = parts[0].split(".")
 
-        if (version.contains("-")) {
+        val normalizedMainParts = mainParts.take(3).mapIndexed { _, part ->
+            val num = part.toIntOrNull() ?: 0
+            num.coerceAtMost(999).toString()
+        }
+
+        var normalizedVersion = normalizedMainParts.joinToString(".")
+
+        if (parts.size > 1 && parts[1].isNotEmpty()) {
             val preRelease = parts[1].split(".").joinToString(".") {
-                if (it.all { char -> char.isDigit() }) it.toInt().toString()
-                else it
+                it
             }
             normalizedVersion += "-$preRelease"
         }
 
-        if (version.contains("+")) {
-            val buildMetadata = version.split("+")[1]
+        if (parts.size > 2 && parts[2].isNotEmpty()) {
+            val buildMetadata = parts[2]
             normalizedVersion += "+$buildMetadata"
         }
 
         return normalizedVersion
     }
-
 }
