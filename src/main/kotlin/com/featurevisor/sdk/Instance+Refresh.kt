@@ -1,9 +1,7 @@
 package com.featurevisor.sdk
 
-import com.featurevisor.sdk.FeaturevisorError.*
+import com.featurevisor.sdk.FeaturevisorError.MissingDatafileUrlWhileRefreshing
 import com.featurevisor.types.EventName
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -45,10 +43,10 @@ private suspend fun FeaturevisorInstance.refresh() {
             ) { result ->
                 result.onSuccess { datafileContent ->
                     val currentRevision = getRevision()
-                    val newRevision = datafileContent.revision
+                    val newRevision = datafileContent.first.revision
                     val isNotSameRevision = currentRevision != newRevision
 
-                    datafileReader = DatafileReader(datafileContent)
+                    datafileReader = DatafileReader(datafileContent.first)
                     logger?.info("refreshed datafile")
 
                     emitter.emit(EventName.REFRESH)

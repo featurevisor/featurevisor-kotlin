@@ -2,6 +2,7 @@ package com.featurevisor.testRunner
 
 import com.featurevisor.sdk.FeaturevisorInstance
 import com.featurevisor.sdk.InstanceOptions
+import com.featurevisor.sdk.JsonConfigFeatureVisor
 import com.featurevisor.sdk.emptyDatafile
 import com.featurevisor.types.*
 import com.featurevisor.types.VariableValue.*
@@ -21,11 +22,6 @@ internal const val ANSI_RED = "\u001B[31m"
 internal const val ANSI_GREEN = "\u001B[32m"
 
 internal const val MAX_BUCKETED_NUMBER = 100000
-
-internal val json = Json {
-    ignoreUnknownKeys = true
-    isLenient = true
-}
 
 internal fun printMessageInGreenColor(message: String) =
     println("$ANSI_GREEN$message$ANSI_RESET")
@@ -66,7 +62,7 @@ internal fun initializeSdkWithDataFileContent(datafileContent: DatafileContent?)
 
 internal fun getFileForSpecificPath(path: String) = File(path)
 
-internal inline fun <reified R : Any> String.convertToDataClass() = json.decodeFromString<R>(this)
+internal inline fun <reified R : Any> String.convertToDataClass() = JsonConfigFeatureVisor.json.decodeFromString<R>(this)
 
 internal fun getRootProjectDir(): String {
     var currentDir = File("../").absoluteFile
@@ -251,13 +247,15 @@ fun checkJsonIsEquals(a: String, b: String): Boolean {
     return map1 == map2
 }
 
-
-fun buildDataFileAsPerEnvironment(projectRootPath: String,environment: String) = try {
+fun buildDataFileAsPerEnvironment(projectRootPath: String, environment: String) = try {
     getJsonForDataFile(environment = environment, projectRootPath = projectRootPath)?.run {
-        convertToDataClass<DatafileContent>()
+        printMessageInRedColor("Start reading ${System.currentTimeMillis()}")
+        val abc = convertToDataClass<DatafileContent>()
+        printMessageInRedColor("End reading ${System.currentTimeMillis()}")
+        return@run abc
     } ?: emptyDatafile
 } catch (e: Exception) {
-    printMessageInRedColor("Unable to parse  data file")
+    printMessageInRedColor("Unable to parse  data file $e")
     emptyDatafile
 }
 
@@ -275,11 +273,11 @@ fun getDataFileContent(featureName: String, environment: String, projectRootPath
         null
     }
 
-fun convertNanoSecondToMilliSecond(timeInNanoSecond:Double):String {
-    val timeInMilliSecond = timeInNanoSecond/1000000
-    return if (timeInMilliSecond > 1000){
+fun convertNanoSecondToMilliSecond(timeInNanoSecond: Double): String {
+    val timeInMilliSecond = timeInNanoSecond / 1000000
+    return if (timeInMilliSecond > 1000) {
         "${timeInMilliSecond / 1000} s"
-    }else{
+    } else {
         "$timeInMilliSecond ms"
     }
 }

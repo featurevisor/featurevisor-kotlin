@@ -18,6 +18,7 @@ import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.TestCoroutineScope
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
+import kotlinx.serialization.json.JsonObject
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -192,6 +193,9 @@ class InstanceTest {
                     features = listOf(
                         Feature(
                             key = "test",
+                            bucketByString = JsonObject(emptyMap()),
+                            variationStrings = JsonObject(emptyMap()),
+                            trafficString = JsonObject(emptyMap()),
                             bucketBy = BucketBy.Single("userId"),
                             variations = listOf(
                                 Variation(value = "control"),
@@ -251,7 +255,10 @@ class InstanceTest {
                                         Allocation(variation = "treatment", range = listOf(0, 0))
                                     )
                                 )
-                            )
+                            ),
+                            bucketByString = JsonObject(emptyMap()),
+                            variationStrings = JsonObject(emptyMap()),
+                            trafficString = JsonObject(emptyMap()),
                         )
                     )
                 ),
@@ -302,7 +309,10 @@ class InstanceTest {
                                         Allocation(variation = "treatment", range = listOf(0, 0))
                                     )
                                 )
-                            )
+                            ),
+                            bucketByString = JsonObject(emptyMap()),
+                            variationStrings = JsonObject(emptyMap()),
+                            trafficString = JsonObject(emptyMap()),
                         )
                     )
                 ),
@@ -355,7 +365,10 @@ class InstanceTest {
                                         Allocation("treatment", listOf(0, 0))
                                     )
                                 )
-                            )
+                            ),
+                            bucketByString = JsonObject(emptyMap()),
+                            variationStrings = JsonObject(emptyMap()),
+                            trafficString = JsonObject(emptyMap()),
                         )
                     )
                 ),
@@ -400,7 +413,10 @@ class InstanceTest {
                                         Allocation("treatment", listOf(0, 0))
                                     )
                                 )
-                            )
+                            ),
+                            bucketByString = JsonObject(emptyMap()),
+                            variationStrings = JsonObject(emptyMap()),
+                            trafficString = JsonObject(emptyMap()),
                         )
                     )
                 ),
@@ -494,7 +510,10 @@ class InstanceTest {
                                                 Allocation("treatment", listOf(0, 100000))
                                             )
                                         )
-                                    )
+                                    ),
+                                    bucketByString = JsonObject(emptyMap()),
+                                    variationStrings = JsonObject(emptyMap()),
+                                    trafficString = JsonObject(emptyMap()),
                                 )
                             ),
                             attributes = emptyList(),
@@ -556,7 +575,10 @@ class InstanceTest {
                                                     Allocation("treatment", listOf(0, 100000))
                                                 )
                                             )
-                                        )
+                                        ),
+                                        bucketByString = JsonObject(emptyMap()),
+                                        variationStrings = JsonObject(emptyMap()),
+                                        trafficString = JsonObject(emptyMap()),
                                     )
                                 )
                             )
@@ -591,7 +613,10 @@ class InstanceTest {
                                     percentage = 0, // disabled
                                     allocation = emptyList()
                                 )
-                            )
+                            ),
+                            bucketByString = JsonObject(emptyMap()),
+                            variationStrings = JsonObject(emptyMap()),
+                            trafficString = JsonObject(emptyMap()),
                         ),
                         Feature(
                             key = "myKey",
@@ -606,7 +631,10 @@ class InstanceTest {
                                     percentage = 100000,
                                     allocation = emptyList()
                                 )
-                            )
+                            ),
+                            bucketByString = JsonObject(emptyMap()),
+                            variationStrings = JsonObject(emptyMap()),
+                            trafficString = JsonObject(emptyMap()),
                         )
                     )
                 )
@@ -630,7 +658,10 @@ class InstanceTest {
                                     percentage = 100000, // enabled
                                     allocation = emptyList()
                                 )
-                            )
+                            ),
+                            bucketByString = JsonObject(emptyMap()),
+                            variationStrings = JsonObject(emptyMap()),
+                            trafficString = JsonObject(emptyMap()),
                         ),
                         Feature(
                             key = "myKey",
@@ -643,7 +674,10 @@ class InstanceTest {
                                     percentage = 100000,
                                     allocation = emptyList()
                                 )
-                            )
+                            ),
+                            bucketByString = JsonObject(emptyMap()),
+                            variationStrings = JsonObject(emptyMap()),
+                            trafficString = JsonObject(emptyMap()),
                         )
                     )
                 )
@@ -676,7 +710,10 @@ class InstanceTest {
                                         Allocation("treatment", listOf(0, 100000))
                                     )
                                 )
-                            )
+                            ),
+                            bucketByString = JsonObject(emptyMap()),
+                            variationStrings = JsonObject(emptyMap()),
+                            trafficString = JsonObject(emptyMap()),
                         ),
                         Feature(
                             key = "myKey",
@@ -696,7 +733,10 @@ class InstanceTest {
                                     percentage = 100000,
                                     allocation = emptyList()
                                 )
-                            )
+                            ),
+                            bucketByString = JsonObject(emptyMap()),
+                            variationStrings = JsonObject(emptyMap()),
+                            trafficString = JsonObject(emptyMap()),
                         )
                     )
                 )
@@ -727,7 +767,10 @@ class InstanceTest {
                                         Allocation("treatment", listOf(0, 100000))
                                     )
                                 )
-                            )
+                            ),
+                            bucketByString = JsonObject(emptyMap()),
+                            variationStrings = JsonObject(emptyMap()),
+                            trafficString = JsonObject(emptyMap()),
                         ),
                         Feature(
                             key = "myKey",
@@ -747,7 +790,10 @@ class InstanceTest {
                                     percentage = 100000,
                                     allocation = emptyList()
                                 )
-                            )
+                            ),
+                            bucketByString = JsonObject(emptyMap()),
+                            variationStrings = JsonObject(emptyMap()),
+                            trafficString = JsonObject(emptyMap()),
                         )
                     )
                 )
@@ -784,7 +830,10 @@ class InstanceTest {
                                         Allocation("treatment", listOf(0, 0))
                                     )
                                 )
-                            )
+                            ),
+                            bucketByString = JsonObject(emptyMap()),
+                            variationStrings = JsonObject(emptyMap()),
+                            trafficString = JsonObject(emptyMap()),
                         ),
                         Feature(
                             key = "deprecatedTest",
@@ -804,7 +853,10 @@ class InstanceTest {
                                         Allocation("treatment", listOf(0, 0))
                                     )
                                 )
-                            )
+                            ),
+                            bucketByString = JsonObject(emptyMap()),
+                            variationStrings = JsonObject(emptyMap()),
+                            trafficString = JsonObject(emptyMap()),
                         )
                     )
                 ),
@@ -857,7 +909,10 @@ class InstanceTest {
                                     percentage = 100000,
                                     allocation = emptyList()
                                 )
-                            )
+                            ),
+                            bucketByString = JsonObject(emptyMap()),
+                            variationStrings = JsonObject(emptyMap()),
+                            trafficString = JsonObject(emptyMap()),
                         )
                     ),
                     segments = listOf(
@@ -865,7 +920,8 @@ class InstanceTest {
                             key = "netherlands",
                             conditions = Condition.Plain(
                                 "country", Operator.EQUALS, ConditionValue.StringValue("nl")
-                            )
+                            ),
+                            conditionStrings = ""
                         )
                     )
                 )
@@ -913,7 +969,10 @@ class InstanceTest {
                                     percentage = 50000,
                                     allocation = emptyList()
                                 )
-                            )
+                            ),
+                            bucketByString = JsonObject(emptyMap()),
+                            variationStrings = JsonObject(emptyMap()),
+                            trafficString = JsonObject(emptyMap()),
                         )
                     )
                 )
@@ -972,7 +1031,10 @@ class InstanceTest {
                                         Allocation("treatment", listOf(0, 100000))
                                     )
                                 )
-                            )
+                            ),
+                            bucketByString = JsonObject(emptyMap()),
+                            variationStrings = JsonObject(emptyMap()),
+                            trafficString = JsonObject(emptyMap()),
                         ),
                         Feature(
                             key = "testWithNoVariation",
@@ -984,7 +1046,10 @@ class InstanceTest {
                                     percentage = 100000,
                                     allocation = emptyList()
                                 )
-                            )
+                            ),
+                            bucketByString = JsonObject(emptyMap()),
+                            variationStrings = JsonObject(emptyMap()),
+                            trafficString = JsonObject(emptyMap()),
                         )
                     ),
                     segments = listOf(
@@ -998,7 +1063,8 @@ class InstanceTest {
                                         ConditionValue.StringValue("nl")
                                     )
                                 )
-                            )
+                            ),
+                            conditionStrings = "",
                         )
                     )
                 )
@@ -1223,7 +1289,10 @@ class InstanceTest {
                                         )
                                     )
                                 )
-                            )
+                            ),
+                            bucketByString = JsonObject(emptyMap()),
+                            variationStrings = JsonObject(emptyMap()),
+                            trafficString = JsonObject(emptyMap()),
                         )
                     ),
                     attributes = listOf(
@@ -1237,7 +1306,8 @@ class InstanceTest {
                                 attributeKey = "country",
                                 operator = Operator.EQUALS,
                                 value = ConditionValue.StringValue("nl")
-                            )
+                            ),
+                            conditionStrings = "",
                         ),
                         Segment(
                             key = "belgium",
@@ -1245,7 +1315,8 @@ class InstanceTest {
                                 attributeKey = "country",
                                 operator = Operator.EQUALS,
                                 value = ConditionValue.StringValue("be")
-                            )
+                            ),
+                            conditionStrings = "",
                         )
                     )
                 )
@@ -1362,8 +1433,8 @@ class InstanceTest {
                                 operator = Operator.EQUALS,
                                 value = ConditionValue.StringValue("nl")
                             ),
-
-                            )
+                            conditionStrings = "",
+                        )
                     ),
                     features = listOf(
                         Feature(
@@ -1390,7 +1461,10 @@ class InstanceTest {
                                     percentage = 100000,
                                     allocation = emptyList()
                                 )
-                            )
+                            ),
+                            bucketByString = JsonObject(emptyMap()),
+                            variationStrings = JsonObject(emptyMap()),
+                            trafficString = JsonObject(emptyMap()),
                         )
                     )
                 )
@@ -1439,7 +1513,10 @@ class InstanceTest {
                                     percentage = 100000,
                                     allocation = emptyList()
                                 )
-                            )
+                            ),
+                            bucketByString = JsonObject(emptyMap()),
+                            variationStrings = JsonObject(emptyMap()),
+                            trafficString = JsonObject(emptyMap()),
                         )
                     ),
                     attributes = emptyList(),
@@ -1450,7 +1527,8 @@ class InstanceTest {
                                 attributeKey = "country",
                                 operator = Operator.EQUALS,
                                 value = ConditionValue.StringValue("nl")
-                            )
+                            ),
+                            conditionStrings = ""
                         ),
                         Segment(
                             key = "iphone",
@@ -1458,8 +1536,8 @@ class InstanceTest {
                                 attributeKey = "device",
                                 operator = Operator.EQUALS,
                                 value = ConditionValue.StringValue("iphone")
-                            )
-
+                            ),
+                            conditionStrings = "",
                         ),
                         Segment(
                             key = "unitedStates",
@@ -1467,7 +1545,8 @@ class InstanceTest {
                                 attributeKey = "country",
                                 operator = Operator.EQUALS,
                                 value = ConditionValue.StringValue("us")
-                            )
+                            ),
+                            conditionStrings = "",
                         )
                     )
                 )

@@ -8,7 +8,6 @@ import com.featurevisor.types.*
 import com.featurevisor.types.EventName.*
 import kotlinx.coroutines.*
 import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
 import kotlin.coroutines.resume
 
 typealias ConfigureBucketKey = (Feature, Context, BucketKey) -> BucketKey
@@ -111,9 +110,9 @@ class FeaturevisorInstance private constructor(options: InstanceOptions) {
                             handleDatafileFetch = handleDatafileFetch,
                         ) { result ->
                             result.onSuccess { datafileContent ->
-                                datafileReader = DatafileReader(datafileContent)
+                                datafileReader = DatafileReader(datafileContent.first)
                                 statuses.ready = true
-                                emitter.emit(READY, datafileContent)
+                                emitter.emit(READY, datafileContent.first, datafileContent.second)
                                 if (refreshInterval != null) startRefreshing()
                             }.onFailure { error ->
                                 logger?.error("Failed to fetch datafile: $error")
@@ -145,19 +144,19 @@ class FeaturevisorInstance private constructor(options: InstanceOptions) {
                 continuation.resume(this)
             }
 
-            val cb :(result:Array<out Any>) -> Unit = {
+            val cb: (result: Array<out Any>) -> Unit = {
                 this.emitter.removeListener(READY)
                 continuation.resume(this)
             }
 
-            this.emitter.addListener(READY,cb)
+            this.emitter.addListener(READY, cb)
         }
     }
 
     fun setDatafile(datafileJSON: String) {
         val data = datafileJSON.toByteArray(Charsets.UTF_8)
         try {
-            val datafileContent = Json.decodeFromString<DatafileContent>(String(data))
+            val datafileContent = JsonConfigFeatureVisor.json.decodeFromString<DatafileContent>(String(data))
             datafileReader = DatafileReader(datafileContent = datafileContent)
         } catch (e: Exception) {
             logger?.error("could not parse datafile", mapOf("error" to e))

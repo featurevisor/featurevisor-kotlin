@@ -85,7 +85,7 @@ inline fun <reified T : Any> FeaturevisorInstance.getVariableObject(
     }
 }
 
-inline fun <reified T: Any> FeaturevisorInstance.getVariableJSON(
+inline fun <reified T : Any> FeaturevisorInstance.getVariableJSON(
     featureKey: FeatureKey,
     variableKey: VariableKey,
     context: Context,
@@ -97,4 +97,3 @@ inline fun <reified T: Any> FeaturevisorInstance.getVariableJSON(
         null
     }
 }
-
