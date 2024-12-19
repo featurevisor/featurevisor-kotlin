@@ -21,7 +21,7 @@ internal fun FeaturevisorInstance.findForceFromFeature(
     datafileReader: DatafileReader,
 ): Force? {
 
-    return feature.force?.firstOrNull { force ->
+    return feature.getForce().firstOrNull { force ->
         when {
             force.conditions != null -> allConditionsAreMatched(force.conditions, context)
             force.segments != null -> allGroupSegmentsAreMatched(
@@ -46,7 +46,7 @@ internal fun FeaturevisorInstance.getMatchedTraffic(
     }
 }
 
-internal fun FeaturevisorInstance.getMatchedAllocation(
+internal fun getMatchedAllocation(
     traffic: Traffic,
     bucketValue: Int,
 ): Allocation? {
@@ -68,7 +68,6 @@ internal fun FeaturevisorInstance.getMatchedTrafficAndAllocation(
     context: Context,
     bucketValue: Int,
     datafileReader: DatafileReader,
-    logger: Logger?,
 ): MatchedTrafficAndAllocation {
 
     var matchedAllocation: Allocation? = null

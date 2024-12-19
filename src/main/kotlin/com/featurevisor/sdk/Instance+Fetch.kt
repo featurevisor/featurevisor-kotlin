@@ -2,22 +2,23 @@ package com.featurevisor.sdk
 
 import com.featurevisor.types.DatafileContent
 import kotlinx.serialization.decodeFromString
-import java.io.IOException
 import okhttp3.*
-import kotlinx.serialization.json.Json
 import okhttp3.HttpUrl.Companion.toHttpUrl
-import java.lang.IllegalArgumentException
+import java.io.IOException
+
+const val BODY_BYTE_COUNT = 1000000L
+val client = OkHttpClient()
 
 // MARK: - Fetch datafile content
 @Throws(IOException::class)
-internal fun FeaturevisorInstance.fetchDatafileContent(
+fun FeaturevisorInstance.fetchDatafileContent(
     url: String,
     handleDatafileFetch: DatafileFetchHandler? = null,
-    completion: (Result<DatafileContent>) -> Unit,
+    completion: (Result<Pair<DatafileContent, String>>) -> Unit,
 ) {
     handleDatafileFetch?.let { handleFetch ->
-        val result = handleFetch(url)
-        completion(result)
+        val result = handleFetch(url).getOrNull()!!
+        completion(Result.success(Pair(result, "")))
     } ?: run {
         fetchDatafileContentFromUrl(url, completion)
     }
@@ -25,7 +26,7 @@ internal fun FeaturevisorInstance.fetchDatafileContent(
 
 private fun fetchDatafileContentFromUrl(
     url: String,
-    completion: (Result<DatafileContent>) -> Unit,
+    completion: (Result<Pair<DatafileContent, String>>) -> Unit,
 ) {
     try {
         val httpUrl = url.toHttpUrl()
@@ -40,26 +41,21 @@ private fun fetchDatafileContentFromUrl(
     }
 }
 
-const val BODY_BYTE_COUNT = 1000000L
 private inline fun fetch(
     request: Request,
-    crossinline completion: (Result<DatafileContent>) -> Unit,
+    crossinline completion: (Result<Pair<DatafileContent, String>>) -> Unit,
 ) {
-    val client = OkHttpClient()
     val call = client.newCall(request)
     call.enqueue(object : Callback {
         override fun onResponse(call: Call, response: Response) {
             val responseBody = response.peekBody(BODY_BYTE_COUNT)
             if (response.isSuccessful) {
-                val json = Json {
-                    ignoreUnknownKeys = true
-                }
                 val responseBodyString = responseBody.string()
                 FeaturevisorInstance.companionLogger?.debug(responseBodyString)
                 try {
-                    val content = json.decodeFromString<DatafileContent>(responseBodyString)
-                    completion(Result.success(content))
-                } catch(throwable: Throwable) {
+                    val content = JsonConfigFeatureVisor.json.decodeFromString<DatafileContent>(responseBodyString)
+                    completion(Result.success(Pair(content, responseBodyString)))
+                } catch (throwable: Throwable) {
                     completion(
                         Result.failure(
                             FeaturevisorError.UnparsableJson(

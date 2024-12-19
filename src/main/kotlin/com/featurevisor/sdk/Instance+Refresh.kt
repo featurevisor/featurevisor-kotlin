@@ -1,9 +1,7 @@
 package com.featurevisor.sdk
 
-import com.featurevisor.sdk.FeaturevisorError.*
+import com.featurevisor.sdk.FeaturevisorError.MissingDatafileUrlWhileRefreshing
 import com.featurevisor.types.EventName
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -17,7 +15,7 @@ fun FeaturevisorInstance.startRefreshing() = when {
     refreshJob != null -> logger?.warn("refreshing has already started")
     refreshInterval == null -> logger?.warn("no `refreshInterval` option provided")
     else -> {
-        refreshJob = CoroutineScope(Dispatchers.Unconfined).launch {
+        refreshJob = coroutineScope.launch {
             while (isActive) {
                 refresh()
                 delay(refreshInterval)
@@ -32,7 +30,7 @@ fun FeaturevisorInstance.stopRefreshing() {
     logger?.warn("refreshing has stopped")
 }
 
-private fun FeaturevisorInstance.refresh() {
+private suspend fun FeaturevisorInstance.refresh() {
     logger?.debug("refreshing datafile")
     when {
         statuses.refreshInProgress -> logger?.warn("refresh in progress, skipping")
@@ -40,17 +38,15 @@ private fun FeaturevisorInstance.refresh() {
         else -> {
             statuses.refreshInProgress = true
             fetchDatafileContent(
-                datafileUrl,
-                handleDatafileFetch,
+                url = datafileUrl,
+                handleDatafileFetch = handleDatafileFetch,
             ) { result ->
-
-                if (result.isSuccess) {
-                    val datafileContent = result.getOrThrow()
+                result.onSuccess { datafileContent ->
                     val currentRevision = getRevision()
-                    val newRevision = datafileContent.revision
+                    val newRevision = datafileContent.first.revision
                     val isNotSameRevision = currentRevision != newRevision
 
-                    datafileReader = DatafileReader(datafileContent)
+                    datafileReader = DatafileReader(datafileContent.first)
                     logger?.info("refreshed datafile")
 
                     emitter.emit(EventName.REFRESH)
@@ -59,7 +55,7 @@ private fun FeaturevisorInstance.refresh() {
                     }
 
                     statuses.refreshInProgress = false
-                } else {
+                }.onFailure {
                     logger?.error(
                         "failed to refresh datafile",
                         mapOf("error" to result)

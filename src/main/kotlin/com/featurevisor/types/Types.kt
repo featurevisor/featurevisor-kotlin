@@ -3,6 +3,8 @@ package com.featurevisor.types
 import com.featurevisor.sdk.serializers.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
+import kotlinx.serialization.json.JsonElement
 import java.util.*
 
 typealias Context = Map<AttributeKey, AttributeValue>
@@ -13,16 +15,22 @@ typealias VariableKey = String
 enum class VariableType {
     @SerialName("boolean")
     BOOLEAN,
+
     @SerialName("string")
     STRING,
+
     @SerialName("integer")
     INTEGER,
+
     @SerialName("double")
     DOUBLE,
+
     @SerialName("array")
     ARRAY,
+
     @SerialName("object")
     OBJECT,
+
     @SerialName("json")
     JSON
 }
@@ -46,7 +54,7 @@ data class VariableOverride(
 
     // one of the below must be present in YAML
     val conditions: Condition? = null,
-    val segments: GroupSegment?=null,
+    val segments: GroupSegment? = null,
 )
 
 @Serializable
@@ -91,20 +99,6 @@ data class Force(
     val variables: VariableValues? = null,
 )
 
-data class Slot(
-    // @TODO: allow false?
-    val feature: FeatureKey? = null,
-
-    // 0 to 100
-    val percentage: Weight,
-)
-
-data class Group(
-    val key: String,
-    val description: String,
-    val slots: List<Slot>,
-)
-
 typealias BucketKey = String
 // 0 to 100,000
 typealias BucketValue = Int
@@ -118,43 +112,6 @@ typealias InitialFeatures = Map<FeatureKey, OverrideFeature>
 typealias Weight = Double
 typealias EnvironmentKey = String
 typealias RuleKey = String
-
-data class Rule(
-    val key: RuleKey,
-    val segments: GroupSegment,
-    val percentage: Weight,
-
-    val enabled: Boolean? = null,
-    val variation: VariationValue? = null,
-    val variables: VariableValues? = null,
-)
-
-data class Environment(
-    val expose: Boolean? = null,
-    val rules: List<Rule>,
-    val force: List<Force>? = null,
-)
-
-typealias Environments = Map<EnvironmentKey, Environment>
-
-data class ParsedFeature(
-    val key: FeatureKey,
-
-    val archived: Boolean?,
-    val deprecated: Boolean?,
-
-    val description: String,
-    val tags: List<String>,
-
-    val bucketBy: BucketBy,
-
-    val required: List<Required>?,
-
-    val variablesSchema: List<VariableSchema>?,
-    val variations: List<Variation>?,
-
-    val environments: Environments,
-)
 
 typealias AttributeKey = String
 
@@ -187,8 +144,6 @@ sealed class Condition {
     data class Not(val not: List<Condition>) : Condition()
 }
 
-const val TAG = "FeaturevisorService"
-
 @Serializable(with = ConditionValueSerializer::class)
 sealed class ConditionValue {
     data class StringValue(val value: String?) : ConditionValue()
@@ -205,7 +160,12 @@ typealias SegmentKey = String
 data class Segment(
     val archived: Boolean? = null,
     val key: SegmentKey,
-    val conditions: Condition,
+
+    @SerialName("conditions")
+    val conditionStrings: String,
+
+    @Transient
+    var conditions: Condition? = null,
 )
 
 data class AndGroupSegment(
@@ -319,15 +279,44 @@ sealed class Required {
 data class Feature(
     val key: FeatureKey,
     val deprecated: Boolean? = null,
-    val variablesSchema: List<VariableSchema>? = null,
-    val variations: List<Variation>? = null,
-    val bucketBy: BucketBy,
-    val required: List<Required>? = null,
-    val traffic: List<Traffic>,
-    val force: List<Force>? = null,
 
-    // if in a Group (mutex), these are available slot ranges
+    @SerialName("variablesSchema")
+    val variablesSchemaString: JsonElement? = null,
+
+    @SerialName("variations")
+    val variationStrings: JsonElement? = null,
+
+    @SerialName("bucketBy")
+    val bucketByString: JsonElement,
+
+    @SerialName("traffic")
+    val trafficString: JsonElement,
+
+    @SerialName("force")
+    val forceString: JsonElement? = null,
+
+    val required: List<Required>? = null,
     val ranges: List<Range>? = null,
+
+    @Transient
+    @SerialName("variablesSchemaObject")
+    var variablesSchema: List<VariableSchema>? = null,
+
+    @Transient
+    @SerialName("variationsObject")
+    var variations: List<Variation>? = null,
+
+    @Transient
+    @SerialName("bucketByObject")
+    var bucketBy: BucketBy? = null,
+
+    @Transient
+    @SerialName("trafficObject")
+    var traffic: List<Traffic>? = null,
+
+    @Transient
+    @SerialName("forceObject")
+    var force: List<Force>? = null
 )
 
 @Serializable
@@ -354,14 +343,14 @@ typealias AssertionMatrix = Map<String, List<AttributeValue>>
 
 
 data class FeatureAssertion(
-    var description: String?=null,
-    var environment: EnvironmentKey="staging",
+    var description: String? = null,
+    var environment: EnvironmentKey = "staging",
     // bucket weight: 0 to 100
     var at: WeightType = WeightType.IntType(40),
     var context: Context = mapOf("devMode" to AttributeValue.BooleanValue(false)),
-    val expectedToBeEnabled: Boolean?=null,
-    val expectedVariation: VariationValue?=null,
-    val expectedVariables: VariableValues?=null,
+    val expectedToBeEnabled: Boolean? = null,
+    val expectedVariation: VariationValue? = null,
+    val expectedVariables: VariableValues? = null,
     val matrix: AssertionMatrix? = null
 )
 
@@ -371,7 +360,7 @@ data class TestFeature(
 )
 
 data class SegmentAssertion(
-    var description: String?=null,
+    var description: String? = null,
     var context: Context,
     val expectedToMatch: Boolean,
     val matrix: AssertionMatrix? = null
@@ -387,20 +376,20 @@ sealed class Test {
     data class Segment(val value: TestSegment) : Test()
 }
 
-sealed class WeightType{
-    data class IntType(val value: Int):WeightType()
+sealed class WeightType {
+    data class IntType(val value: Int) : WeightType()
 
-    data class DoubleType(val value: Double):WeightType()
+    data class DoubleType(val value: Double) : WeightType()
 
-    data class StringType(val value: String):WeightType()
+    data class StringType(val value: String) : WeightType()
 }
 
 data class TestResultAssertionError(
     val type: String,
-    val expected: Any?=null,
-    val actual: Any?=null,
-    val message: String?=null,
-    val details: Map<String, Any>?=null
+    val expected: Any? = null,
+    val actual: Any? = null,
+    val message: String? = null,
+    val details: Map<String, Any>? = null
 )
 
 data class TestResultAssertion(
@@ -414,7 +403,7 @@ data class TestResultAssertion(
 data class TestResult(
     val type: String,
     val key: FeatureKey,
-    var notFound: Boolean?=null,
+    var notFound: Boolean? = null,
     var passed: Boolean,
     var duration: Long,
     val assertions: List<TestResultAssertion>
@@ -426,29 +415,24 @@ data class ExecutionResult(
 )
 
 data class AssertionsCount(
-    var passed: Int=0,
-    var failed: Int=0
-)
-
-data class DataFile(
-    val stagingDataFiles: DatafileContent? = null,
-    val productionDataFiles: DatafileContent? = null
+    var passed: Int = 0,
+    var failed: Int = 0
 )
 
 @Serializable
 data class Configuration(
-    val environments:List<String>,
+    val environments: List<String>,
     val tags: List<String>,
-    val defaultBucketBy:String,
-    val prettyState:Boolean,
-    val prettyDatafile:Boolean,
-    val stringify:Boolean,
-    val featuresDirectoryPath:String,
-    val segmentsDirectoryPath:String,
-    val attributesDirectoryPath:String,
-    val groupsDirectoryPath:String,
-    val testsDirectoryPath:String,
-    val stateDirectoryPath:String,
-    val outputDirectoryPath:String,
-    val siteExportDirectoryPath:String
+    val defaultBucketBy: String,
+    val prettyState: Boolean,
+    val prettyDatafile: Boolean,
+    val stringify: Boolean,
+    val featuresDirectoryPath: String,
+    val segmentsDirectoryPath: String,
+    val attributesDirectoryPath: String,
+    val groupsDirectoryPath: String,
+    val testsDirectoryPath: String,
+    val stateDirectoryPath: String,
+    val outputDirectoryPath: String,
+    val siteExportDirectoryPath: String
 )
