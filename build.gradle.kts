@@ -52,6 +52,7 @@ dependencies {
     // Uncomment when needed
     testImplementation("io.mockk:mockk:1.13.8")
     testImplementation("io.kotest:kotest-assertions-core:5.7.2")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.0")
 
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
@@ -65,7 +66,6 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.11.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
     implementation("org.yaml:snakeyaml:2.2")
-    implementation("com.google.code.gson:gson:2.10.1")
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
