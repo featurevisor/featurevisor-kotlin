@@ -111,19 +111,18 @@ object Conditions {
                 }
             }
 
-            attributeValue is AttributeValue.IntValue && conditionValue is ConditionValue.ArrayValue -> {
+            attributeValue is AttributeValue.StringValue && conditionValue is ConditionValue.ArrayValue -> {
                 when (operator) {
-                    IN_ARRAY -> attributeValue.value.toString() in conditionValue.values
-                    NOT_IN_ARRAY -> (attributeValue.value.toString() !in conditionValue.values)
+                    IN_ARRAY -> attributeValue.value in conditionValue.values
+                    NOT_IN_ARRAY -> (attributeValue.value !in conditionValue.values)
                     else -> false
                 }
             }
 
-            conditionValue is ConditionValue.ArrayValue -> {
-                val valueInContext = (context[attributeKey] as? AttributeValue.StringValue)?.value
+            attributeValue is AttributeValue.IntValue && conditionValue is ConditionValue.ArrayValue -> {
                 when (operator) {
-                    IN_ARRAY -> valueInContext in conditionValue.values
-                    NOT_IN_ARRAY -> valueInContext !in conditionValue.values
+                    IN_ARRAY -> attributeValue.value.toString() in conditionValue.values
+                    NOT_IN_ARRAY -> (attributeValue.value.toString() !in conditionValue.values)
                     else -> false
                 }
             }
