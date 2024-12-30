@@ -73,7 +73,6 @@ fun FeaturevisorInstance.isEnabled(featureKey: FeatureKey, context: Context = em
     return evaluation.enabled == true
 }
 
-@Suppress("UNREACHABLE_CODE")
 fun FeaturevisorInstance.evaluateVariation(featureKey: FeatureKey, context: Context = emptyMap()): Evaluation {
     var evaluation: Evaluation
     try {
@@ -125,7 +124,7 @@ fun FeaturevisorInstance.evaluateVariation(featureKey: FeatureKey, context: Cont
             return evaluation
         }
 
-        if (feature.variations.isNullOrEmpty()) {
+        if (feature.getVariations().isEmpty()) {
             // no variations
             evaluation = Evaluation(
                 featureKey = featureKey,
@@ -141,7 +140,7 @@ fun FeaturevisorInstance.evaluateVariation(featureKey: FeatureKey, context: Cont
         // forced
         val force = findForceFromFeature(feature, context, datafileReader)
         if (force != null) {
-            val variation = feature.variations.firstOrNull { it.value == force.variation }
+            val variation = feature.getVariations().firstOrNull { it.value == force.variation }
 
             if (variation != null) {
                 evaluation = Evaluation(
@@ -160,18 +159,17 @@ fun FeaturevisorInstance.evaluateVariation(featureKey: FeatureKey, context: Cont
         val bucketValue = getBucketValue(feature, finalContext)
 
         val matchedTrafficAndAllocation = getMatchedTrafficAndAllocation(
-            feature.traffic,
+            feature.getTraffic(),
             finalContext,
             bucketValue,
             datafileReader,
-            logger
         )
 
         val matchedTraffic = matchedTrafficAndAllocation.matchedTraffic
 
         // override from rule
         if (matchedTraffic?.variation != null) {
-            val variation = feature.variations.firstOrNull { it.value == matchedTraffic.variation }
+            val variation = feature.getVariations().firstOrNull { it.value == matchedTraffic.variation }
             if (variation != null) {
                 evaluation = Evaluation(
                     featureKey = feature.key,
@@ -191,7 +189,7 @@ fun FeaturevisorInstance.evaluateVariation(featureKey: FeatureKey, context: Cont
 
         // regular allocation
         if (matchedAllocation != null) {
-            val variation = feature.variations?.firstOrNull { it.value == matchedAllocation.variation }
+            val variation = feature.getVariations().firstOrNull { it.value == matchedAllocation.variation }
             if (variation != null) {
                 evaluation = Evaluation(
                     featureKey = feature.key,
@@ -229,7 +227,6 @@ fun FeaturevisorInstance.evaluateVariation(featureKey: FeatureKey, context: Cont
 }
 
 
-@Suppress("UNREACHABLE_CODE")
 fun FeaturevisorInstance.evaluateFlag(featureKey: FeatureKey, context: Context = emptyMap()): Evaluation {
 
     var evaluation: Evaluation
@@ -301,8 +298,8 @@ fun FeaturevisorInstance.evaluateFlag(featureKey: FeatureKey, context: Context =
         }
 
         // required
-        if (feature.required.isNullOrEmpty().not()) {
-            val requiredFeaturesAreEnabled = feature.required?.all { item ->
+        if (feature.getRequired().isNullOrEmpty().not()) {
+            val requiredFeaturesAreEnabled = feature.getRequired()?.all { item ->
                 var requiredKey: FeatureKey? = null
                 var requiredVariation: VariationValue? = null
                 when (item) {
@@ -347,7 +344,7 @@ fun FeaturevisorInstance.evaluateFlag(featureKey: FeatureKey, context: Context =
         val bucketValue = getBucketValue(feature = feature, context = finalContext)
 
         val matchedTraffic = getMatchedTraffic(
-            traffic = feature.traffic,
+            traffic = feature.getTraffic(),
             context = finalContext,
             datafileReader = datafileReader,
         )
@@ -440,7 +437,6 @@ fun FeaturevisorInstance.evaluateFlag(featureKey: FeatureKey, context: Context =
     }
 }
 
-@Suppress("UNREACHABLE_CODE")
 fun FeaturevisorInstance.evaluateVariable(
     featureKey: FeatureKey,
     variableKey: VariableKey,
@@ -497,7 +493,7 @@ fun FeaturevisorInstance.evaluateVariable(
                 return evaluation
             }
 
-            val variableSchema = feature.variablesSchema?.firstOrNull { variableSchema ->
+            val variableSchema = feature.getVariablesSchema().firstOrNull { variableSchema ->
                 variableSchema.key == variableKey
             }
 
@@ -537,11 +533,10 @@ fun FeaturevisorInstance.evaluateVariable(
             val bucketValue = getBucketValue(feature, finalContext)
 
             val matchedTrafficAndAllocation = getMatchedTrafficAndAllocation(
-                traffic = feature.traffic,
+                traffic = feature.getTraffic(),
                 context = finalContext,
                 bucketValue = bucketValue,
                 datafileReader = datafileReader,
-                logger = logger
             )
 
             matchedTrafficAndAllocation.matchedTraffic?.let { matchedTraffic ->
@@ -571,7 +566,7 @@ fun FeaturevisorInstance.evaluateVariable(
                         matchedAllocation.variation
                     }
 
-                    val variation = feature.variations?.firstOrNull { variation ->
+                    val variation = feature.getVariations().firstOrNull { variation ->
                         variation.value == variationValue
                     }
 
@@ -654,10 +649,10 @@ fun FeaturevisorInstance.evaluateVariable(
 
 private fun FeaturevisorInstance.getBucketKey(feature: Feature, context: Context): BucketKey {
     val featureKey = feature.key
-    var type: String
-    var attributeKeys: List<AttributeKey>
+    val type: String
+    val attributeKeys: List<AttributeKey>
 
-    when (val bucketBy = feature.bucketBy) {
+    when (val bucketBy = feature.getBucketBy()) {
         is BucketBy.Single -> {
             type = "plain"
             attributeKeys = listOf(bucketBy.bucketBy)

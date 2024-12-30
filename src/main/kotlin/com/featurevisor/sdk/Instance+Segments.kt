@@ -2,31 +2,12 @@ package com.featurevisor.sdk
 
 import com.featurevisor.sdk.Conditions.allConditionsAreMatched
 import com.featurevisor.types.Context
-import com.featurevisor.types.FeatureKey
 import com.featurevisor.types.GroupSegment
 import com.featurevisor.types.GroupSegment.*
 import com.featurevisor.types.Segment
-import com.featurevisor.types.VariationValue
-
-internal fun FeaturevisorInstance.segmentIsMatched(
-    featureKey: FeatureKey,
-    context: Context,
-): VariationValue? {
-    val evaluation = evaluateVariation(featureKey, context)
-
-    if (evaluation.variationValue != null) {
-        return evaluation.variationValue
-    }
-
-    if (evaluation.variation != null) {
-        return evaluation.variation.value
-    }
-
-    return null
-}
 
 internal fun segmentIsMatched(segment: Segment, context: Context): Boolean {
-    return allConditionsAreMatched(segment.conditions, context)
+    return allConditionsAreMatched(segment.getCondition(), context)
 }
 
 internal fun FeaturevisorInstance.allGroupSegmentsAreMatched(

@@ -9,326 +9,315 @@ import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.descriptors.buildSerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.JsonDecoder
-import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.booleanOrNull
-import kotlinx.serialization.json.doubleOrNull
-import kotlinx.serialization.json.intOrNull
-import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.*
 import java.text.SimpleDateFormat
 
 @OptIn(InternalSerializationApi::class, ExperimentalSerializationApi::class)
 @Serializer(forClass = Required::class)
-object RequiredSerializer: KSerializer<Required>{
+object RequiredSerializer : KSerializer<Required> {
     override val descriptor: SerialDescriptor =
         buildSerialDescriptor("package.Required", PolymorphicKind.SEALED)
 
     override fun deserialize(decoder: Decoder): Required {
         val input = decoder as? JsonDecoder
-            ?: throw SerializationException("This class can be decoded only by Json format")
-        return when (val tree = input.decodeJsonElement()) {
-            is JsonPrimitive ->{
-                Required.FeatureKey(tree.content)
+            ?: throw SerializationException("This class can only be decoded using the Json format")
+
+        return when (val element = input.decodeJsonElement()) {
+            is JsonPrimitive -> Required.FeatureKey(element.content)
+            is JsonObject -> {
+                val key = element["key"]?.jsonPrimitive?.content.orEmpty()
+                val variation = element["variation"]?.jsonPrimitive?.content.orEmpty()
+                Required.WithVariation(RequiredWithVariation(key, variation))
             }
-            is JsonArray -> {
-                // Never lies in JsonArray block
-                Required.FeatureKey(tree.toString())
-            }
-            is JsonObject ->{
-                val requiredWithVariation = RequiredWithVariation(tree["key"]?.jsonPrimitive?.content.orEmpty(),tree["variation"]?.jsonPrimitive?.content.orEmpty())
-                Required.WithVariation(requiredWithVariation)
-            }
+
+            else -> throw SerializationException("Unexpected JSON element: ${element::class.simpleName}")
         }
     }
 }
 
-@OptIn(InternalSerializationApi::class)
-@Serializer(forClass = Condition::class)
+@OptIn(InternalSerializationApi::class, ExperimentalSerializationApi::class)
 object ConditionSerializer : KSerializer<Condition> {
     override val descriptor: SerialDescriptor =
         buildSerialDescriptor("package.Condition", PolymorphicKind.SEALED)
 
     override fun deserialize(decoder: Decoder): Condition {
         val input = decoder as? JsonDecoder
-            ?: throw SerializationException("This class can be decoded only by Json format")
-        return when (val tree = input.decodeJsonElement()) {
+            ?: throw SerializationException("This class can only be decoded using the Json format")
+
+        return when (val element = input.decodeJsonElement()) {
             is JsonArray -> {
-                Condition.And(tree.map { jsonElement ->
-                    input.json.decodeFromJsonElement(
-                        Condition::class.serializer(),
-                        jsonElement
-                    )
-                })
+                val conditions = element.map {
+                    input.json.decodeFromJsonElement(Condition.serializer(), it)
+                }
+                Condition.And(conditions)
             }
 
             is JsonObject -> {
-                FeaturevisorInstance.companionLogger?.debug("Segment deserializing: ${tree["attribute"]?.jsonPrimitive?.content}, tree: $tree")
+                FeaturevisorInstance.companionLogger?.debug(
+                    "Segment deserializing: ${element["attribute"]?.jsonPrimitive?.content}, tree: $element"
+                )
+
                 when {
-                    tree.containsKey("and") -> Condition.And(
-                        tree["and"]!!.jsonArray.map {
-                            input.json.decodeFromJsonElement(
-                                Condition::class.serializer(),
-                                it
-                            )
+                    "and" in element -> Condition.And(
+                        element["and"]!!.jsonArray.map {
+                            input.json.decodeFromJsonElement(Condition.serializer(), it)
                         }
                     )
 
-                    tree.containsKey("or") -> Condition.Or(
-                        tree["or"]!!.jsonArray.map {
-                            input.json.decodeFromJsonElement(
-                                Condition::class.serializer(),
-                                it
-                            )
+                    "or" in element -> Condition.Or(
+                        element["or"]!!.jsonArray.map {
+                            input.json.decodeFromJsonElement(Condition.serializer(), it)
                         }
                     )
 
-                    tree.containsKey("not") -> Condition.Not(
-                        tree["not"]!!.jsonArray.map {
-                            input.json.decodeFromJsonElement(
-                                Condition::class.serializer(),
-                                it
-                            )
+                    "not" in element -> Condition.Not(
+                        element["not"]!!.jsonArray.map {
+                            input.json.decodeFromJsonElement(Condition.serializer(), it)
                         }
                     )
 
                     else -> Condition.Plain(
-                        attributeKey = tree["attribute"]?.jsonPrimitive?.content ?: "",
-                        operator = mapOperator(tree["operator"]?.jsonPrimitive?.content ?: ""),
+                        attributeKey = element["attribute"]?.jsonPrimitive?.content.orEmpty(),
+                        operator = mapOperator(element["operator"]?.jsonPrimitive?.content.orEmpty()),
                         value = input.json.decodeFromJsonElement(
-                            ConditionValue::class.serializer(),
-                            tree["value"]!!
-                        ),
+                            ConditionValue.serializer(),
+                            element["value"]!!
+                        )
                     )
                 }
             }
 
             is JsonPrimitive -> {
-                val jsonElement = input.json.parseToJsonElement(tree.content)
-                input.json.decodeFromJsonElement(
-                    Condition::class.serializer(),
-                    jsonElement
-                )
+                val parsedElement = input.json.parseToJsonElement(element.content)
+                input.json.decodeFromJsonElement(Condition.serializer(), parsedElement)
             }
+
+            else -> throw SerializationException("Unexpected JSON element: ${element::class.simpleName}")
         }
     }
 
     override fun serialize(encoder: Encoder, value: Condition) {
-        // TODO: Later if needed
+        // TODO: Implement if serialization is required in the future
     }
 }
 
 @OptIn(InternalSerializationApi::class)
-@Serializer(forClass = GroupSegment::class)
 object GroupSegmentSerializer : KSerializer<GroupSegment> {
+
+    @OptIn(ExperimentalSerializationApi::class)
     override val descriptor: SerialDescriptor =
         buildSerialDescriptor("package.GroupSegment", PolymorphicKind.SEALED)
 
     override fun deserialize(decoder: Decoder): GroupSegment {
         val input = decoder as? JsonDecoder
-            ?: throw SerializationException("This class can be decoded only by Json format")
-        return when (val tree = input.decodeJsonElement()) {
-            is JsonArray -> GroupSegment.Multiple(tree.map { jsonElement ->
-                input.json.decodeFromJsonElement(
-                    GroupSegment::class.serializer(),
-                    jsonElement
-                )
-            })
+            ?: throw SerializationException("This class can only be decoded by Json format")
 
-            is JsonObject -> {
-                when {
-                    tree.containsKey("and") -> GroupSegment.And(
-                        AndGroupSegment(
-                            tree["and"]!!.jsonArray.map {
-                                input.json.decodeFromJsonElement(
-                                    GroupSegment::class.serializer(),
-                                    it
-                                )
-                            }
-                        )
-                    )
+        return when (val jsonElement = input.decodeJsonElement()) {
+            is JsonArray -> parseJsonArray(input, jsonElement)
+            is JsonObject -> parseJsonObject(input, jsonElement)
+            is JsonPrimitive -> parseJsonPrimitive(input, jsonElement)
+            else -> throw SerializationException("Unexpected GroupSegment element type")
+        }
+    }
 
-                    tree.containsKey("or") -> GroupSegment.Or(
-                        OrGroupSegment(
-                            tree["or"]!!.jsonArray.map {
-                                input.json.decodeFromJsonElement(
-                                    GroupSegment::class.serializer(),
-                                    it
-                                )
-                            }
-                        )
-                    )
+    private fun parseJsonArray(input: JsonDecoder, jsonArray: JsonArray): GroupSegment.Multiple {
+        val elements = jsonArray.map {
+            input.json.decodeFromJsonElement(GroupSegment::class.serializer(), it)
+        }
+        return GroupSegment.Multiple(elements)
+    }
 
-                    tree.containsKey("not") -> GroupSegment.Not(
-                        NotGroupSegment(
-                            tree["not"]!!.jsonArray.map {
-                                input.json.decodeFromJsonElement(
-                                    GroupSegment::class.serializer(),
-                                    it
-                                )
-                            }
-                        )
-                    )
+    private fun parseJsonObject(input: JsonDecoder, jsonObject: JsonObject): GroupSegment {
+        val keys = jsonObject.keys
+        return when {
+            "and" in keys -> GroupSegment.And(
+                AndGroupSegment(parseNestedArray(input, jsonObject["and"]!!.jsonArray))
+            )
 
-                    else -> throw Exception("Unexpected GroupSegment element content")
-                }
-            }
+            "or" in keys -> GroupSegment.Or(
+                OrGroupSegment(parseNestedArray(input, jsonObject["or"]!!.jsonArray))
+            )
 
-            is JsonPrimitive -> {
-                val isString = tree.content.none { it in setOf('{', '}', ':', '[', ']') }
-                if (isString) {
-                    GroupSegment.Plain(tree.content)
-                } else {
-                    val jsonElement = Json.parseToJsonElement(tree.content)
-                    input.json.decodeFromJsonElement(
-                        GroupSegment::class.serializer(),
-                        jsonElement,
-                    )
-                }
-            }
+            "not" in keys -> GroupSegment.Not(
+                NotGroupSegment(parseNestedArray(input, jsonObject["not"]!!.jsonArray))
+            )
+
+            else -> throw SerializationException("Unexpected GroupSegment object keys: $keys")
+        }
+    }
+
+    private fun parseJsonPrimitive(input: JsonDecoder, jsonPrimitive: JsonPrimitive): GroupSegment {
+        val content = jsonPrimitive.content
+        return if (content.none { it in setOf('{', '}', ':', '[', ']') }) {
+            GroupSegment.Plain(content)
+        } else {
+            val parsedElement = Json.parseToJsonElement(content)
+            input.json.decodeFromJsonElement(GroupSegment::class.serializer(), parsedElement)
+        }
+    }
+
+    private fun parseNestedArray(input: JsonDecoder, jsonArray: JsonArray): List<GroupSegment> {
+        return jsonArray.map {
+            input.json.decodeFromJsonElement(GroupSegment::class.serializer(), it)
         }
     }
 
     override fun serialize(encoder: Encoder, value: GroupSegment) {
-        // TODO: Later if needed
+        // TODO: Implement serialization logic if needed
     }
 }
 
 @OptIn(InternalSerializationApi::class)
-@Serializer(forClass = BucketBy::class)
 object BucketBySerializer : KSerializer<BucketBy> {
+
+    @OptIn(ExperimentalSerializationApi::class)
     override val descriptor: SerialDescriptor =
         buildSerialDescriptor("package.BucketBy", PolymorphicKind.SEALED)
 
     override fun deserialize(decoder: Decoder): BucketBy {
         val input = decoder as? JsonDecoder
-            ?: throw SerializationException("This class can be decoded only by Json format")
-        return when (val tree = input.decodeJsonElement()) {
-            is JsonArray -> {
-                BucketBy.And(tree.map { jsonElement ->
-                    jsonElement.jsonPrimitive.content
-                })
-            }
+            ?: throw SerializationException("This class can only be decoded by Json format")
 
-            is JsonObject -> {
-                when {
-                    tree.containsKey("or") -> BucketBy.Or(tree["or"]!!.jsonArray.map { it.jsonPrimitive.content })
-                    tree.containsKey("and") -> BucketBy.And(tree["and"]!!.jsonArray.map { it.jsonPrimitive.content })
-                    else -> throw Exception("Unexpected BucketBy element content")
-                }
-            }
-
-            is JsonPrimitive -> {
-                val isString = tree.content.none { it in setOf('{', '}', ':', '[', ']') }
-                if (isString) {
-                    BucketBy.Single(tree.content)
-                } else {
-                    val jsonElement = Json.parseToJsonElement(tree.content)
-                    input.json.decodeFromJsonElement(
-                        BucketBy::class.serializer(),
-                        jsonElement
-                    )
-                }
-            }
+        return when (val jsonElement = input.decodeJsonElement()) {
+            is JsonArray -> parseJsonArray(jsonElement)
+            is JsonObject -> parseJsonObject(jsonElement)
+            is JsonPrimitive -> parseJsonPrimitive(input, jsonElement)
+            else -> throw SerializationException("Unexpected BucketBy element type")
         }
     }
 
+    private fun parseJsonArray(jsonArray: JsonArray): BucketBy.And {
+        val elements = jsonArray.map { it.jsonPrimitive.content }
+        return BucketBy.And(elements)
+    }
+
+    private fun parseJsonObject(jsonObject: JsonObject): BucketBy {
+        return when {
+            "or" in jsonObject -> BucketBy.Or(
+                parseJsonArrayContent(jsonObject["or"]!!.jsonArray)
+            )
+
+            "and" in jsonObject -> BucketBy.And(
+                parseJsonArrayContent(jsonObject["and"]!!.jsonArray)
+            )
+
+            else -> throw SerializationException("Unexpected BucketBy object keys: ${jsonObject.keys}")
+        }
+    }
+
+    private fun parseJsonPrimitive(input: JsonDecoder, jsonPrimitive: JsonPrimitive): BucketBy {
+        val content = jsonPrimitive.content
+        return if (content.none { it in setOf('{', '}', ':', '[', ']') }) {
+            BucketBy.Single(content)
+        } else {
+            val parsedElement = Json.parseToJsonElement(content)
+            input.json.decodeFromJsonElement(BucketBy::class.serializer(), parsedElement)
+        }
+    }
+
+    private fun parseJsonArrayContent(jsonArray: JsonArray): List<String> {
+        return jsonArray.map { it.jsonPrimitive.content }
+    }
+
     override fun serialize(encoder: Encoder, value: BucketBy) {
-        // TODO: Later if needed
+        // TODO: Implement serialization logic if needed
     }
 }
 
 @OptIn(InternalSerializationApi::class)
-@Serializer(forClass = ConditionValue::class)
 object ConditionValueSerializer : KSerializer<ConditionValue> {
+
+    @OptIn(ExperimentalSerializationApi::class)
     override val descriptor: SerialDescriptor =
         buildSerialDescriptor("package.ConditionValue", PolymorphicKind.SEALED)
 
     override fun deserialize(decoder: Decoder): ConditionValue {
         val input = decoder as? JsonDecoder
-            ?: throw SerializationException("This class can be decoded only by Json format")
-        return when (val tree = input.decodeJsonElement()) {
-            is JsonPrimitive -> {
-                tree.intOrNull?.let {
-                    ConditionValue.IntValue(it)
-                } ?: tree.booleanOrNull?.let {
-                    ConditionValue.BooleanValue(it)
-                } ?: tree.doubleOrNull?.let {
-                    ConditionValue.DoubleValue(it)
-                } ?: tree.content.let {
-                    try {
-                        val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
-                        val date = dateFormat.parse(it)
-                        ConditionValue.DateTimeValue(date)
-                    }catch (e:Exception){
-                        ConditionValue.StringValue(it)
-                    }
-                }
-            }
+            ?: throw SerializationException("This class can only be decoded by Json format")
 
-            is JsonArray -> {
-                ConditionValue.ArrayValue(tree.jsonArray.map { jsonElement -> jsonElement.jsonPrimitive.content })
-            }
-
-            is JsonObject -> {
-                throw NotImplementedError("ConditionValue does not support JsonObject")
-            }
+        return when (val jsonElement = input.decodeJsonElement()) {
+            is JsonPrimitive -> parseJsonPrimitive(jsonElement)
+            is JsonArray -> parseJsonArray(jsonElement)
+            is JsonObject -> throw NotImplementedError("ConditionValue does not support JsonObject")
+            else -> throw SerializationException("Unexpected ConditionValue element type")
         }
     }
 
+    private fun parseJsonPrimitive(jsonPrimitive: JsonPrimitive): ConditionValue {
+        return jsonPrimitive.intOrNull?.let { ConditionValue.IntValue(it) }
+            ?: jsonPrimitive.booleanOrNull?.let { ConditionValue.BooleanValue(it) }
+            ?: jsonPrimitive.doubleOrNull?.let { ConditionValue.DoubleValue(it) }
+            ?: parseStringValue(jsonPrimitive.content)
+    }
+
+    private fun parseStringValue(content: String): ConditionValue {
+        return try {
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+            val date = dateFormat.parse(content)
+            ConditionValue.DateTimeValue(date)
+        } catch (e: Exception) {
+            ConditionValue.StringValue(content)
+        }
+    }
+
+    private fun parseJsonArray(jsonArray: JsonArray): ConditionValue.ArrayValue {
+        val elements = jsonArray.map { it.jsonPrimitive.content }
+        return ConditionValue.ArrayValue(elements)
+    }
+
     override fun serialize(encoder: Encoder, value: ConditionValue) {
-        // TODO: Later if needed
+        // TODO: Implement serialization logic if needed
     }
 }
 
 @OptIn(InternalSerializationApi::class)
-@Serializer(forClass = VariableValue::class)
 object VariableValueSerializer : KSerializer<VariableValue> {
+
+    @OptIn(ExperimentalSerializationApi::class)
     override val descriptor: SerialDescriptor =
         buildSerialDescriptor("package.VariableValue", PolymorphicKind.SEALED)
 
     override fun deserialize(decoder: Decoder): VariableValue {
         val input = decoder as? JsonDecoder
-            ?: throw SerializationException("This class can be decoded only by Json format")
-        return when (val tree = input.decodeJsonElement()) {
-            is JsonPrimitive -> {
-                if (tree.isString) {
-                    if (isValidJson(tree.content)) {
-                        VariableValue.JsonValue(tree.content)
-                    } else {
-                        VariableValue.StringValue(tree.content)
-                    }
-                } else {
-                    tree.intOrNull?.let {
-                        VariableValue.IntValue(it)
-                    } ?: tree.booleanOrNull?.let {
-                        VariableValue.BooleanValue(it)
-                    } ?: tree.doubleOrNull?.let {
-                        VariableValue.DoubleValue(it)
-                    } ?: tree.content.let {
-                        VariableValue.StringValue(it)
-                    }
-                }
-            }
+            ?: throw SerializationException("This class can only be decoded by Json format")
 
-            is JsonArray -> {
-                VariableValue.ArrayValue(tree.jsonArray.map { jsonElement -> jsonElement.jsonPrimitive.content })
-            }
-
-            is JsonObject -> {
-                FeaturevisorInstance.companionLogger?.debug("VariableValueSerializer, JsonObject, tree.jsonObject: ${tree.jsonObject}, tree: $tree")
-                VariableValue.JsonValue(tree.jsonObject.toString())
-            }
+        return when (val jsonElement = input.decodeJsonElement()) {
+            is JsonPrimitive -> parseJsonPrimitive(jsonElement)
+            is JsonArray -> parseJsonArray(jsonElement)
+            is JsonObject -> parseJsonObject(jsonElement)
+            else -> throw SerializationException("Unexpected VariableValue element type")
         }
     }
 
+    private fun parseJsonPrimitive(jsonPrimitive: JsonPrimitive): VariableValue {
+        return when {
+            jsonPrimitive.isString -> {
+                if (isValidJson(jsonPrimitive.content)) {
+                    VariableValue.JsonValue(jsonPrimitive.content)
+                } else {
+                    VariableValue.StringValue(jsonPrimitive.content)
+                }
+            }
+
+            jsonPrimitive.intOrNull != null -> VariableValue.IntValue(jsonPrimitive.int)
+            jsonPrimitive.booleanOrNull != null -> VariableValue.BooleanValue(jsonPrimitive.boolean)
+            jsonPrimitive.doubleOrNull != null -> VariableValue.DoubleValue(jsonPrimitive.double)
+            else -> VariableValue.StringValue(jsonPrimitive.content)
+        }
+    }
+
+    private fun parseJsonArray(jsonArray: JsonArray): VariableValue.ArrayValue {
+        val elements = jsonArray.map { it.jsonPrimitive.content }
+        return VariableValue.ArrayValue(elements)
+    }
+
+    private fun parseJsonObject(jsonObject: JsonObject): VariableValue.JsonValue {
+        FeaturevisorInstance.companionLogger?.debug("VariableValueSerializer, JsonObject: $jsonObject")
+        return VariableValue.JsonValue(jsonObject.toString())
+    }
+
     override fun serialize(encoder: Encoder, value: VariableValue) {
-        // TODO: Later if needed
+        // TODO: Implement serialization logic if needed
     }
 }
 
