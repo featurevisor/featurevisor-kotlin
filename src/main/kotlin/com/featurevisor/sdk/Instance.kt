@@ -117,7 +117,7 @@ class FeaturevisorInstance private constructor(options: InstanceOptions) {
                                 if (refreshInterval != null) startRefreshing()
                             }.onFailure { error ->
                                 logger?.error("Failed to fetch datafile: $error")
-                                emitter.emit(ERROR)
+                                emitter.emit(ERROR, error)
                             }
                             cancelFetchJob()
                         }

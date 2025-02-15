@@ -75,7 +75,8 @@ private inline fun fetch(
                     Result.failure(
                         FeaturevisorError.UnparsableJson(
                             responseBody.string(),
-                            response.message
+                            response.message,
+                            response.code
                         )
                     )
                 )
