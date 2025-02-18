@@ -23,6 +23,8 @@ data class InstanceOptions(
     val onError: Listener? = null,
     val refreshInterval: Long? = null, // seconds
     val stickyFeatures: StickyFeatures? = null,
+    val retryInterval: Long = 300L,
+    val retryCount: Int = 1,
 ) {
     companion object {
         private const val defaultBucketKeySeparator = "."

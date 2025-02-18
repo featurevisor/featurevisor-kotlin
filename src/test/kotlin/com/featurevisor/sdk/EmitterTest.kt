@@ -4,6 +4,7 @@ import com.featurevisor.types.EventName.ACTIVATION
 import com.featurevisor.types.EventName.READY
 import com.featurevisor.types.EventName.REFRESH
 import com.featurevisor.types.EventName.UPDATE
+import com.featurevisor.types.EventName.ERROR
 import com.featurevisor.types.EventName.values
 import io.mockk.every
 import io.mockk.mockk
@@ -23,6 +24,9 @@ class EmitterTest {
     }
     private val activationCallback: Listener = mockk {
         every { this@mockk(emptyArray()) } answers { nothing }
+    }
+    private val errorCallback: Listener = mockk {
+        every { this@mockk(any()) } answers { nothing }
     }
 
     private val systemUnderTest = Emitter()
@@ -83,6 +87,17 @@ class EmitterTest {
             refreshCallback(any())
             updateCallback(any())
             activationCallback(any())
+        }
+    }
+
+    @Test
+    fun `add error listener and confirm it is invoked`() {
+        systemUnderTest.addListener(ERROR, errorCallback)
+
+        systemUnderTest.emit(ERROR, "data")
+
+        verify(exactly = 1) {
+            errorCallback(arrayOf("data"))
         }
     }
 }
