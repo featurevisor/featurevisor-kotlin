@@ -148,7 +148,15 @@ private suspend fun fetchWithRetry(
                     logger?.error("Request failed with message: ${response.message}")
                     delay(retryInterval)
                 } else {
-                    completion(Result.failure(FeaturevisorError.UnparsableJson(responseBodyString, response.message)))
+                    completion(
+                        Result.failure(
+                            FeaturevisorError.UnparsableJson(
+                                responseBodyString,
+                                response.message,
+                                response.code,
+                            )
+                        )
+                    )
                 }
             }
         } catch (e: IOException) {
