@@ -84,7 +84,6 @@ internal suspend fun fetchDatafileContent(
     }
 }
 
-const val BODY_BYTE_COUNT = 1000000L
 private val client = OkHttpClient()
 
 private suspend fun fetchDatafileContentFromUrl(
@@ -135,8 +134,8 @@ private suspend fun fetchWithRetry(
         val call = client.newCall(request)
         try {
             val response = call.execute()
-            val responseBody = response.peekBody(BODY_BYTE_COUNT)
-            val responseBodyString = responseBody.string()
+            val responseBody = response.body
+            val responseBodyString = responseBody?.string().orEmpty()
             if (response.isSuccessful) {
                 val json = Json { ignoreUnknownKeys = true }
                 FeaturevisorInstance.companionLogger?.debug(responseBodyString)
