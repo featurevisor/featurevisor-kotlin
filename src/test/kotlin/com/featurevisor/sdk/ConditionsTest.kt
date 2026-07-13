@@ -3,13 +3,10 @@ package com.featurevisor.sdk
 import com.featurevisor.types.AttributeValue
 import com.featurevisor.types.Condition
 import com.featurevisor.types.ConditionValue
-import com.featurevisor.types.Operator
 import com.featurevisor.types.Operator.*
 import io.kotest.matchers.shouldBe
 import java.sql.Date
-import java.time.LocalDate
 import java.util.*
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 
 class ConditionsTest {
@@ -22,17 +19,17 @@ class ConditionsTest {
             Condition.Plain(
                 attributeKey = "browser_type",
                 operator = EQUALS,
-                value = ConditionValue.StringValue("chrome")
+                value = ConditionValue.StringValue("chrome"),
             )
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("browser_type" to AttributeValue.StringValue("chrome"))
+            context = mapOf("browser_type" to AttributeValue.StringValue("chrome")),
         ) shouldBe true
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("browser_type" to AttributeValue.StringValue("firefox"))
+            context = mapOf("browser_type" to AttributeValue.StringValue("firefox")),
         ) shouldBe false
     }
 
@@ -42,17 +39,17 @@ class ConditionsTest {
             Condition.Plain(
                 attributeKey = "browser_type",
                 operator = NOT_EQUALS,
-                value = ConditionValue.StringValue("chrome")
+                value = ConditionValue.StringValue("chrome"),
             )
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("browser_type" to AttributeValue.StringValue("firefox"))
+            context = mapOf("browser_type" to AttributeValue.StringValue("firefox")),
         ) shouldBe true
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("browser_type" to AttributeValue.StringValue("chrome"))
+            context = mapOf("browser_type" to AttributeValue.StringValue("chrome")),
         ) shouldBe false
     }
 
@@ -62,17 +59,17 @@ class ConditionsTest {
             Condition.Plain(
                 attributeKey = "age",
                 operator = GREATER_THAN,
-                value = ConditionValue.IntValue(18)
+                value = ConditionValue.IntValue(18),
             )
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("age" to AttributeValue.IntValue(19))
+            context = mapOf("age" to AttributeValue.IntValue(19)),
         ) shouldBe true
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("age" to AttributeValue.IntValue(17))
+            context = mapOf("age" to AttributeValue.IntValue(17)),
         ) shouldBe false
     }
 
@@ -82,17 +79,17 @@ class ConditionsTest {
             Condition.Plain(
                 attributeKey = "age",
                 operator = LESS_THAN,
-                value = ConditionValue.IntValue(18)
+                value = ConditionValue.IntValue(18),
             )
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("age" to AttributeValue.IntValue(17))
+            context = mapOf("age" to AttributeValue.IntValue(17)),
         ) shouldBe true
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("age" to AttributeValue.IntValue(19))
+            context = mapOf("age" to AttributeValue.IntValue(19)),
         ) shouldBe false
     }
 
@@ -102,22 +99,22 @@ class ConditionsTest {
             Condition.Plain(
                 attributeKey = "age",
                 operator = GREATER_THAN_OR_EQUALS,
-                value = ConditionValue.IntValue(18)
+                value = ConditionValue.IntValue(18),
             )
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("age" to AttributeValue.IntValue(17))
+            context = mapOf("age" to AttributeValue.IntValue(17)),
         ) shouldBe false
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("age" to AttributeValue.IntValue(18))
+            context = mapOf("age" to AttributeValue.IntValue(18)),
         ) shouldBe true
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("age" to AttributeValue.IntValue(19))
+            context = mapOf("age" to AttributeValue.IntValue(19)),
         ) shouldBe true
     }
 
@@ -127,22 +124,22 @@ class ConditionsTest {
             Condition.Plain(
                 attributeKey = "age",
                 operator = LESS_THAN_OR_EQUALS,
-                value = ConditionValue.IntValue(18)
+                value = ConditionValue.IntValue(18),
             )
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("age" to AttributeValue.IntValue(17))
+            context = mapOf("age" to AttributeValue.IntValue(17)),
         ) shouldBe true
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("age" to AttributeValue.IntValue(18))
+            context = mapOf("age" to AttributeValue.IntValue(18)),
         ) shouldBe true
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("age" to AttributeValue.IntValue(19))
+            context = mapOf("age" to AttributeValue.IntValue(19)),
         ) shouldBe false
     }
 
@@ -156,12 +153,12 @@ class ConditionsTest {
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("browser_type" to AttributeValue.StringValue("chrome"))
+            context = mapOf("browser_type" to AttributeValue.StringValue("chrome")),
         ) shouldBe true
 
         Conditions.conditionIsMatched(
             condition = condition.copy(value = ConditionValue.StringValue("hrk")),
-            context = mapOf("browser_type" to AttributeValue.StringValue("chrome"))
+            context = mapOf("browser_type" to AttributeValue.StringValue("chrome")),
         ) shouldBe false
     }
 
@@ -175,12 +172,12 @@ class ConditionsTest {
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("browser_type" to AttributeValue.StringValue("chrome"))
+            context = mapOf("browser_type" to AttributeValue.StringValue("chrome")),
         ) shouldBe true
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("browser_type" to AttributeValue.StringValue("firefox"))
+            context = mapOf("browser_type" to AttributeValue.StringValue("firefox")),
         ) shouldBe false
     }
 
@@ -194,12 +191,12 @@ class ConditionsTest {
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("browser_type" to AttributeValue.StringValue("chrome"))
+            context = mapOf("browser_type" to AttributeValue.StringValue("chrome")),
         ) shouldBe true
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("browser_type" to AttributeValue.StringValue("firefox"))
+            context = mapOf("browser_type" to AttributeValue.StringValue("firefox")),
         ) shouldBe false
     }
 
@@ -213,12 +210,12 @@ class ConditionsTest {
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("browser_type" to AttributeValue.StringValue("chrome"))
+            context = mapOf("browser_type" to AttributeValue.StringValue("chrome")),
         ) shouldBe true
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("browser_type" to AttributeValue.StringValue("firefox"))
+            context = mapOf("browser_type" to AttributeValue.StringValue("firefox")),
         ) shouldBe false
     }
 
@@ -227,17 +224,17 @@ class ConditionsTest {
         val condition = Condition.Plain(
             attributeKey = "version",
             operator = SEMVER_EQUALS,
-            value = ConditionValue.StringValue("1.2.3")
+            value = ConditionValue.StringValue("1.2.3"),
         )
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("version" to AttributeValue.StringValue("1.2.3"))
+            context = mapOf("version" to AttributeValue.StringValue("1.2.3")),
         ) shouldBe true
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("version" to AttributeValue.StringValue("1.2.4"))
+            context = mapOf("version" to AttributeValue.StringValue("1.2.4")),
         ) shouldBe false
     }
 
@@ -246,17 +243,17 @@ class ConditionsTest {
         val condition = Condition.Plain(
             attributeKey = "version",
             operator = SEMVER_NOT_EQUALS,
-            value = ConditionValue.StringValue("1.2.3")
+            value = ConditionValue.StringValue("1.2.3"),
         )
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("version" to AttributeValue.StringValue("1.2.3"))
+            context = mapOf("version" to AttributeValue.StringValue("1.2.3")),
         ) shouldBe false
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("version" to AttributeValue.StringValue("1.2.4"))
+            context = mapOf("version" to AttributeValue.StringValue("1.2.4")),
         ) shouldBe true
     }
 
@@ -265,22 +262,22 @@ class ConditionsTest {
         val condition = Condition.Plain(
             attributeKey = "version",
             operator = SEMVER_GREATER_THAN,
-            value = ConditionValue.StringValue("1.2.3")
+            value = ConditionValue.StringValue("1.2.3"),
         )
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("version" to AttributeValue.StringValue("1.2.4"))
+            context = mapOf("version" to AttributeValue.StringValue("1.2.4")),
         ) shouldBe true
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("version" to AttributeValue.StringValue("1.2.3"))
+            context = mapOf("version" to AttributeValue.StringValue("1.2.3")),
         ) shouldBe false
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("version" to AttributeValue.StringValue("1.2.2"))
+            context = mapOf("version" to AttributeValue.StringValue("1.2.2")),
         ) shouldBe false
     }
 
@@ -289,22 +286,22 @@ class ConditionsTest {
         val condition = Condition.Plain(
             attributeKey = "version",
             operator = SEMVER_GREATER_THAN_OR_EQUALS,
-            value = ConditionValue.StringValue("1.2.3")
+            value = ConditionValue.StringValue("1.2.3"),
         )
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("version" to AttributeValue.StringValue("1.2.4"))
+            context = mapOf("version" to AttributeValue.StringValue("1.2.4")),
         ) shouldBe true
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("version" to AttributeValue.StringValue("1.2.3"))
+            context = mapOf("version" to AttributeValue.StringValue("1.2.3")),
         ) shouldBe true
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("version" to AttributeValue.StringValue("1.2.2"))
+            context = mapOf("version" to AttributeValue.StringValue("1.2.2")),
         ) shouldBe false
     }
 
@@ -313,22 +310,22 @@ class ConditionsTest {
         val condition = Condition.Plain(
             attributeKey = "version",
             operator = SEMVER_LESS_THAN,
-            value = ConditionValue.StringValue("1.2.3")
+            value = ConditionValue.StringValue("1.2.3"),
         )
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("version" to AttributeValue.StringValue("1.2.4"))
+            context = mapOf("version" to AttributeValue.StringValue("1.2.4")),
         ) shouldBe false
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("version" to AttributeValue.StringValue("1.2.3"))
+            context = mapOf("version" to AttributeValue.StringValue("1.2.3")),
         ) shouldBe false
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("version" to AttributeValue.StringValue("1.2.2"))
+            context = mapOf("version" to AttributeValue.StringValue("1.2.2")),
         ) shouldBe true
     }
 
@@ -337,22 +334,22 @@ class ConditionsTest {
         val condition = Condition.Plain(
             attributeKey = "version",
             operator = SEMVER_LESS_THAN_OR_EQUALS,
-            value = ConditionValue.StringValue("1.2.3")
+            value = ConditionValue.StringValue("1.2.3"),
         )
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("version" to AttributeValue.StringValue("1.2.4"))
+            context = mapOf("version" to AttributeValue.StringValue("1.2.4")),
         ) shouldBe false
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("version" to AttributeValue.StringValue("1.2.3"))
+            context = mapOf("version" to AttributeValue.StringValue("1.2.3")),
         ) shouldBe true
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("version" to AttributeValue.StringValue("1.2.2"))
+            context = mapOf("version" to AttributeValue.StringValue("1.2.2")),
         ) shouldBe true
     }
 
@@ -366,17 +363,17 @@ class ConditionsTest {
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("date" to AttributeValue.DateValue(Date.valueOf("2022-11-4")))
+            context = mapOf("date" to AttributeValue.DateValue(Date.valueOf("2022-11-4"))),
         ) shouldBe true
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("date" to AttributeValue.DateValue(Date.valueOf("2024-10-4")))
+            context = mapOf("date" to AttributeValue.DateValue(Date.valueOf("2024-10-4"))),
         ) shouldBe false
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("date" to AttributeValue.DateValue(Date.valueOf("2024-10-4")))
+            context = mapOf("date" to AttributeValue.DateValue(Date.valueOf("2024-10-4"))),
         ) shouldBe false
     }
 
@@ -390,17 +387,17 @@ class ConditionsTest {
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("date" to AttributeValue.DateValue(Date.valueOf("2022-10-4")))
+            context = mapOf("date" to AttributeValue.DateValue(Date.valueOf("2022-10-4"))),
         ) shouldBe false
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("date" to AttributeValue.DateValue(Date.valueOf("2022-10-4")))
+            context = mapOf("date" to AttributeValue.DateValue(Date.valueOf("2022-10-4"))),
         ) shouldBe false
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("date" to AttributeValue.DateValue(Date.valueOf("2024-10-4")))
+            context = mapOf("date" to AttributeValue.DateValue(Date.valueOf("2024-10-4"))),
         ) shouldBe true
     }
 
@@ -447,17 +444,17 @@ class ConditionsTest {
         val condition = Condition.Plain(
             attributeKey = "version",
             operator = SEMVER_EQUALS,
-            value = ConditionValue.StringValue("1.2")
+            value = ConditionValue.StringValue("1.2"),
         )
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("version" to AttributeValue.DoubleValue(1.2))
+            context = mapOf("version" to AttributeValue.DoubleValue(1.2)),
         ) shouldBe true
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("version" to AttributeValue.DoubleValue(1.3))
+            context = mapOf("version" to AttributeValue.DoubleValue(1.3)),
         ) shouldBe false
     }
 
@@ -466,17 +463,17 @@ class ConditionsTest {
         val condition = Condition.Plain(
             attributeKey = "version",
             operator = SEMVER_NOT_EQUALS,
-            value = ConditionValue.StringValue("1.2")
+            value = ConditionValue.StringValue("1.2"),
         )
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("version" to AttributeValue.DoubleValue(1.2))
+            context = mapOf("version" to AttributeValue.DoubleValue(1.2)),
         ) shouldBe false
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("version" to AttributeValue.DoubleValue(1.3))
+            context = mapOf("version" to AttributeValue.DoubleValue(1.3)),
         ) shouldBe true
     }
 
@@ -485,17 +482,17 @@ class ConditionsTest {
         val condition = Condition.Plain(
             attributeKey = "version",
             operator = SEMVER_GREATER_THAN,
-            value = ConditionValue.StringValue("1.2")
+            value = ConditionValue.StringValue("1.2"),
         )
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("version" to AttributeValue.DoubleValue(1.2))
+            context = mapOf("version" to AttributeValue.DoubleValue(1.2)),
         ) shouldBe false
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("version" to AttributeValue.DoubleValue(1.3))
+            context = mapOf("version" to AttributeValue.DoubleValue(1.3)),
         ) shouldBe true
     }
 
@@ -504,22 +501,22 @@ class ConditionsTest {
         val condition = Condition.Plain(
             attributeKey = "version",
             operator = SEMVER_GREATER_THAN_OR_EQUALS,
-            value = ConditionValue.StringValue("1.2")
+            value = ConditionValue.StringValue("1.2"),
         )
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("version" to AttributeValue.DoubleValue(1.1))
+            context = mapOf("version" to AttributeValue.DoubleValue(1.1)),
         ) shouldBe false
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("version" to AttributeValue.DoubleValue(1.2))
+            context = mapOf("version" to AttributeValue.DoubleValue(1.2)),
         ) shouldBe true
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("version" to AttributeValue.DoubleValue(1.3))
+            context = mapOf("version" to AttributeValue.DoubleValue(1.3)),
         ) shouldBe true
     }
 
@@ -528,17 +525,17 @@ class ConditionsTest {
         val condition = Condition.Plain(
             attributeKey = "version",
             operator = SEMVER_LESS_THAN,
-            value = ConditionValue.StringValue("1.2")
+            value = ConditionValue.StringValue("1.2"),
         )
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("version" to AttributeValue.DoubleValue(1.1))
+            context = mapOf("version" to AttributeValue.DoubleValue(1.1)),
         ) shouldBe true
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("version" to AttributeValue.DoubleValue(1.2))
+            context = mapOf("version" to AttributeValue.DoubleValue(1.2)),
         ) shouldBe false
     }
 
@@ -547,22 +544,22 @@ class ConditionsTest {
         val condition = Condition.Plain(
             attributeKey = "version",
             operator = SEMVER_LESS_THAN_OR_EQUALS,
-            value = ConditionValue.StringValue("1.2")
+            value = ConditionValue.StringValue("1.2"),
         )
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("version" to AttributeValue.DoubleValue(1.1))
+            context = mapOf("version" to AttributeValue.DoubleValue(1.1)),
         ) shouldBe true
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("version" to AttributeValue.DoubleValue(1.2))
+            context = mapOf("version" to AttributeValue.DoubleValue(1.2)),
         ) shouldBe true
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("version" to AttributeValue.DoubleValue(1.3))
+            context = mapOf("version" to AttributeValue.DoubleValue(1.3)),
         ) shouldBe false
     }
 
@@ -571,17 +568,17 @@ class ConditionsTest {
         val condition = Condition.Plain(
             attributeKey = "browser_type",
             operator = EQUALS,
-            value = ConditionValue.IntValue(1)
+            value = ConditionValue.IntValue(1),
         )
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("browser_type" to AttributeValue.StringValue("1"))
+            context = mapOf("browser_type" to AttributeValue.StringValue("1")),
         ) shouldBe true
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("browser_type" to AttributeValue.StringValue("2"))
+            context = mapOf("browser_type" to AttributeValue.StringValue("2")),
         ) shouldBe false
     }
 
@@ -590,17 +587,17 @@ class ConditionsTest {
         val condition = Condition.Plain(
             attributeKey = "browser_type",
             operator = NOT_EQUALS,
-            value = ConditionValue.IntValue(1)
+            value = ConditionValue.IntValue(1),
         )
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("browser_type" to AttributeValue.StringValue("1"))
+            context = mapOf("browser_type" to AttributeValue.StringValue("1")),
         ) shouldBe false
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("browser_type" to AttributeValue.StringValue("2"))
+            context = mapOf("browser_type" to AttributeValue.StringValue("2")),
         ) shouldBe true
     }
 
@@ -609,17 +606,17 @@ class ConditionsTest {
         val condition = Condition.Plain(
             attributeKey = "browser_type",
             operator = CONTAINS,
-            value = ConditionValue.IntValue(1)
+            value = ConditionValue.IntValue(1),
         )
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("browser_type" to AttributeValue.StringValue("123"))
+            context = mapOf("browser_type" to AttributeValue.StringValue("123")),
         ) shouldBe true
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("browser_type" to AttributeValue.StringValue("23"))
+            context = mapOf("browser_type" to AttributeValue.StringValue("23")),
         ) shouldBe false
     }
 
@@ -628,17 +625,17 @@ class ConditionsTest {
         val condition = Condition.Plain(
             attributeKey = "browser_type",
             operator = NOT_CONTAINS,
-            value = ConditionValue.IntValue(1)
+            value = ConditionValue.IntValue(1),
         )
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("browser_type" to AttributeValue.StringValue("123"))
+            context = mapOf("browser_type" to AttributeValue.StringValue("123")),
         ) shouldBe false
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("browser_type" to AttributeValue.StringValue("23"))
+            context = mapOf("browser_type" to AttributeValue.StringValue("23")),
         ) shouldBe true
     }
 
@@ -647,17 +644,17 @@ class ConditionsTest {
         val condition = Condition.Plain(
             attributeKey = "browser_type",
             operator = STARTS_WITH,
-            value = ConditionValue.IntValue(1)
+            value = ConditionValue.IntValue(1),
         )
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("browser_type" to AttributeValue.StringValue("123"))
+            context = mapOf("browser_type" to AttributeValue.StringValue("123")),
         ) shouldBe true
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("browser_type" to AttributeValue.StringValue("23"))
+            context = mapOf("browser_type" to AttributeValue.StringValue("23")),
         ) shouldBe false
     }
 
@@ -666,17 +663,17 @@ class ConditionsTest {
         val condition = Condition.Plain(
             attributeKey = "browser_type",
             operator = ENDS_WITH,
-            value = ConditionValue.IntValue(3)
+            value = ConditionValue.IntValue(3),
         )
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("browser_type" to AttributeValue.StringValue("123"))
+            context = mapOf("browser_type" to AttributeValue.StringValue("123")),
         ) shouldBe true
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("browser_type" to AttributeValue.StringValue("25"))
+            context = mapOf("browser_type" to AttributeValue.StringValue("25")),
         ) shouldBe false
     }
 
@@ -685,17 +682,17 @@ class ConditionsTest {
         val condition = Condition.Plain(
             attributeKey = "browser_type",
             operator = IN_ARRAY,
-            value = ConditionValue.ArrayValue(listOf("1","2","3","4"))
+            value = ConditionValue.ArrayValue(listOf("1", "2", "3", "4")),
         )
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("browser_type" to AttributeValue.IntValue(1))
+            context = mapOf("browser_type" to AttributeValue.IntValue(1)),
         ) shouldBe true
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("browser_type" to AttributeValue.IntValue(5))
+            context = mapOf("browser_type" to AttributeValue.IntValue(5)),
         ) shouldBe false
     }
 
@@ -704,17 +701,17 @@ class ConditionsTest {
         val condition = Condition.Plain(
             attributeKey = "browser_type",
             operator = NOT_IN_ARRAY,
-            value = ConditionValue.ArrayValue(listOf("1","2","3","4"))
+            value = ConditionValue.ArrayValue(listOf("1", "2", "3", "4")),
         )
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("browser_type" to AttributeValue.IntValue(1))
+            context = mapOf("browser_type" to AttributeValue.IntValue(1)),
         ) shouldBe false
 
         Conditions.conditionIsMatched(
             condition = condition,
-            context = mapOf("browser_type" to AttributeValue.IntValue(5))
+            context = mapOf("browser_type" to AttributeValue.IntValue(5)),
         ) shouldBe true
     }
 
@@ -729,14 +726,14 @@ class ConditionsTest {
         val semVerCondition = Condition.Plain(
             attributeKey = "version",
             operator = SEMVER_GREATER_THAN,
-            value = ConditionValue.StringValue("1.2.3")
+            value = ConditionValue.StringValue("1.2.3"),
         )
 
         val ageCondition =
             Condition.Plain(
                 attributeKey = "age",
                 operator = GREATER_THAN,
-                value = ConditionValue.IntValue(18)
+                value = ConditionValue.IntValue(18),
             )
 
         val beforeCondition = Condition.Plain(
@@ -757,20 +754,20 @@ class ConditionsTest {
                     listOf(
                         startsWithCondition,
                         semVerCondition,
-                    )
+                    ),
                 ),
                 Condition.Or(
                     listOf(
                         ageCondition,
                         beforeCondition,
-                    )
+                    ),
                 ),
                 Condition.Not(
                     listOf(
-                        inArrayCondition
-                    )
-                )
-            )
+                        inArrayCondition,
+                    ),
+                ),
+            ),
         )
 
         val context = mapOf(

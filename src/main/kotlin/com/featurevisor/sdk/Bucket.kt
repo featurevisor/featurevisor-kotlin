@@ -7,6 +7,7 @@ object Bucket {
 
     private const val HASH_SEED = 1u
     private const val MAX_HASH_VALUE = 4294967296 // 2^32
+
     // 100% * 1000 to include three decimal places in the same integer value
     private const val MAX_BUCKETED_NUMBER = 100000
 

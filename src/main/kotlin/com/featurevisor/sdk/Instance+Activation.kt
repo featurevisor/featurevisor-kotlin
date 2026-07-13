@@ -26,7 +26,7 @@ fun FeaturevisorInstance.activate(featureKey: FeatureKey, context: Context = emp
         variationValue,
         finalContext,
         captureContext,
-        evaluation
+        evaluation,
     )
 
     return variationValue

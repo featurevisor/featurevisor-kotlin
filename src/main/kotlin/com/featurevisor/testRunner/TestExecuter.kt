@@ -10,7 +10,7 @@ data class TestProjectOption(
     val showDatafile: Boolean = false,
     val onlyFailures: Boolean = false,
     val fast: Boolean = false,
-    val projectRootPath: String? = null
+    val projectRootPath: String? = null,
 )
 
 fun startTest(option: TestProjectOption) = option.projectRootPath?.let { it ->
@@ -30,7 +30,7 @@ fun startTest(option: TestProjectOption) = option.projectRootPath?.let { it ->
         for (environment in projectConfig.environments) {
             val datafileContent = buildDataFileAsPerEnvironment(
                 projectRootPath = it,
-                environment = environment
+                environment = environment,
             )
             datafileContentByEnvironment[environment] = datafileContent
         }
@@ -88,18 +88,17 @@ fun startTest(option: TestProjectOption) = option.projectRootPath?.let { it ->
     }
 } ?: printNormalMessage("Root Project Path Not Found")
 
-
 private fun executeTest(
     filePath: String,
     datafileContentByEnvironment: MutableMap<String, DatafileContent>,
     option: TestProjectOption,
-    configuration: Configuration
+    configuration: Configuration,
 ): ExecutionResult? {
     val test = parseTestFeatureAssertions(filePath)
 
     val executionResult = ExecutionResult(
         passed = true,
-        assertionsCount = AssertionsCount(0, 0)
+        assertionsCount = AssertionsCount(0, 0),
     )
 
     if (test != null) {
@@ -117,7 +116,7 @@ private fun executeTest(
                 testFeature(
                     testFeature = test.value,
                     datafileContentByEnvironment = datafileContentByEnvironment,
-                    option = option
+                    option = option,
                 )
             }
 
@@ -125,7 +124,7 @@ private fun executeTest(
                 testSegment(
                     testSegment = test.value,
                     configuration = configuration,
-                    option = option
+                    option = option,
                 )
             }
         }
@@ -142,16 +141,11 @@ private fun executeTest(
             executionResult.passed = false
 
             executionResult.assertionsCount.failed = testResult.assertions.count { !it.passed }
-            executionResult.assertionsCount.passed += testResult.assertions.size - executionResult.assertionsCount.failed
+            executionResult.assertionsCount.passed +=
+                testResult.assertions.size - executionResult.assertionsCount.failed
         } else {
             executionResult.assertionsCount.passed = testResult.assertions.size
         }
     }
     return executionResult
 }
-
-
-
-
-
-

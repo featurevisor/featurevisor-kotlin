@@ -21,7 +21,7 @@ class InstanceTest {
         revision = "0",
         attributes = listOf(),
         segments = listOf(),
-        features = listOf()
+        features = listOf(),
     )
     private var instanceOptions = InstanceOptions(
         bucketKeySeparator = "",
@@ -42,7 +42,7 @@ class InstanceTest {
         onError = {},
     )
     private val systemUnderTest = FeaturevisorInstance.createInstance(
-        options = instanceOptions
+        options = instanceOptions,
     )
 
     @Test
@@ -60,7 +60,7 @@ class InstanceTest {
         )
 
         FeaturevisorInstance.createInstance(
-            options = instanceOptions
+            options = instanceOptions,
         )
 
         verify(exactly = 1) {

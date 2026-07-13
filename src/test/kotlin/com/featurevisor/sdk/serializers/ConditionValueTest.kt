@@ -3,9 +3,9 @@ package com.featurevisor.sdk.serializers
 import com.featurevisor.types.ConditionValue
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeTypeOf
+import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.Test
-import kotlinx.serialization.decodeFromString
 
 class ConditionValueTest {
 

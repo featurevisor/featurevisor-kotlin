@@ -13,18 +13,24 @@ typealias VariableKey = String
 enum class VariableType {
     @SerialName("boolean")
     BOOLEAN,
+
     @SerialName("string")
     STRING,
+
     @SerialName("integer")
     INTEGER,
+
     @SerialName("double")
     DOUBLE,
+
     @SerialName("array")
     ARRAY,
+
     @SerialName("object")
     OBJECT,
+
     @SerialName("json")
-    JSON
+    JSON,
 }
 
 typealias VariableObjectValue = Map<String, VariableValue>
@@ -46,7 +52,7 @@ data class VariableOverride(
 
     // one of the below must be present in YAML
     val conditions: Condition? = null,
-    val segments: GroupSegment?=null,
+    val segments: GroupSegment? = null,
 )
 
 @Serializable
@@ -106,6 +112,7 @@ data class Group(
 )
 
 typealias BucketKey = String
+
 // 0 to 100,000
 typealias BucketValue = Int
 typealias StickyFeatures = Map<FeatureKey, OverrideFeature>
@@ -259,7 +266,7 @@ enum class Operator(val value: String) {
 
     // array of strings
     IN_ARRAY("in"),
-    NOT_IN_ARRAY("notIn");
+    NOT_IN_ARRAY("notIn"),
 }
 
 enum class EventName {
@@ -352,17 +359,16 @@ data class OverrideFeature(
 
 typealias AssertionMatrix = Map<String, List<AttributeValue>>
 
-
 data class FeatureAssertion(
-    var description: String?=null,
-    var environment: EnvironmentKey="staging",
+    var description: String? = null,
+    var environment: EnvironmentKey = "staging",
     // bucket weight: 0 to 100
     var at: WeightType = WeightType.IntType(40),
     var context: Context = mapOf("devMode" to AttributeValue.BooleanValue(false)),
-    val expectedToBeEnabled: Boolean?=null,
-    val expectedVariation: VariationValue?=null,
-    val expectedVariables: VariableValues?=null,
-    val matrix: AssertionMatrix? = null
+    val expectedToBeEnabled: Boolean? = null,
+    val expectedVariation: VariationValue? = null,
+    val expectedVariables: VariableValues? = null,
+    val matrix: AssertionMatrix? = null,
 )
 
 data class TestFeature(
@@ -371,10 +377,10 @@ data class TestFeature(
 )
 
 data class SegmentAssertion(
-    var description: String?=null,
+    var description: String? = null,
     var context: Context,
     val expectedToMatch: Boolean,
-    val matrix: AssertionMatrix? = null
+    val matrix: AssertionMatrix? = null,
 )
 
 data class TestSegment(
@@ -387,20 +393,20 @@ sealed class Test {
     data class Segment(val value: TestSegment) : Test()
 }
 
-sealed class WeightType{
-    data class IntType(val value: Int):WeightType()
+sealed class WeightType {
+    data class IntType(val value: Int) : WeightType()
 
-    data class DoubleType(val value: Double):WeightType()
+    data class DoubleType(val value: Double) : WeightType()
 
-    data class StringType(val value: String):WeightType()
+    data class StringType(val value: String) : WeightType()
 }
 
 data class TestResultAssertionError(
     val type: String,
-    val expected: Any?=null,
-    val actual: Any?=null,
-    val message: String?=null,
-    val details: Map<String, Any>?=null
+    val expected: Any? = null,
+    val actual: Any? = null,
+    val message: String? = null,
+    val details: Map<String, Any>? = null,
 )
 
 data class TestResultAssertion(
@@ -408,47 +414,47 @@ data class TestResultAssertion(
     val environment: EnvironmentKey? = null,
     var duration: Long,
     var passed: Boolean,
-    val errors: List<TestResultAssertionError>?
+    val errors: List<TestResultAssertionError>?,
 )
 
 data class TestResult(
     val type: String,
     val key: FeatureKey,
-    var notFound: Boolean?=null,
+    var notFound: Boolean? = null,
     var passed: Boolean,
     var duration: Long,
-    val assertions: List<TestResultAssertion>
+    val assertions: List<TestResultAssertion>,
 )
 
 data class ExecutionResult(
     var passed: Boolean,
-    val assertionsCount: AssertionsCount
+    val assertionsCount: AssertionsCount,
 )
 
 data class AssertionsCount(
-    var passed: Int=0,
-    var failed: Int=0
+    var passed: Int = 0,
+    var failed: Int = 0,
 )
 
 data class DataFile(
     val stagingDataFiles: DatafileContent? = null,
-    val productionDataFiles: DatafileContent? = null
+    val productionDataFiles: DatafileContent? = null,
 )
 
 @Serializable
 data class Configuration(
-    val environments:List<String>,
+    val environments: List<String>,
     val tags: List<String>,
-    val defaultBucketBy:String,
-    val prettyState:Boolean,
-    val prettyDatafile:Boolean,
-    val stringify:Boolean,
-    val featuresDirectoryPath:String,
-    val segmentsDirectoryPath:String,
-    val attributesDirectoryPath:String,
-    val groupsDirectoryPath:String,
-    val testsDirectoryPath:String,
-    val stateDirectoryPath:String,
-    val outputDirectoryPath:String,
-    val siteExportDirectoryPath:String
+    val defaultBucketBy: String,
+    val prettyState: Boolean,
+    val prettyDatafile: Boolean,
+    val stringify: Boolean,
+    val featuresDirectoryPath: String,
+    val segmentsDirectoryPath: String,
+    val attributesDirectoryPath: String,
+    val groupsDirectoryPath: String,
+    val testsDirectoryPath: String,
+    val stateDirectoryPath: String,
+    val outputDirectoryPath: String,
+    val siteExportDirectoryPath: String,
 )

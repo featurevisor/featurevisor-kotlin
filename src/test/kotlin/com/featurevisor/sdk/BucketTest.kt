@@ -6,7 +6,6 @@ import kotlin.test.assertEquals
 class BucketTest {
     @Test
     fun getBucketedNumberReturnsExpectedValues() {
-
         val expectedResults =
             mapOf(
                 "foo" to 20602,
@@ -14,7 +13,7 @@ class BucketTest {
                 "123.foo" to 3151,
                 "123.bar" to 9710,
                 "123.456.foo" to 14432,
-                "123.456.bar" to 1982
+                "123.456.bar" to 1982,
             )
 
         for ((key, value) in expectedResults) {

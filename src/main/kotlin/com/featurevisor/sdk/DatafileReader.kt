@@ -18,27 +18,15 @@ class DatafileReader constructor(
     private val segments: Map<SegmentKey, Segment> = datafileContent.segments.associateBy { it.key }
     private val features: Map<FeatureKey, Feature> = datafileContent.features.associateBy { it.key }
 
-    fun getRevision(): String {
-        return revision
-    }
+    fun getRevision(): String = revision
 
-    fun getSchemaVersion(): String {
-        return schemaVersion
-    }
+    fun getSchemaVersion(): String = schemaVersion
 
-    fun getAllAttributes(): List<Attribute> {
-        return attributes.values.toList()
-    }
+    fun getAllAttributes(): List<Attribute> = attributes.values.toList()
 
-    fun getAttribute(attributeKey: AttributeKey): Attribute? {
-        return attributes[attributeKey]
-    }
+    fun getAttribute(attributeKey: AttributeKey): Attribute? = attributes[attributeKey]
 
-    fun getSegment(segmentKey: SegmentKey): Segment? {
-        return segments[segmentKey]
-    }
+    fun getSegment(segmentKey: SegmentKey): Segment? = segments[segmentKey]
 
-    fun getFeature(featureKey: FeatureKey): Feature? {
-        return features[featureKey]
-    }
+    fun getFeature(featureKey: FeatureKey): Feature? = features[featureKey]
 }

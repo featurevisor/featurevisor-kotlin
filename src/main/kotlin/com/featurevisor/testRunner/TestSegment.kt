@@ -3,7 +3,7 @@ package com.featurevisor.testRunner
 import com.featurevisor.sdk.segmentIsMatched
 import com.featurevisor.types.*
 
-fun testSegment(testSegment: TestSegment,configuration: Configuration,option: TestProjectOption): TestResult {
+fun testSegment(testSegment: TestSegment, configuration: Configuration, option: TestProjectOption): TestResult {
     val testStartTime = System.currentTimeMillis()
     val segmentKey = testSegment.key
 
@@ -13,11 +13,11 @@ fun testSegment(testSegment: TestSegment,configuration: Configuration,option: Te
         notFound = false,
         duration = 0,
         passed = true,
-        assertions = mutableListOf()
+        assertions = mutableListOf(),
     )
 
     testSegment.assertions.forEachIndexed { index, segmentAssertion ->
-        val assertions = getSegmentAssertionsFromMatrix(index,segmentAssertion)
+        val assertions = getSegmentAssertionsFromMatrix(index, segmentAssertion)
 
         assertions.forEach {
             val assertionStartTime = System.currentTimeMillis()
@@ -26,7 +26,7 @@ fun testSegment(testSegment: TestSegment,configuration: Configuration,option: Te
                 description = it.description.orEmpty(),
                 duration = 0,
                 passed = true,
-                errors = mutableListOf()
+                errors = mutableListOf(),
             )
 
             if (option.assertionPattern.isNotEmpty() && !it.description.orEmpty().contains(option.assertionPattern)) {
@@ -42,7 +42,7 @@ fun testSegment(testSegment: TestSegment,configuration: Configuration,option: Te
                 val testResultAssertionError = TestResultAssertionError(
                     type = "segment",
                     expected = expected,
-                    actual = actual
+                    actual = actual,
                 )
 
                 (testResultAssertion.errors as MutableList<TestResultAssertionError>).add(testResultAssertionError)

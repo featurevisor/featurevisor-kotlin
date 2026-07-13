@@ -24,7 +24,7 @@ fun FeaturevisorInstance.getVariable(
     val evaluation = evaluateVariable(
         featureKey = featureKey,
         variableKey = variableKey,
-        context = context
+        context = context,
     )
 
     return evaluation.variableValue
@@ -34,41 +34,36 @@ fun FeaturevisorInstance.getVariableBoolean(
     featureKey: FeatureKey,
     variableKey: VariableKey,
     context: Context,
-): Boolean? {
-    return (getVariable(featureKey, variableKey, context) as? BooleanValue)?.value
-}
+): Boolean? =
+    (getVariable(featureKey, variableKey, context) as? BooleanValue)?.value
 
 fun FeaturevisorInstance.getVariableString(
     featureKey: FeatureKey,
     variableKey: VariableKey,
     context: Context,
-): String? {
-    return (getVariable(featureKey, variableKey, context) as? StringValue)?.value
-}
+): String? =
+    (getVariable(featureKey, variableKey, context) as? StringValue)?.value
 
 fun FeaturevisorInstance.getVariableInteger(
     featureKey: FeatureKey,
     variableKey: VariableKey,
     context: Context,
-): Int? {
-    return (getVariable(featureKey, variableKey, context) as? IntValue)?.value
-}
+): Int? =
+    (getVariable(featureKey, variableKey, context) as? IntValue)?.value
 
 fun FeaturevisorInstance.getVariableDouble(
     featureKey: FeatureKey,
     variableKey: VariableKey,
     context: Context,
-): Double? {
-    return (getVariable(featureKey, variableKey, context) as? DoubleValue)?.value
-}
+): Double? =
+    (getVariable(featureKey, variableKey, context) as? DoubleValue)?.value
 
 fun FeaturevisorInstance.getVariableArray(
     featureKey: FeatureKey,
     variableKey: VariableKey,
     context: Context,
-): List<String>? {
-    return (getVariable(featureKey, variableKey, context) as? ArrayValue)?.values
-}
+): List<String>? =
+    (getVariable(featureKey, variableKey, context) as? ArrayValue)?.values
 
 inline fun <reified T : Any> FeaturevisorInstance.getVariableObject(
     featureKey: FeatureKey,
@@ -84,7 +79,7 @@ inline fun <reified T : Any> FeaturevisorInstance.getVariableObject(
     }
 }
 
-inline fun <reified T: Any> FeaturevisorInstance.getVariableJSON(
+inline fun <reified T : Any> FeaturevisorInstance.getVariableJSON(
     featureKey: FeatureKey,
     variableKey: VariableKey,
     context: Context,
@@ -96,4 +91,3 @@ inline fun <reified T: Any> FeaturevisorInstance.getVariableJSON(
         null
     }
 }
-

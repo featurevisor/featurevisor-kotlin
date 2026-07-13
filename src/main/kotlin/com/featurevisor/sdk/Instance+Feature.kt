@@ -7,27 +7,22 @@ import com.featurevisor.types.Feature
 import com.featurevisor.types.Force
 import com.featurevisor.types.Traffic
 
-fun FeaturevisorInstance.getFeatureByKey(featureKey: String): Feature? {
-    return datafileReader.getFeature(featureKey)
-}
+fun FeaturevisorInstance.getFeatureByKey(featureKey: String): Feature? = datafileReader.getFeature(featureKey)
 
-fun FeaturevisorInstance.getFeature(featureKey: String): Feature?{
-    return datafileReader.getFeature(featureKey)
-}
+fun FeaturevisorInstance.getFeature(featureKey: String): Feature? = datafileReader.getFeature(featureKey)
 
 internal fun FeaturevisorInstance.findForceFromFeature(
     feature: Feature,
     context: Context,
     datafileReader: DatafileReader,
 ): Force? {
-
     return feature.force?.firstOrNull { force ->
         when {
             force.conditions != null -> allConditionsAreMatched(force.conditions, context)
             force.segments != null -> allGroupSegmentsAreMatched(
                 force.segments,
                 context,
-                datafileReader
+                datafileReader,
             )
 
             else -> false
@@ -40,7 +35,6 @@ internal fun FeaturevisorInstance.getMatchedTraffic(
     context: Context,
     datafileReader: DatafileReader,
 ): Traffic? {
-
     return traffic.firstOrNull { trafficItem ->
         allGroupSegmentsAreMatched(trafficItem.segments, context, datafileReader)
     }
@@ -50,7 +44,6 @@ internal fun FeaturevisorInstance.getMatchedAllocation(
     traffic: Traffic,
     bucketValue: Int,
 ): Allocation? {
-
     return traffic.allocation.firstOrNull { allocation ->
         with(allocation.range) {
             bucketValue in this.first()..this.last()
@@ -70,7 +63,6 @@ internal fun FeaturevisorInstance.getMatchedTrafficAndAllocation(
     datafileReader: DatafileReader,
     logger: Logger?,
 ): MatchedTrafficAndAllocation {
-
     var matchedAllocation: Allocation? = null
     val matchedTraffic = traffic.firstOrNull { trafficItem ->
         if (allGroupSegmentsAreMatched(trafficItem.segments, context, datafileReader)) {
