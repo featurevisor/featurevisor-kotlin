@@ -1,6 +1,6 @@
 package com.featurevisor.sdk
 
-sealed class FeaturevisorError(message: String) : Throwable(message = message) {
+sealed class FeaturevisorError(message: String, var code: Int = 0) : Throwable(message = message) {
 
     /// Thrown when attempting to init Featurevisor instance without passing datafile and datafileUrl.
     /// At least one of them is required to init the SDK correctly
@@ -12,7 +12,7 @@ sealed class FeaturevisorError(message: String) : Throwable(message = message) {
     /// - Parameters:
     ///   - data: The data being parsed.
     ///   - errorMessage: The message from the error which occured during parsing.
-    class UnparsableJson(val data: String?, errorMessage: String) : FeaturevisorError(errorMessage)
+    class UnparsableJson(val data: String?, errorMessage: String, code: Int = 0) : FeaturevisorError(errorMessage, code)
 
     /// Thrown when attempting to construct an invalid URL.
     /// - Parameter string: The invalid URL string.

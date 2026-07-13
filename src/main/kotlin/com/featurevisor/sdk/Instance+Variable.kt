@@ -1,16 +1,11 @@
 package com.featurevisor.sdk
 
+import com.featurevisor.testRunner.getVariableValues
 import com.featurevisor.types.Context
 import com.featurevisor.types.FeatureKey
 import com.featurevisor.types.VariableKey
 import com.featurevisor.types.VariableValue
-import com.featurevisor.types.VariableValue.ArrayValue
-import com.featurevisor.types.VariableValue.BooleanValue
-import com.featurevisor.types.VariableValue.DoubleValue
-import com.featurevisor.types.VariableValue.IntValue
-import com.featurevisor.types.VariableValue.JsonValue
-import com.featurevisor.types.VariableValue.ObjectValue
-import com.featurevisor.types.VariableValue.StringValue
+import com.featurevisor.types.VariableValue.*
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromJsonElement
@@ -76,8 +71,14 @@ inline fun <reified T : Any> FeaturevisorInstance.getVariableObject(
     context: Context,
 ): T? {
     val objectValue = getVariable(featureKey, variableKey, context) as? ObjectValue
+    val actualValue = objectValue?.value?.keys?.map {
+        mapOf(
+            it to getVariableValues(objectValue.value[it]).toString()
+        )
+    }?.firstOrNull()
+
     return try {
-        val encoded = Json.encodeToJsonElement(objectValue?.value)
+        val encoded = Json.encodeToJsonElement(actualValue)
         return Json.decodeFromJsonElement<T>(encoded)
     } catch (e: Exception) {
         null
