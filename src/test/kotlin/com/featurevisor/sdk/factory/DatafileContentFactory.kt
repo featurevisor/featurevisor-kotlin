@@ -9,6 +9,7 @@ import com.featurevisor.types.Feature
 import com.featurevisor.types.Operator.EQUALS
 import com.featurevisor.types.Operator.NOT_EQUALS
 import com.featurevisor.types.Segment
+import kotlinx.serialization.json.JsonObject
 
 object DatafileContentFactory {
 
@@ -56,6 +57,7 @@ object DatafileContentFactory {
                     )
                 ),
             ),
+            conditionStrings = ""
         ),
     )
 
@@ -70,6 +72,9 @@ object DatafileContentFactory {
             traffic = emptyList(),
             force = null,
             ranges = null,
+            bucketByString = JsonObject(emptyMap()),
+            variationStrings = JsonObject(emptyMap()),
+            trafficString = JsonObject(emptyMap()),
         )
     )
 }

@@ -1,9 +1,11 @@
 package com.featurevisor.testRunner
 
+import com.featurevisor.sdk.JsonConfigFeatureVisor
 import com.featurevisor.sdk.serializers.isValidJson
 import com.featurevisor.sdk.serializers.mapOperator
 import com.featurevisor.types.*
-import com.google.gson.Gson
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.yaml.snakeyaml.Yaml
 import java.io.File
 import java.util.*
@@ -66,28 +68,34 @@ internal fun parseTestFeatureAssertions(yamlFilePath: String) =
     }
 
 private fun mapMatrixValues(value: Any) =
-    when(value){
+    when (value) {
         is Boolean -> {
-            if (value){
+            if (value) {
                 AttributeValue.StringValue("yes")
-            }else{
+            } else {
                 AttributeValue.StringValue("no")
             }
         }
+
         is Int -> {
             AttributeValue.IntValue(value)
         }
+
         is Double -> {
             AttributeValue.DoubleValue(value)
         }
+
         is String -> {
             AttributeValue.StringValue(value)
         }
+
         is Date -> {
             AttributeValue.DateValue(value)
         }
 
-        else -> { AttributeValue.StringValue("")}
+        else -> {
+            AttributeValue.StringValue("")
+        }
     }
 
 private fun parseWeightValue(value: Any): WeightType {
@@ -118,7 +126,7 @@ private fun parseVariableValue(value: Any?): VariableValue {
         }
 
         is Map<*, *> -> {
-            val json = Gson().toJson(value)
+            val json = Json.encodeToString(value)
             VariableValue.JsonValue(json)
         }
 
@@ -156,7 +164,7 @@ private fun parseAttributeValue(value: Any?): AttributeValue {
         }
 
         is Map<*, *> -> {
-            val json = Gson().toJson(value)
+            val json = Json.encodeToString(value)
             AttributeValue.StringValue(json)
         }
 
@@ -174,14 +182,14 @@ internal fun parseYamlSegment(segmentFilePath: String) =
         val data = yaml.load<Map<String, Any>>(yamlContent)
 
         val archived = data["archived"] as? Boolean
-        val description = data["description"] as? String
 
         val conditionsData = data["conditions"]
 
         Segment(
             archived = archived,
             key = "",
-            conditions = parseCondition(conditionsData)
+            conditions = parseCondition(conditionsData),
+            conditionStrings = ""
         )
 
     } catch (e: Exception) {
@@ -245,6 +253,7 @@ private fun parseConditionValue(value: Any?): ConditionValue {
                 ConditionValue.DoubleValue(value.toDouble())
             } ?: ConditionValue.StringValue(value)
         }
+
         is Int -> ConditionValue.IntValue(value)
         is Double -> ConditionValue.DoubleValue(value)
         is Boolean -> ConditionValue.BooleanValue(value)
@@ -258,6 +267,6 @@ private fun parseConditionValue(value: Any?): ConditionValue {
 }
 
 fun parseConfiguration(projectRootPath: String) =
-    json.decodeFromString(Configuration.serializer(),getConfigurationJson(projectRootPath)!!)
+    JsonConfigFeatureVisor.json.decodeFromString(Configuration.serializer(), getConfigurationJson(projectRootPath)!!)
 
 

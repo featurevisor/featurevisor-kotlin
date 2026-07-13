@@ -1,9 +1,6 @@
 package com.featurevisor.testRunner
 
-import com.featurevisor.sdk.Logger
-import com.featurevisor.sdk.getVariable
-import com.featurevisor.sdk.getVariation
-import com.featurevisor.sdk.isEnabled
+import com.featurevisor.sdk.*
 import com.featurevisor.types.*
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
@@ -11,7 +8,7 @@ import kotlinx.serialization.json.JsonElement
 
 fun testFeature(
     testFeature: TestFeature,
-    datafileContentByEnvironment:MutableMap<String, DatafileContent>,
+    datafileContentByEnvironment: MutableMap<String, DatafileContent>,
     option: TestProjectOption
 ): TestResult {
     val testStartTime = System.currentTimeMillis()
@@ -121,9 +118,9 @@ fun testFeature(
                         val actualValue = sdk.getVariable(featureKey, variableKey, it.context)
                         val passed: Boolean
 
-                        val variableSchema = datafileContent.features.find { feature ->
+                        val variableSchema = datafileContent.getFeature().find { feature ->
                             feature.key == testFeature.key
-                        }?.variablesSchema?.find { variableSchema ->
+                        }?.getVariablesSchema()?.find { variableSchema ->
                             variableSchema.key.equals(variableKey, ignoreCase = true)
                         }
 

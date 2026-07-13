@@ -8,15 +8,15 @@ import com.featurevisor.types.FeatureKey
 import com.featurevisor.types.Segment
 import com.featurevisor.types.SegmentKey
 
-class DatafileReader constructor(
+class DatafileReader (
     datafileContent: DatafileContent,
 ) {
 
     private val schemaVersion: String = datafileContent.schemaVersion
     private val revision: String = datafileContent.revision
-    private val attributes: Map<AttributeKey, Attribute> = datafileContent.attributes.associateBy { it.key }
-    private val segments: Map<SegmentKey, Segment> = datafileContent.segments.associateBy { it.key }
-    private val features: Map<FeatureKey, Feature> = datafileContent.features.associateBy { it.key }
+    private val attributes: Map<AttributeKey, Attribute> = datafileContent.getAttributes().associateBy { it.key }
+    private val segments: Map<SegmentKey, Segment> = datafileContent.getSegment().associateBy { it.key }
+    private val features: Map<FeatureKey, Feature> = datafileContent.getFeature().associateBy { it.key }
 
     fun getRevision(): String {
         return revision
