@@ -7,7 +7,7 @@ fun generateCombinations(
     matrix: AssertionMatrix,
     idx: Int,
     prev: MutableMap<String, AttributeValue>,
-    combinations: MutableList<MutableMap<String, AttributeValue>>
+    combinations: MutableList<MutableMap<String, AttributeValue>>,
 ) {
     val key = keys[idx]
     val values = matrix[key] ?: emptyList()
@@ -54,13 +54,13 @@ fun applyCombinationToValue(value: Any?, combination: Map<String, AttributeValue
 
 fun applyCombinationToFeatureAssertion(
     combination: Map<String, AttributeValue>,
-    assertion: FeatureAssertion
+    assertion: FeatureAssertion,
 ): FeatureAssertion {
     val flattenedAssertion = assertion.copy()
 
     flattenedAssertion.environment = applyCombinationToValue(
         flattenedAssertion.environment,
-        combination
+        combination,
     ) as EnvironmentKey
 
     flattenedAssertion.context =
@@ -75,12 +75,14 @@ fun applyCombinationToFeatureAssertion(
             } else {
                 WeightType.IntType(it.toInt())
             }
-        } else it
+        } else {
+            it
+        }
     } as WeightType
 
     flattenedAssertion.description = applyCombinationToValue(
         flattenedAssertion.description,
-        combination
+        combination,
     ) as? String
 
     return flattenedAssertion
@@ -88,12 +90,11 @@ fun applyCombinationToFeatureAssertion(
 
 fun getFeatureAssertionsFromMatrix(
     aIndex: Int,
-    assertionWithMatrix: FeatureAssertion
+    assertionWithMatrix: FeatureAssertion,
 ): List<FeatureAssertion> {
     if (assertionWithMatrix.matrix == null) {
         val assertion = assertionWithMatrix.copy()
-        assertion.description =
-            "Assertion #${aIndex + 1}: (${assertion.environment}) ${assertion.description ?: "at ${getAtValue(assertion.at)}%"}"
+        assertion.description = describeAssertion(aIndex, assertion)
         return listOf(assertion)
     }
 
@@ -102,12 +103,16 @@ fun getFeatureAssertionsFromMatrix(
 
     for (combination in combinations) {
         val assertion = applyCombinationToFeatureAssertion(combination, assertionWithMatrix)
-        assertion.description =
-            "Assertion #${aIndex + 1}: (${assertion.environment}) ${assertion.description ?: "at ${getAtValue(assertion.at)}%"}"
+        assertion.description = describeAssertion(aIndex, assertion)
         assertions.add(assertion)
     }
 
     return assertions
+}
+
+private fun describeAssertion(aIndex: Int, assertion: FeatureAssertion): String {
+    val fallbackDescription = "at ${getAtValue(assertion.at)}%"
+    return "Assertion #${aIndex + 1}: (${assertion.environment}) ${assertion.description ?: fallbackDescription}"
 }
 
 @Suppress("IMPLICIT_CAST_TO_ANY")
@@ -127,7 +132,7 @@ fun getAtValue(at: WeightType) = when (at) {
 
 fun applyCombinationToSegmentAssertion(
     combination: Map<String, AttributeValue>,
-    assertion: SegmentAssertion
+    assertion: SegmentAssertion,
 ): SegmentAssertion {
     val flattenedAssertion = assertion.copy()
 
@@ -137,7 +142,7 @@ fun applyCombinationToSegmentAssertion(
 
     flattenedAssertion.description = applyCombinationToValue(
         flattenedAssertion.description,
-        combination
+        combination,
     ) as? String
 
     return flattenedAssertion
@@ -145,7 +150,7 @@ fun applyCombinationToSegmentAssertion(
 
 fun getSegmentAssertionsFromMatrix(
     aIndex: Int,
-    assertionWithMatrix: SegmentAssertion
+    assertionWithMatrix: SegmentAssertion,
 ): List<SegmentAssertion> {
     if (assertionWithMatrix.matrix == null) {
         val assertion = assertionWithMatrix.copy()

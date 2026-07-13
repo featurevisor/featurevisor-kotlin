@@ -2,7 +2,6 @@ package com.featurevisor.testRunner
 
 import java.io.File
 import java.io.IOException
-import java.util.concurrent.TimeUnit
 
 internal fun getJsonForFeatureUsingCommand(featureName: String, environment: String, projectRootPath: String) =
     try {
@@ -40,14 +39,13 @@ private fun String.runCommand(workingDir: File): String? =
         null
     }
 
-fun createCommandForConfiguration()=
+fun createCommandForConfiguration() =
     "npx featurevisor config --print --pretty"
 
 fun getConfigurationJson(projectRootPath: String) =
     try {
         createCommandForConfiguration().runCommand(getFileForSpecificPath(projectRootPath))
-    }catch (e:Exception){
+    } catch (e: Exception) {
         printMessageInRedColor("Exception in createCommandForConfiguration Commandline execution --> ${e.message}")
         null
     }
-

@@ -53,7 +53,7 @@ object DatafileContentFactory {
                         attributeKey = "device",
                         operator = NOT_EQUALS,
                         value = ConditionValue.StringValue("tablet"),
-                    )
+                    ),
                 ),
             ),
         ),
@@ -70,6 +70,6 @@ object DatafileContentFactory {
             traffic = emptyList(),
             force = null,
             ranges = null,
-        )
+        ),
     )
 }

@@ -25,7 +25,7 @@ import java.text.SimpleDateFormat
 
 @OptIn(InternalSerializationApi::class, ExperimentalSerializationApi::class)
 @Serializer(forClass = Required::class)
-object RequiredSerializer: KSerializer<Required>{
+object RequiredSerializer : KSerializer<Required> {
     override val descriptor: SerialDescriptor =
         buildSerialDescriptor("package.Required", PolymorphicKind.SEALED)
 
@@ -33,15 +33,19 @@ object RequiredSerializer: KSerializer<Required>{
         val input = decoder as? JsonDecoder
             ?: throw SerializationException("This class can be decoded only by Json format")
         return when (val tree = input.decodeJsonElement()) {
-            is JsonPrimitive ->{
+            is JsonPrimitive -> {
                 Required.FeatureKey(tree.content)
             }
             is JsonArray -> {
                 // Never lies in JsonArray block
                 Required.FeatureKey(tree.toString())
             }
-            is JsonObject ->{
-                val requiredWithVariation = RequiredWithVariation(tree["key"]?.jsonPrimitive?.content.orEmpty(),tree["variation"]?.jsonPrimitive?.content.orEmpty())
+            is JsonObject -> {
+                val requiredWithVariation =
+                    RequiredWithVariation(
+                        tree["key"]?.jsonPrimitive?.content.orEmpty(),
+                        tree["variation"]?.jsonPrimitive?.content.orEmpty(),
+                    )
                 Required.WithVariation(requiredWithVariation)
             }
         }
@@ -59,42 +63,46 @@ object ConditionSerializer : KSerializer<Condition> {
             ?: throw SerializationException("This class can be decoded only by Json format")
         return when (val tree = input.decodeJsonElement()) {
             is JsonArray -> {
-                Condition.And(tree.map { jsonElement ->
-                    input.json.decodeFromJsonElement(
-                        Condition::class.serializer(),
-                        jsonElement
-                    )
-                })
+                Condition.And(
+                    tree.map { jsonElement ->
+                        input.json.decodeFromJsonElement(
+                            Condition::class.serializer(),
+                            jsonElement,
+                        )
+                    },
+                )
             }
 
             is JsonObject -> {
-                FeaturevisorInstance.companionLogger?.debug("Segment deserializing: ${tree["attribute"]?.jsonPrimitive?.content}, tree: $tree")
+                FeaturevisorInstance.companionLogger?.debug(
+                    "Segment deserializing: ${tree["attribute"]?.jsonPrimitive?.content}, tree: $tree",
+                )
                 when {
                     tree.containsKey("and") -> Condition.And(
                         tree["and"]!!.jsonArray.map {
                             input.json.decodeFromJsonElement(
                                 Condition::class.serializer(),
-                                it
+                                it,
                             )
-                        }
+                        },
                     )
 
                     tree.containsKey("or") -> Condition.Or(
                         tree["or"]!!.jsonArray.map {
                             input.json.decodeFromJsonElement(
                                 Condition::class.serializer(),
-                                it
+                                it,
                             )
-                        }
+                        },
                     )
 
                     tree.containsKey("not") -> Condition.Not(
                         tree["not"]!!.jsonArray.map {
                             input.json.decodeFromJsonElement(
                                 Condition::class.serializer(),
-                                it
+                                it,
                             )
-                        }
+                        },
                     )
 
                     else -> Condition.Plain(
@@ -102,7 +110,7 @@ object ConditionSerializer : KSerializer<Condition> {
                         operator = mapOperator(tree["operator"]?.jsonPrimitive?.content ?: ""),
                         value = input.json.decodeFromJsonElement(
                             ConditionValue::class.serializer(),
-                            tree["value"]!!
+                            tree["value"]!!,
                         ),
                     )
                 }
@@ -112,7 +120,7 @@ object ConditionSerializer : KSerializer<Condition> {
                 val jsonElement = input.json.parseToJsonElement(tree.content)
                 input.json.decodeFromJsonElement(
                     Condition::class.serializer(),
-                    jsonElement
+                    jsonElement,
                 )
             }
         }
@@ -133,12 +141,14 @@ object GroupSegmentSerializer : KSerializer<GroupSegment> {
         val input = decoder as? JsonDecoder
             ?: throw SerializationException("This class can be decoded only by Json format")
         return when (val tree = input.decodeJsonElement()) {
-            is JsonArray -> GroupSegment.Multiple(tree.map { jsonElement ->
-                input.json.decodeFromJsonElement(
-                    GroupSegment::class.serializer(),
-                    jsonElement
-                )
-            })
+            is JsonArray -> GroupSegment.Multiple(
+                tree.map { jsonElement ->
+                    input.json.decodeFromJsonElement(
+                        GroupSegment::class.serializer(),
+                        jsonElement,
+                    )
+                },
+            )
 
             is JsonObject -> {
                 when {
@@ -147,10 +157,10 @@ object GroupSegmentSerializer : KSerializer<GroupSegment> {
                             tree["and"]!!.jsonArray.map {
                                 input.json.decodeFromJsonElement(
                                     GroupSegment::class.serializer(),
-                                    it
+                                    it,
                                 )
-                            }
-                        )
+                            },
+                        ),
                     )
 
                     tree.containsKey("or") -> GroupSegment.Or(
@@ -158,10 +168,10 @@ object GroupSegmentSerializer : KSerializer<GroupSegment> {
                             tree["or"]!!.jsonArray.map {
                                 input.json.decodeFromJsonElement(
                                     GroupSegment::class.serializer(),
-                                    it
+                                    it,
                                 )
-                            }
-                        )
+                            },
+                        ),
                     )
 
                     tree.containsKey("not") -> GroupSegment.Not(
@@ -169,10 +179,10 @@ object GroupSegmentSerializer : KSerializer<GroupSegment> {
                             tree["not"]!!.jsonArray.map {
                                 input.json.decodeFromJsonElement(
                                     GroupSegment::class.serializer(),
-                                    it
+                                    it,
                                 )
-                            }
-                        )
+                            },
+                        ),
                     )
 
                     else -> throw Exception("Unexpected GroupSegment element content")
@@ -210,9 +220,11 @@ object BucketBySerializer : KSerializer<BucketBy> {
             ?: throw SerializationException("This class can be decoded only by Json format")
         return when (val tree = input.decodeJsonElement()) {
             is JsonArray -> {
-                BucketBy.And(tree.map { jsonElement ->
-                    jsonElement.jsonPrimitive.content
-                })
+                BucketBy.And(
+                    tree.map { jsonElement ->
+                        jsonElement.jsonPrimitive.content
+                    },
+                )
             }
 
             is JsonObject -> {
@@ -231,7 +243,7 @@ object BucketBySerializer : KSerializer<BucketBy> {
                     val jsonElement = Json.parseToJsonElement(tree.content)
                     input.json.decodeFromJsonElement(
                         BucketBy::class.serializer(),
-                        jsonElement
+                        jsonElement,
                     )
                 }
             }
@@ -265,7 +277,7 @@ object ConditionValueSerializer : KSerializer<ConditionValue> {
                         val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
                         val date = dateFormat.parse(it)
                         ConditionValue.DateTimeValue(date)
-                    }catch (e:Exception){
+                    } catch (e: Exception) {
                         ConditionValue.StringValue(it)
                     }
                 }
@@ -321,7 +333,9 @@ object VariableValueSerializer : KSerializer<VariableValue> {
             }
 
             is JsonObject -> {
-                FeaturevisorInstance.companionLogger?.debug("VariableValueSerializer, JsonObject, tree.jsonObject: ${tree.jsonObject}, tree: $tree")
+                FeaturevisorInstance.companionLogger?.debug(
+                    "VariableValueSerializer, JsonObject, tree.jsonObject: ${tree.jsonObject}, tree: $tree",
+                )
                 VariableValue.JsonValue(tree.jsonObject.toString())
             }
         }

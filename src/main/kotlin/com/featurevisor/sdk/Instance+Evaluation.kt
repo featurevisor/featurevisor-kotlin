@@ -37,7 +37,7 @@ enum class EvaluationReason(val value: String) {
     ALLOCATED("allocated"),
     DEFAULTED("defaulted"),
     OVERRIDE("override"),
-    ERROR("error")
+    ERROR("error"),
 }
 
 @Serializable
@@ -106,7 +106,7 @@ fun FeaturevisorInstance.evaluateVariation(featureKey: FeatureKey, context: Cont
             evaluation = Evaluation(
                 featureKey = featureKey,
                 reason = INITIAL,
-                variationValue = variationValue
+                variationValue = variationValue,
             )
 
             logger?.debug("using initial variation", evaluation.toDictionary())
@@ -118,7 +118,7 @@ fun FeaturevisorInstance.evaluateVariation(featureKey: FeatureKey, context: Cont
             // not found
             evaluation = Evaluation(
                 featureKey = featureKey,
-                reason = NOT_FOUND
+                reason = NOT_FOUND,
             )
 
             logger?.warn("feature not found", evaluation.toDictionary())
@@ -129,7 +129,7 @@ fun FeaturevisorInstance.evaluateVariation(featureKey: FeatureKey, context: Cont
             // no variations
             evaluation = Evaluation(
                 featureKey = featureKey,
-                reason = NO_VARIATIONS
+                reason = NO_VARIATIONS,
             )
 
             logger?.warn("no variations", evaluation.toDictionary())
@@ -147,7 +147,7 @@ fun FeaturevisorInstance.evaluateVariation(featureKey: FeatureKey, context: Cont
                 evaluation = Evaluation(
                     featureKey = feature.key,
                     reason = FORCED,
-                    variation = variation
+                    variation = variation,
                 )
 
                 logger?.debug("forced variation found", evaluation.toDictionary())
@@ -164,7 +164,7 @@ fun FeaturevisorInstance.evaluateVariation(featureKey: FeatureKey, context: Cont
             finalContext,
             bucketValue,
             datafileReader,
-            logger
+            logger,
         )
 
         val matchedTraffic = matchedTrafficAndAllocation.matchedTraffic
@@ -178,7 +178,7 @@ fun FeaturevisorInstance.evaluateVariation(featureKey: FeatureKey, context: Cont
                     reason = RULE,
                     bucketValue = bucketValue,
                     ruleKey = matchedTraffic.key,
-                    variation = variation
+                    variation = variation,
                 )
 
                 logger?.debug("override from rule", evaluation.toDictionary())
@@ -197,7 +197,7 @@ fun FeaturevisorInstance.evaluateVariation(featureKey: FeatureKey, context: Cont
                     featureKey = feature.key,
                     reason = ALLOCATED,
                     bucketValue = bucketValue,
-                    variation = variation
+                    variation = variation,
                 )
 
                 logger?.debug("allocated variation", evaluation.toDictionary())
@@ -210,13 +210,13 @@ fun FeaturevisorInstance.evaluateVariation(featureKey: FeatureKey, context: Cont
         evaluation = Evaluation(
             featureKey = feature.key,
             reason = ERROR,
-            bucketValue = bucketValue
+            bucketValue = bucketValue,
         )
 
         logger?.debug("no matched variation", evaluation.toDictionary())
 
         return evaluation
-    }catch (e:Exception){
+    } catch (e: Exception) {
         evaluation = Evaluation(
             featureKey = featureKey,
             reason = ERROR,
@@ -228,10 +228,8 @@ fun FeaturevisorInstance.evaluateVariation(featureKey: FeatureKey, context: Cont
     }
 }
 
-
 @Suppress("UNREACHABLE_CODE")
 fun FeaturevisorInstance.evaluateFlag(featureKey: FeatureKey, context: Context = emptyMap()): Evaluation {
-
     var evaluation: Evaluation
 
     try {
@@ -243,7 +241,7 @@ fun FeaturevisorInstance.evaluateFlag(featureKey: FeatureKey, context: Context =
                 featureKey = featureKey,
                 reason = STICKY,
                 enabled = stickyFeature.enabled,
-                sticky = stickyFeature
+                sticky = stickyFeature,
             )
 
             logger?.debug("using sticky enabled", evaluation.toDictionary())
@@ -258,7 +256,7 @@ fun FeaturevisorInstance.evaluateFlag(featureKey: FeatureKey, context: Context =
                 featureKey = featureKey,
                 reason = INITIAL,
                 enabled = initialFeature?.enabled,
-                initial = initialFeature
+                initial = initialFeature,
             )
 
             logger?.debug("using initial enabled", evaluation.toDictionary())
@@ -271,7 +269,7 @@ fun FeaturevisorInstance.evaluateFlag(featureKey: FeatureKey, context: Context =
             // not found
             evaluation = Evaluation(
                 featureKey = featureKey,
-                reason = NOT_FOUND
+                reason = NOT_FOUND,
             )
 
             logger?.warn("feature not found", evaluation.toDictionary())
@@ -291,7 +289,7 @@ fun FeaturevisorInstance.evaluateFlag(featureKey: FeatureKey, context: Context =
                 evaluation = Evaluation(
                     featureKey = featureKey,
                     reason = FORCED,
-                    enabled = force.enabled
+                    enabled = force.enabled,
                 )
 
                 logger?.debug("forced enabled found", evaluation.toDictionary())
@@ -323,7 +321,7 @@ fun FeaturevisorInstance.evaluateFlag(featureKey: FeatureKey, context: Context =
                     return@all false
                 }
 
-                if (requiredVariation != null){
+                if (requiredVariation != null) {
                     val requiredVariationValue = getVariation(requiredKey, finalContext)
 
                     return@all requiredVariationValue == requiredVariation
@@ -336,7 +334,7 @@ fun FeaturevisorInstance.evaluateFlag(featureKey: FeatureKey, context: Context =
                 evaluation = Evaluation(
                     featureKey = feature.key,
                     reason = REQUIRED,
-                    enabled = requiredFeaturesAreEnabled
+                    enabled = requiredFeaturesAreEnabled,
                 )
 
                 return evaluation
@@ -353,9 +351,7 @@ fun FeaturevisorInstance.evaluateFlag(featureKey: FeatureKey, context: Context =
         )
 
         if (matchedTraffic != null) {
-
             if (feature.ranges.isNullOrEmpty().not()) {
-
                 val matchedRange = feature.ranges!!.firstOrNull { range ->
                     bucketValue >= range.first() && bucketValue < range.last()
                 }
@@ -366,7 +362,7 @@ fun FeaturevisorInstance.evaluateFlag(featureKey: FeatureKey, context: Context =
                         featureKey = feature.key,
                         reason = ALLOCATED,
                         bucketValue = bucketValue,
-                        enabled = matchedTraffic.enabled ?: true
+                        enabled = matchedTraffic.enabled ?: true,
                     )
 
                     return evaluation
@@ -377,7 +373,7 @@ fun FeaturevisorInstance.evaluateFlag(featureKey: FeatureKey, context: Context =
                     featureKey = feature.key,
                     reason = OUT_OF_RANGE,
                     bucketValue = bucketValue,
-                    enabled = false
+                    enabled = false,
                 )
 
                 logger?.debug("not matched", evaluation.toDictionary())
@@ -394,7 +390,7 @@ fun FeaturevisorInstance.evaluateFlag(featureKey: FeatureKey, context: Context =
                     bucketValue = bucketValue,
                     ruleKey = matchedTraffic.key,
                     enabled = matchedTrafficEnabled,
-                    traffic = matchedTraffic
+                    traffic = matchedTraffic,
                 )
 
                 logger?.debug("override from rule", evaluation.toDictionary())
@@ -411,7 +407,7 @@ fun FeaturevisorInstance.evaluateFlag(featureKey: FeatureKey, context: Context =
                     bucketValue = bucketValue,
                     ruleKey = matchedTraffic.key,
                     enabled = true,
-                    traffic = matchedTraffic
+                    traffic = matchedTraffic,
                 )
 
                 return evaluation
@@ -423,11 +419,10 @@ fun FeaturevisorInstance.evaluateFlag(featureKey: FeatureKey, context: Context =
             featureKey = feature.key,
             reason = ERROR,
             bucketValue = bucketValue,
-            enabled = false
+            enabled = false,
         )
 
         return evaluation
-
     } catch (e: Exception) {
         evaluation = Evaluation(
             featureKey = featureKey,
@@ -446,7 +441,6 @@ fun FeaturevisorInstance.evaluateVariable(
     variableKey: VariableKey,
     context: Context = emptyMap(),
 ): Evaluation {
-
     FeaturevisorInstance.companionLogger?.debug("evaluateVariable, featureKey: $featureKey, variableKey: $variableKey")
     var evaluation: Evaluation
 
@@ -464,7 +458,7 @@ fun FeaturevisorInstance.evaluateVariable(
                 featureKey = featureKey,
                 reason = STICKY,
                 variableKey = variableKey,
-                variableValue = variableValue
+                variableValue = variableValue,
             )
 
             logger?.debug("using sticky variable", evaluation.toDictionary())
@@ -478,7 +472,7 @@ fun FeaturevisorInstance.evaluateVariable(
                 featureKey = featureKey,
                 reason = INITIAL,
                 variableKey = variableKey,
-                variableValue = variableValue
+                variableValue = variableValue,
             )
 
             logger?.debug("using initial variable", evaluation.toDictionary())
@@ -490,7 +484,7 @@ fun FeaturevisorInstance.evaluateVariable(
                 evaluation = Evaluation(
                     featureKey = featureKey,
                     reason = NOT_FOUND,
-                    variableKey = variableKey
+                    variableKey = variableKey,
                 )
 
                 logger?.warn("feature not found in datafile", evaluation.toDictionary())
@@ -505,7 +499,7 @@ fun FeaturevisorInstance.evaluateVariable(
                 evaluation = Evaluation(
                     featureKey = featureKey,
                     reason = NOT_FOUND,
-                    variableKey = variableKey
+                    variableKey = variableKey,
                 )
 
                 logger?.warn("variable schema not found", evaluation.toDictionary())
@@ -515,7 +509,7 @@ fun FeaturevisorInstance.evaluateVariable(
             val finalContext = interceptContext?.invoke(context) ?: context
 
             // forced
-            val force =   findForceFromFeature(feature, context, datafileReader)
+            val force = findForceFromFeature(feature, context, datafileReader)
 
             force?.let {
                 if (it.variables?.containsKey(variableKey) == true) {
@@ -525,7 +519,7 @@ fun FeaturevisorInstance.evaluateVariable(
                         reason = FORCED,
                         variableKey = variableKey,
                         variableValue = variableValue,
-                        variableSchema = variableSchema
+                        variableSchema = variableSchema,
                     )
 
                     logger?.debug("forced variable", evaluation.toDictionary())
@@ -541,7 +535,7 @@ fun FeaturevisorInstance.evaluateVariable(
                 context = finalContext,
                 bucketValue = bucketValue,
                 datafileReader = datafileReader,
-                logger = logger
+                logger = logger,
             )
 
             matchedTrafficAndAllocation.matchedTraffic?.let { matchedTraffic ->
@@ -554,7 +548,7 @@ fun FeaturevisorInstance.evaluateVariable(
                         ruleKey = matchedTraffic.key,
                         variableKey = variableKey,
                         variableValue = variableValue,
-                        variableSchema = variableSchema
+                        variableSchema = variableSchema,
                     )
 
                     logger?.debug("override from rule", evaluation.toDictionary())
@@ -588,7 +582,7 @@ fun FeaturevisorInstance.evaluateVariable(
                             return@firstOrNull allGroupSegmentsAreMatched(
                                 override.segments,
                                 finalContext,
-                                datafileReader
+                                datafileReader,
                             )
                         }
 
@@ -601,7 +595,7 @@ fun FeaturevisorInstance.evaluateVariable(
                             ruleKey = matchedTraffic.key,
                             variableKey = variableKey,
                             variableValue = override.value,
-                            variableSchema = variableSchema
+                            variableSchema = variableSchema,
                         )
 
                         logger?.debug("variable override", evaluation.toDictionary())
@@ -616,7 +610,7 @@ fun FeaturevisorInstance.evaluateVariable(
                             ruleKey = matchedTraffic.key,
                             variableKey = variableKey,
                             variableValue = variableFromVariation.value,
-                            variableSchema = variableSchema
+                            variableSchema = variableSchema,
                         )
 
                         logger?.debug("allocated variable", evaluation.toDictionary())
@@ -632,13 +626,13 @@ fun FeaturevisorInstance.evaluateVariable(
                 bucketValue = bucketValue,
                 variableKey = variableKey,
                 variableValue = variableSchema.defaultValue,
-                variableSchema = variableSchema
+                variableSchema = variableSchema,
             )
 
             logger?.debug("using default value", evaluation.toDictionary())
             return evaluation
         }
-    } catch (e: Exception){
+    } catch (e: Exception) {
         evaluation = Evaluation(
             featureKey = featureKey,
             reason = ERROR,
@@ -648,8 +642,6 @@ fun FeaturevisorInstance.evaluateVariable(
 
         return evaluation
     }
-
-
 }
 
 private fun FeaturevisorInstance.getBucketKey(feature: Feature, context: Context): BucketKey {
@@ -680,7 +672,7 @@ private fun FeaturevisorInstance.getBucketKey(feature: Feature, context: Context
         if (attributeValue != null) {
             if (type == "plain" || type == "and") {
                 bucketKey.add(attributeValue)
-            } else {  // or
+            } else { // or
                 if (bucketKey.isEmpty()) {
                     bucketKey.add(attributeValue)
                 }

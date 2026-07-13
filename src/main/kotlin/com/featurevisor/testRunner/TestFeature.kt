@@ -11,8 +11,8 @@ import kotlinx.serialization.json.JsonElement
 
 fun testFeature(
     testFeature: TestFeature,
-    datafileContentByEnvironment:MutableMap<String, DatafileContent>,
-    option: TestProjectOption
+    datafileContentByEnvironment: MutableMap<String, DatafileContent>,
+    option: TestProjectOption,
 ): TestResult {
     val testStartTime = System.currentTimeMillis()
     val featureKey = testFeature.key
@@ -23,7 +23,7 @@ fun testFeature(
         notFound = false,
         duration = 0,
         passed = true,
-        assertions = mutableListOf()
+        assertions = mutableListOf(),
     )
 
     testFeature.assertions.forEachIndexed { index, assertion ->
@@ -37,7 +37,7 @@ fun testFeature(
                 environment = it.environment,
                 duration = 0,
                 passed = true,
-                errors = mutableListOf()
+                errors = mutableListOf(),
             )
 
             if (option.assertionPattern.isNotEmpty() && !it.description.orEmpty().contains(option.assertionPattern)) {
@@ -48,7 +48,7 @@ fun testFeature(
                 ?: getDataFileContent(
                     featureName = testFeature.key,
                     environment = it.environment,
-                    projectRootPath = option.projectRootPath.orEmpty()
+                    projectRootPath = option.projectRootPath.orEmpty(),
                 )
 
             if (option.showDatafile) {
@@ -58,7 +58,6 @@ fun testFeature(
             }
 
             if (datafileContent != null) {
-
                 val sdk = getSdkInstance(datafileContent, it)
 
                 if (option.verbose) {
@@ -67,8 +66,8 @@ fun testFeature(
                             Logger.LogLevel.DEBUG,
                             Logger.LogLevel.INFO,
                             Logger.LogLevel.WARN,
-                            Logger.LogLevel.ERROR
-                        )
+                            Logger.LogLevel.ERROR,
+                        ),
                     )
                 }
 
@@ -91,13 +90,13 @@ fun testFeature(
                             TestResultAssertionError(
                                 type = "flag",
                                 expected = it.expectedToBeEnabled,
-                                actual = isEnabled
-                            )
+                                actual = isEnabled,
+                            ),
                         )
                     }
                 }
 
-                //Variation
+                // Variation
                 if (!it.expectedVariation.isNullOrEmpty()) {
                     val variation = sdk.getVariation(testFeature.key, it.context)
 
@@ -109,13 +108,13 @@ fun testFeature(
                             TestResultAssertionError(
                                 type = "variation",
                                 expected = it.expectedVariation,
-                                actual = variation
-                            )
+                                actual = variation,
+                            ),
                         )
                     }
                 }
 
-                //Variables
+                // Variables
                 if (assertion.expectedVariables is Map<*, *>) {
                     assertion.expectedVariables.forEach { (variableKey, expectedValue) ->
                         val actualValue = sdk.getVariable(featureKey, variableKey, it.context)
@@ -136,8 +135,8 @@ fun testFeature(
                                     type = "variable",
                                     expected = it.expectedVariation,
                                     actual = null,
-                                    message = "schema for variable \"${variableKey}\" not found in feature"
-                                )
+                                    message = "schema for variable \"${variableKey}\" not found in feature",
+                                ),
                             )
                             return@forEach
                         }
@@ -157,17 +156,17 @@ fun testFeature(
                             passed = when (actualValue) {
                                 is VariableValue.ArrayValue -> checkIfArraysAreEqual(
                                     stringToArray(parsedExpectedValue.toString()).orEmpty().toTypedArray(),
-                                    actualValue.values.toTypedArray()
+                                    actualValue.values.toTypedArray(),
                                 )
 
                                 is VariableValue.ObjectValue -> checkIfObjectsAreEqual(
                                     (parsedExpectedValue as VariableValue.ObjectValue).value,
-                                    (actualValue as VariableValue.ObjectValue).value
+                                    (actualValue as VariableValue.ObjectValue).value,
                                 )
 
                                 is VariableValue.JsonValue -> checkJsonIsEquals(
                                     (expectedValue as VariableValue.JsonValue).value,
-                                    (actualValue as VariableValue.JsonValue).value
+                                    (actualValue as VariableValue.JsonValue).value,
                                 )
 
                                 else -> parsedExpectedValue == actualValue
@@ -178,24 +177,32 @@ fun testFeature(
                                 testResultAssertion.passed = false
 
                                 val expectedValueString =
-                                    if (expectedValue !is VariableValue.StringValue) expectedValue.toString() else expectedValue
+                                    if (expectedValue !is VariableValue.StringValue) {
+                                        expectedValue.toString()
+                                    } else {
+                                        expectedValue
+                                    }
                                 val actualValueString =
-                                    if (actualValue !is VariableValue.StringValue) actualValue.toString() else actualValue
+                                    if (actualValue !is VariableValue.StringValue) {
+                                        actualValue.toString()
+                                    } else {
+                                        actualValue
+                                    }
 
                                 (testResultAssertion.errors as MutableList<TestResultAssertionError>).add(
                                     TestResultAssertionError(
                                         type = "variable",
                                         expected = expectedValueString,
                                         actual = actualValueString,
-                                        details = mapOf("variableKey" to variableKey)
-                                    )
+                                        details = mapOf("variableKey" to variableKey),
+                                    ),
                                 )
                             }
                         } else {
                             passed = when (expectedValue) {
                                 is VariableValue.ArrayValue -> checkIfArraysAreEqual(
                                     (expectedValue as VariableValue.ArrayValue).values.toTypedArray(),
-                                    (actualValue as VariableValue.ArrayValue).values.toTypedArray()
+                                    (actualValue as VariableValue.ArrayValue).values.toTypedArray(),
                                 )
 
                                 is VariableValue.ObjectValue -> checkIfObjectsAreEqual(expectedValue, actualValue)
@@ -207,17 +214,25 @@ fun testFeature(
                                 testResultAssertion.passed = false
 
                                 val expectedValueString =
-                                    if (expectedValue !is VariableValue.StringValue) expectedValue.toString() else expectedValue
+                                    if (expectedValue !is VariableValue.StringValue) {
+                                        expectedValue.toString()
+                                    } else {
+                                        expectedValue
+                                    }
                                 val actualValueString =
-                                    if (actualValue !is VariableValue.StringValue) actualValue.toString() else actualValue
+                                    if (actualValue !is VariableValue.StringValue) {
+                                        actualValue.toString()
+                                    } else {
+                                        actualValue
+                                    }
 
                                 (testResultAssertion.errors as MutableList<TestResultAssertionError>).add(
                                     TestResultAssertionError(
                                         type = "variable",
                                         expected = expectedValueString,
                                         actual = actualValueString,
-                                        details = mapOf("variableKey" to variableKey)
-                                    )
+                                        details = mapOf("variableKey" to variableKey),
+                                    ),
                                 )
                             }
                         }
@@ -232,8 +247,8 @@ fun testFeature(
                         type = "Data File",
                         expected = null,
                         actual = null,
-                        message = "Unable to generate Data File"
-                    )
+                        message = "Unable to generate Data File",
+                    ),
                 )
             }
             testResultAssertion.duration = System.currentTimeMillis() - assertionStartTime

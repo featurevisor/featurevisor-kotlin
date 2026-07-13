@@ -2,10 +2,10 @@ package com.featurevisor.sdk
 
 import com.featurevisor.types.DatafileContent
 import kotlinx.serialization.decodeFromString
-import java.io.IOException
-import okhttp3.*
 import kotlinx.serialization.json.Json
+import okhttp3.*
 import okhttp3.HttpUrl.Companion.toHttpUrl
+import java.io.IOException
 import java.lang.IllegalArgumentException
 
 // MARK: - Fetch datafile content
@@ -59,14 +59,14 @@ private inline fun fetch(
                 try {
                     val content = json.decodeFromString<DatafileContent>(responseBodyString)
                     completion(Result.success(content))
-                } catch(throwable: Throwable) {
+                } catch (throwable: Throwable) {
                     completion(
                         Result.failure(
                             FeaturevisorError.UnparsableJson(
                                 responseBody.string(),
-                                response.message
-                            )
-                        )
+                                response.message,
+                            ),
+                        ),
                     )
                 }
             } else {
@@ -74,9 +74,9 @@ private inline fun fetch(
                     Result.failure(
                         FeaturevisorError.UnparsableJson(
                             responseBody.string(),
-                            response.message
-                        )
-                    )
+                            response.message,
+                        ),
+                    ),
                 )
             }
         }

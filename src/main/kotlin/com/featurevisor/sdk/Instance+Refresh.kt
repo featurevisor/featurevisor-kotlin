@@ -62,7 +62,7 @@ private fun FeaturevisorInstance.refresh() {
                 } else {
                     logger?.error(
                         "failed to refresh datafile",
-                        mapOf("error" to result)
+                        mapOf("error" to result),
                     )
                     statuses.refreshInProgress = false
                 }

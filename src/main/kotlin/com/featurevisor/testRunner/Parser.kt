@@ -22,13 +22,17 @@ internal fun parseTestFeatureAssertions(yamlFilePath: String) =
             val segmentAssertion = (data["assertions"] as? List<Map<String, Any>>)!!.map { assertionMap ->
                 SegmentAssertion(
                     description = assertionMap["description"] as? String,
-                    context = (assertionMap["context"] as Map<AttributeKey, Any?>).mapValues { parseAttributeValue(it.value) },
+                    context = (assertionMap["context"] as Map<AttributeKey, Any?>).mapValues {
+                        parseAttributeValue(
+                            it.value,
+                        )
+                    },
                     expectedToMatch = assertionMap["expectedToMatch"] as Boolean,
                     matrix = (assertionMap["matrix"] as? Map<String, List<Any>>)?.mapValues {
                         it.value.map { item ->
                             mapMatrixValues(item)
                         }
-                    }
+                    },
                 )
             }
             val testSegment = TestSegment(key = segment, assertions = segmentAssertion)
@@ -39,11 +43,15 @@ internal fun parseTestFeatureAssertions(yamlFilePath: String) =
                     description = assertionMap["description"] as? String,
                     environment = assertionMap["environment"] as String,
                     at = parseWeightValue((assertionMap["at"] as Any)),
-                    context = (assertionMap["context"] as Map<AttributeKey, Any?>).mapValues { parseAttributeValue(it.value) },
+                    context = (assertionMap["context"] as Map<AttributeKey, Any?>).mapValues {
+                        parseAttributeValue(
+                            it.value,
+                        )
+                    },
                     expectedToBeEnabled = assertionMap["expectedToBeEnabled"] as Boolean,
                     expectedVariables = (assertionMap["expectedVariables"] as? Map<String, Any?>)?.mapValues {
                         parseVariableValue(
-                            it.value
+                            it.value,
                         )
                     },
                     expectedVariation = assertionMap["expectedVariation"] as? String,
@@ -51,7 +59,7 @@ internal fun parseTestFeatureAssertions(yamlFilePath: String) =
                         it.value.map { item ->
                             mapMatrixValues(item)
                         }
-                    }
+                    },
                 )
             }
 
@@ -66,11 +74,11 @@ internal fun parseTestFeatureAssertions(yamlFilePath: String) =
     }
 
 private fun mapMatrixValues(value: Any) =
-    when(value){
+    when (value) {
         is Boolean -> {
-            if (value){
+            if (value) {
                 AttributeValue.StringValue("yes")
-            }else{
+            } else {
                 AttributeValue.StringValue("no")
             }
         }
@@ -87,7 +95,7 @@ private fun mapMatrixValues(value: Any) =
             AttributeValue.DateValue(value)
         }
 
-        else -> { AttributeValue.StringValue("")}
+        else -> { AttributeValue.StringValue("") }
     }
 
 private fun parseWeightValue(value: Any): WeightType {
@@ -99,7 +107,6 @@ private fun parseWeightValue(value: Any): WeightType {
 }
 
 private fun parseVariableValue(value: Any?): VariableValue {
-
     return when (value) {
         is Boolean -> VariableValue.BooleanValue(value)
         is String -> {
@@ -181,14 +188,12 @@ internal fun parseYamlSegment(segmentFilePath: String) =
         Segment(
             archived = archived,
             key = "",
-            conditions = parseCondition(conditionsData)
+            conditions = parseCondition(conditionsData),
         )
-
     } catch (e: Exception) {
         printMessageInRedColor("Exception while parsing Yaml segment Assertion File  --> ${e.message}")
         null
     }
-
 
 private fun parseCondition(conditionData: Any?): Condition {
     return when (conditionData) {
@@ -228,8 +233,6 @@ private fun parseCondition(conditionData: Any?): Condition {
 
         else -> throw IllegalArgumentException("Invalid condition format")
     }
-
-
 }
 
 private fun parseConditionValue(value: Any?): ConditionValue {
@@ -258,6 +261,4 @@ private fun parseConditionValue(value: Any?): ConditionValue {
 }
 
 fun parseConfiguration(projectRootPath: String) =
-    json.decodeFromString(Configuration.serializer(),getConfigurationJson(projectRootPath)!!)
-
-
+    json.decodeFromString(Configuration.serializer(), getConfigurationJson(projectRootPath)!!)

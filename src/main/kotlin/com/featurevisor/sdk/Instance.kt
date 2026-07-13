@@ -16,7 +16,7 @@ typealias InterceptContext = (Context) -> Context
 typealias DatafileFetchHandler = (datafileUrl: String) -> Result<DatafileContent>
 
 var emptyDatafile = DatafileContent(
-    schemaVersion =  "1",
+    schemaVersion = "1",
     revision = "unknown",
     attributes = emptyList(),
     segments = emptyList(),
@@ -26,9 +26,7 @@ var emptyDatafile = DatafileContent(
 class FeaturevisorInstance private constructor(options: InstanceOptions) {
 
     companion object {
-        fun createInstance(options: InstanceOptions): FeaturevisorInstance {
-            return FeaturevisorInstance(options)
-        }
+        fun createInstance(options: InstanceOptions): FeaturevisorInstance = FeaturevisorInstance(options)
 
         var companionLogger: Logger? = null
     }
@@ -66,22 +64,26 @@ class FeaturevisorInstance private constructor(options: InstanceOptions) {
 
             if (onRefresh != null) {
                 emitter.addListener(
-                    REFRESH, onRefresh
+                    REFRESH,
+                    onRefresh,
                 )
             }
             if (onUpdate != null) {
                 emitter.addListener(
-                    UPDATE, onUpdate
+                    UPDATE,
+                    onUpdate,
                 )
             }
             if (onActivation != null) {
                 emitter.addListener(
-                    ACTIVATION, onActivation
+                    ACTIVATION,
+                    onActivation,
                 )
             }
             if (onError != null) {
                 emitter.addListener(
-                    ERROR, onError
+                    ERROR,
+                    onError,
                 )
             }
 
@@ -99,7 +101,7 @@ class FeaturevisorInstance private constructor(options: InstanceOptions) {
                 }
 
                 datafileUrl != null -> {
-                    datafileReader = DatafileReader(options.datafile?: emptyDatafile)
+                    datafileReader = DatafileReader(options.datafile ?: emptyDatafile)
                     fetchDatafileContent(datafileUrl, handleDatafileFetch) { result ->
                         if (result.isSuccess) {
                             datafileReader = DatafileReader(result.getOrThrow())
@@ -140,7 +142,5 @@ class FeaturevisorInstance private constructor(options: InstanceOptions) {
         this.stickyFeatures = stickyFeatures
     }
 
-    fun getRevision(): String {
-        return datafileReader.getRevision()
-    }
+    fun getRevision(): String = datafileReader.getRevision()
 }

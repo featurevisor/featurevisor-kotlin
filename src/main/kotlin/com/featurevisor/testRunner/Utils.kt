@@ -11,7 +11,6 @@ import java.io.File
 import java.util.*
 import kotlin.math.abs
 
-
 internal const val tick = "\u2713"
 internal const val cross = "\u2717"
 
@@ -34,7 +33,6 @@ internal fun printMessageInRedColor(message: String) =
 
 internal fun printAssertionSuccessfulMessage(message: String) = println("\t$tick $message")
 
-
 internal fun printAssertionFailedMessage(message: String) =
     println("$ANSI_RED\t$cross $message $ANSI_RESET")
 
@@ -49,18 +47,20 @@ internal fun getSdkInstance(datafileContent: DatafileContent?, assertion: Featur
             configureBucketValue = { _, _, _ ->
                 when (assertion.at) {
                     is WeightType.IntType -> ((assertion.at as WeightType.IntType).value * (MAX_BUCKETED_NUMBER / 100))
-                    is WeightType.DoubleType -> ((assertion.at as WeightType.DoubleType).value * (MAX_BUCKETED_NUMBER / 100)).toInt()
+                    is WeightType.DoubleType ->
+                        ((assertion.at as WeightType.DoubleType).value * (MAX_BUCKETED_NUMBER / 100)).toInt()
+
                     else -> (MAX_BUCKETED_NUMBER / 100)
                 }
-            }
-        )
+            },
+        ),
     )
 
 internal fun initializeSdkWithDataFileContent(datafileContent: DatafileContent?) =
     FeaturevisorInstance.createInstance(
         InstanceOptions(
             datafile = datafileContent,
-        )
+        ),
     )
 
 internal fun getFileForSpecificPath(path: String) = File(path)
@@ -147,7 +147,7 @@ internal fun printTestResult(testResult: TestResult) {
 
                     else -> {
                         printMessageInRedColor(
-                            "    => ${error.type}: expected \"${error.expected}\", received \"${error.actual}\""
+                            "    => ${error.type}: expected \"${error.expected}\", received \"${error.actual}\"",
                         )
                     }
                 }
@@ -238,8 +238,7 @@ fun checkJsonIsEquals(a: String, b: String): Boolean {
     return map1 == map2
 }
 
-
-fun buildDataFileAsPerEnvironment(projectRootPath: String,environment: String) = try {
+fun buildDataFileAsPerEnvironment(projectRootPath: String, environment: String) = try {
     getJsonForDataFile(environment = environment, projectRootPath = projectRootPath)?.run {
         convertToDataClass<DatafileContent>()
     } ?: emptyDatafile
@@ -253,7 +252,7 @@ fun getDataFileContent(featureName: String, environment: String, projectRootPath
         getJsonForFeatureUsingCommand(
             featureName = featureName,
             environment = environment,
-            projectRootPath = projectRootPath
+            projectRootPath = projectRootPath,
         )?.run {
             convertToDataClass<DatafileContent>()
         }
@@ -262,12 +261,11 @@ fun getDataFileContent(featureName: String, environment: String, projectRootPath
         null
     }
 
-fun convertNanoSecondToMilliSecond(timeInNanoSecond:Double):String {
-    val timeInMilliSecond = timeInNanoSecond/1000000
-    return if (timeInMilliSecond > 1000){
+fun convertNanoSecondToMilliSecond(timeInNanoSecond: Double): String {
+    val timeInMilliSecond = timeInNanoSecond / 1000000
+    return if (timeInMilliSecond > 1000) {
         "${timeInMilliSecond / 1000} s"
-    }else{
+    } else {
         "$timeInMilliSecond ms"
     }
 }
-

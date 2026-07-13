@@ -1,0 +1,10 @@
+empty-blocks:
+  active: true
+
+style:
+  active: true
+  RedundantExplicitType:
+    active: true
+  ExpressionBodySyntax:
+    active: true
+    includeLineWrapping: false

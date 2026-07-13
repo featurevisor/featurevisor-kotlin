@@ -8,7 +8,7 @@ import com.featurevisor.types.*
 
 data class BenchmarkOutput(
     val value: Any? = null,
-    val duration: Double
+    val duration: Double,
 )
 
 data class BenchMarkOptions(
@@ -52,9 +52,8 @@ fun benchmarkFeature(option: BenchMarkOptions) {
             feature = option.feature,
             variableKey = option.variable,
             context = option.context,
-            n = option.n
+            n = option.n,
         )
-
     } else if (option.variation != null) {
         println("Evaluating variation ${option.variation} ${option.n} times...")
 
@@ -62,7 +61,7 @@ fun benchmarkFeature(option: BenchMarkOptions) {
             sdk,
             feature = option.feature,
             context = option.context,
-            n = option.n
+            n = option.n,
         )
     } else {
         println("Evaluating flag ${option.n} times...")
@@ -71,7 +70,7 @@ fun benchmarkFeature(option: BenchMarkOptions) {
             sdk,
             feature = option.feature,
             context = option.context,
-            n = option.n
+            n = option.n,
         )
     }
 
@@ -82,12 +81,11 @@ fun benchmarkFeature(option: BenchMarkOptions) {
     }
 }
 
-
 fun benchmarkFeatureFlag(
     f: FeaturevisorInstance,
     feature: FeatureKey,
     context: Context,
-    n: Int
+    n: Int,
 ): BenchmarkOutput {
     val start = System.nanoTime().toDouble()
     var value: Any = false
@@ -100,16 +98,15 @@ fun benchmarkFeatureFlag(
 
     return BenchmarkOutput(
         value = value,
-        duration = end - start
+        duration = end - start,
     )
 }
-
 
 fun benchmarkFeatureVariation(
     f: FeaturevisorInstance,
     feature: FeatureKey,
     context: Context,
-    n: Int
+    n: Int,
 ): BenchmarkOutput {
     val start = System.nanoTime().toDouble()
     var value: VariationValue? = null
@@ -122,7 +119,7 @@ fun benchmarkFeatureVariation(
 
     return BenchmarkOutput(
         value = value,
-        duration = end - start
+        duration = end - start,
     )
 }
 
@@ -131,7 +128,7 @@ fun benchmarkFeatureVariable(
     feature: FeatureKey,
     variableKey: VariableKey,
     context: Context,
-    n: Int
+    n: Int,
 ): BenchmarkOutput {
     val start = System.nanoTime().toDouble()
     var value: VariableValue? = null
@@ -144,6 +141,6 @@ fun benchmarkFeatureVariable(
 
     return BenchmarkOutput(
         value = value,
-        duration = end - start
+        duration = end - start,
     )
 }

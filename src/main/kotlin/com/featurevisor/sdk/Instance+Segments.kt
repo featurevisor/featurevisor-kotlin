@@ -25,9 +25,8 @@ internal fun FeaturevisorInstance.segmentIsMatched(
     return null
 }
 
-internal fun segmentIsMatched(segment: Segment, context: Context): Boolean {
-    return allConditionsAreMatched(segment.conditions, context)
-}
+internal fun segmentIsMatched(segment: Segment, context: Context): Boolean =
+    allConditionsAreMatched(segment.conditions, context)
 
 internal fun FeaturevisorInstance.allGroupSegmentsAreMatched(
     groupSegments: GroupSegment,

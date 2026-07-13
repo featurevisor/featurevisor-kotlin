@@ -57,22 +57,22 @@ object Conditions {
 
                     SEMVER_GREATER_THAN -> compareVersions(
                         attributeValue.value.orEmpty(),
-                        conditionValue.value.orEmpty()
+                        conditionValue.value.orEmpty(),
                     ) == 1
 
                     SEMVER_GREATER_THAN_OR_EQUALS -> compareVersions(
                         attributeValue.value.orEmpty(),
-                        conditionValue.value.orEmpty()
+                        conditionValue.value.orEmpty(),
                     ) >= 0
 
                     SEMVER_LESS_THAN -> compareVersions(
                         attributeValue.value.orEmpty(),
-                        conditionValue.value.orEmpty()
+                        conditionValue.value.orEmpty(),
                     ) == -1
 
                     SEMVER_LESS_THAN_OR_EQUALS -> compareVersions(
                         attributeValue.value.orEmpty(),
-                        conditionValue.value.orEmpty()
+                        conditionValue.value.orEmpty(),
                     ) <= 0
 
                     else -> false
@@ -144,22 +144,22 @@ object Conditions {
 
                     SEMVER_GREATER_THAN -> compareVersions(
                         attributeValue.value.toString(),
-                        conditionValue.value.orEmpty()
+                        conditionValue.value.orEmpty(),
                     ) == 1
 
                     SEMVER_GREATER_THAN_OR_EQUALS -> compareVersions(
                         attributeValue.value.toString(),
-                        conditionValue.value.orEmpty()
+                        conditionValue.value.orEmpty(),
                     ) >= 0
 
                     SEMVER_LESS_THAN -> compareVersions(
                         attributeValue.value.toString(),
-                        conditionValue.value.orEmpty()
+                        conditionValue.value.orEmpty(),
                     ) == -1
 
                     SEMVER_LESS_THAN_OR_EQUALS -> compareVersions(
                         attributeValue.value.toString(),
-                        conditionValue.value.orEmpty()
+                        conditionValue.value.orEmpty(),
                     ) <= 0
 
                     else -> false
