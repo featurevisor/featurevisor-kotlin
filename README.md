@@ -129,6 +129,10 @@ We are breaking down the various parts that we need to migrate to Swift in the s
 |                     | `fetchDatafileContent`                           |        |
 |                     | `getValueByType`                                 |        |
 
+### Releasing
+
+See [RELEASE.md](./RELEASE.md) for how to cut and publish a new version.
+
 ### Test runner
 
 We should also have an executable as an output of this repository that can be used to run the test specs against the Kotlin SDK: https://featurevisor.com/docs/testing/
