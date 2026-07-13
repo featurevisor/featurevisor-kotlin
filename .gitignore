@@ -15,5 +15,5 @@ local.properties
 # Intellij
 *.iml
 *iws
-.idea/workspace.xml
-.idea/
+.idea/*
+!.idea/externalDependencies.xml

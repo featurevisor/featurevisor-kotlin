@@ -7,6 +7,7 @@ This repository is a work-in-progress port of the [Featurevisor](https://feature
 - [Structure](#structure)
 - [Building](#building)
 - [Testing](#testing)
+- [Code style](#code-style)
 - [Porting work](#porting-work)
 - [Documentation](#documentation)
 
@@ -53,6 +54,12 @@ $ gradle test
 To run a specific test class or method, use Gradle's `--tests` filter, e.g. `gradle test --tests "com.featurevisor.sdk.BucketTest"`.
 
 There is also a `run-test` Gradle task wired to `com.featurevisor.cli.TestExecuter`, intended to run Featurevisor YAML test specs against this SDK (the `featurevisor-kotlin test` executable mentioned in the README).
+
+## Code style
+
+Formatting is enforced by [ktlint](https://github.com/pinterest/ktlint) (config in `.editorconfig`), and semantic style rules (redundant explicit types, expression-body functions, no silently-empty blocks) by [detekt](https://detekt.dev) (config in `config/detekt/detekt.yml`). Both run as part of `./gradlew build`/`check` and in CI — run `./gradlew ktlintCheck`/`ktlintFormat` and `./gradlew detekt` directly if needed. For anything not covered by either, follow the [Kotlin Coding Conventions](https://kotlinlang.org/docs/coding-conventions.html).
+
+Opening the project in IntelliJ/Android Studio prompts you to install the ktlint and detekt plugins (`.idea/externalDependencies.xml`); once installed they read the same `.editorconfig`/`detekt.yml` as CI, so IDE and CI stay in sync automatically. The detekt plugin needs a one-time manual pointer to `config/detekt/detekt.yml` in Settings → Tools → detekt — it doesn't auto-discover the Gradle config.
 
 ## Porting work
 

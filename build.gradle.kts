@@ -17,6 +17,21 @@ plugins {
     `java-library`
 
     `maven-publish`
+
+    id("org.jlleitschuh.gradle.ktlint") version "11.6.1"
+    id("io.gitlab.arturbosch.detekt") version "1.23.4"
+}
+
+ktlint {
+    version.set("0.50.0")
+    filter {
+        exclude { it.file.path.contains("build/") }
+    }
+}
+
+detekt {
+    buildUponDefaultConfig = false
+    config.setFrom(files("$rootDir/config/detekt/detekt.yml"))
 }
 
 repositories {
@@ -96,4 +111,3 @@ tasks.register<JavaExec>("run-test") {
         args(*argsArray)
     }
 }
-
