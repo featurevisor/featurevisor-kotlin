@@ -38,7 +38,7 @@ val someVariable = "asd"
 
 ## Empty statements or lambdas
 
-We want to make sure that empty or blank statements are not left there by accident, that's why you need to use `doNothing()` function from `com.dazn.extensions` for marking it as intentionally empty.
+We want to make sure that empty or blank statements are not left there by accident, that's why you need to use a `doNothing()` function for marking it as intentionally empty.
 
 ```kotlin
 when (x) {

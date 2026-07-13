@@ -14,7 +14,7 @@ Separately, and independently of that workflow, [JitPack](https://jitpack.io/#fe
 
 ## Distribution channels
 
-- **JitPack** — what the [README's Installation section](./README.md#installation) tells consumers to use (`com.github.featurevisor:featurevisor-kotlin:<version>` via `https://jitpack.io`). This is also what the only known consumer (`android-dazn-app`) actually uses.
+- **JitPack** — what the [README's Installation section](./README.md#installation) tells consumers to use (`com.github.featurevisor:featurevisor-kotlin:<version>` via `https://jitpack.io`). This is also what the only known consumer actually uses.
 - **GitHub Packages** — published to `https://maven.pkg.github.com/featurevisor/featurevisor-kotlin` by CI on every release. Requires authenticating to GitHub Packages to consume.
 
 ## Notes
