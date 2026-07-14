@@ -59,7 +59,7 @@ dependencies {
     api("org.apache.commons:commons-math3:3.6.1")
 
     // This dependency is used internally, and not exposed to consumers on their own compile classpath.
-    implementation("net.swiftzer.semver:semver:1.3.0")
+    implementation("net.swiftzer.semver:semver:2.1.0")
     implementation("com.goncalossilva:murmurhash:0.4.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
     implementation("com.squareup.okhttp3:okhttp:4.11.0")
